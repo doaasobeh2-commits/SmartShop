@@ -19,8 +19,8 @@ export const spacing = {
 } as const;
 
 export const dimensions = {
-  phoneWidth: "340px",
-  phoneHeight: "680px",
+  phoneWidth: "390px",
+  phoneHeight: "844px",
   dynamicIslandWidth: "110px",
   dynamicIslandHeight: "28px",
   dynamicIslandTop: "12px",
