@@ -28,6 +28,7 @@
     justify-content: center;
     align-items: stretch;
     overflow: hidden;
+    background: var(--background);
   }
 }
 
@@ -35,15 +36,20 @@
   #root {
     align-items: center;
     padding: 1rem;
+    background: var(--gradient-app-background);
   }
 }
 
 @layer components {
+  .app-screen-host {
+    @apply isolate flex min-h-0 w-full flex-1 flex-col bg-background;
+  }
+
   .screen-scroll {
-    @apply flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden;
+    @apply isolate flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto bg-background [scrollbar-width:none] [&::-webkit-scrollbar]:hidden;
   }
 
   .screen-stack {
-    @apply flex min-h-0 w-full flex-1 flex-col overflow-x-hidden;
+    @apply isolate flex min-h-0 w-full flex-1 flex-col overflow-x-hidden bg-background;
   }
 }

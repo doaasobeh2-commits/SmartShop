@@ -30,7 +30,7 @@ export function PhoneFrame({ children, className = "", style, ...props }: PhoneF
           borderRadius: radius.dynamicIsland,
         }}
       />
-      <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden">{children}</div>
+      <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden bg-background">{children}</div>
       <div
         aria-hidden
         className="pointer-events-none absolute bottom-2 left-1/2 z-10 -translate-x-1/2"

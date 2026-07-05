@@ -9,14 +9,21 @@ export type AppShellProps = HTMLAttributes<HTMLDivElement> & {
 export function AppShell({ children, footer, className = "", ...props }: AppShellProps) {
   return (
     <PhoneFrame className={className} {...props}>
-      <div className="flex h-full w-full min-w-0 flex-col">
-        <div
-          className={`relative flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-hidden pt-[var(--app-safe-top)]${footer ? "" : " pb-[var(--app-content-bottom)]"}`}
-        >
-          {children}
+      <div className="flex h-full w-full min-w-0 flex-col bg-background">
+        <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden bg-background">
+          <div
+            aria-hidden
+            className="pointer-events-none shrink-0 bg-background"
+            style={{ height: "var(--app-safe-top)" }}
+          />
+          <div
+            className={`relative isolate flex min-h-0 w-full flex-1 flex-col overflow-hidden bg-background${footer ? "" : " pb-[var(--app-content-bottom)]"}`}
+          >
+            {children}
+          </div>
         </div>
         {footer ? (
-          <div className="w-full shrink-0 pb-[var(--app-safe-bottom)]">{footer}</div>
+          <div className="w-full shrink-0 bg-background pb-[var(--app-safe-bottom)]">{footer}</div>
         ) : null}
       </div>
     </PhoneFrame>

@@ -19,7 +19,7 @@ export function Header({
 }: HeaderProps) {
   return (
     <header
-      className={`border-b border-[var(--border)]/50 px-5 pb-4 pt-3 ${className}`}
+      className={`shrink-0 border-b border-[var(--border)]/50 bg-background px-5 pb-4 pt-3 ${className}`}
       {...props}
     >
       {onBack ? (
