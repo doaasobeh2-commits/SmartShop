@@ -1,5 +1,9 @@
 node_modules
 dist
+core/dist
+shared/dist
+ecosystem/dist
+apps/smart-shop/dist
 .DS_Store
 *.local
 .env
