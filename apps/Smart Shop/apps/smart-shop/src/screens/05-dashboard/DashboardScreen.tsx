@@ -3,8 +3,6 @@ import {
   AppShell,
   BottomNav,
   Header,
-  PreviewShell,
-  SparklesIcon,
   StatCard,
   StatusBar,
 } from "@smart-shop/shared";
@@ -13,6 +11,7 @@ import {
   BOTTOM_NAV_TARGETS,
   type ScreenNavigationProps,
 } from "../../navigation/screenNavigation";
+import { useAppState } from "../../state/AppProvider";
 
 type IconProps = {
   size?: number;
@@ -98,25 +97,6 @@ function ShoppingCartIcon({ size = 16, className = "" }: IconProps) {
       <circle cx="8" cy="21" r="1" />
       <circle cx="19" cy="21" r="1" />
       <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
-    </svg>
-  );
-}
-
-function MessageSquareIcon({ size = 16, className = "" }: IconProps) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden
-    >
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
     </svg>
   );
 }
@@ -250,99 +230,83 @@ function QuickAccessItem({ icon, title, subtitle, onClick }: QuickAccessItemProp
 
 const BOTTOM_NAV_ITEMS = [
   { id: "home", label: "Home", icon: <HomeIcon /> },
-  { id: "list", label: "Liste", icon: <ShoppingCartIcon size={20} /> },
+  { id: "list", label: "Plan", icon: <ShoppingCartIcon size={20} /> },
   { id: "analytics", label: "Analyse", icon: <BarChartIcon size={20} /> },
-  { id: "ai", label: "KI", icon: <MessageSquareIcon size={20} /> },
+  { id: "profile", label: "Profil", icon: <UserIcon size={20} /> },
   { id: "notifications", label: "Neues", icon: <BellIcon /> },
 ] as const;
 
 export function DashboardScreen({ onNavigate }: ScreenNavigationProps = {}) {
+  const { planLines, householdSetup } = useAppState();
+  const planTotal = planLines.reduce((sum, item) => sum + item.price, 0);
+  const budgetRemaining = householdSetup.monthlyBudget
+    ? Math.max(0, householdSetup.monthlyBudget - planTotal)
+    : 125;
+
   return (
-    <PreviewShell screenNumber={6}>
-      <AppShell
-        footer={
-          <BottomNav
-            items={[...BOTTOM_NAV_ITEMS]}
-            activeId="home"
-            onChange={(id) => {
-              const target = BOTTOM_NAV_TARGETS[id as keyof typeof BOTTOM_NAV_TARGETS];
-              if (target) {
-                onNavigate?.(target);
-              }
-            }}
-          />
-        }
-      >
-        <div className="flex h-full flex-col overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <StatusBar />
-          <Header title="Dashboard" rightSlot={<SparklesIcon size={14} />} />
+    <AppShell
+      footer={
+        <BottomNav
+          items={[...BOTTOM_NAV_ITEMS]}
+          activeId="home"
+          onChange={(id) => {
+            const target = BOTTOM_NAV_TARGETS[id as keyof typeof BOTTOM_NAV_TARGETS];
+            if (target) {
+              onNavigate?.(target);
+            }
+          }}
+        />
+      }
+    >
+      <div className="flex h-full flex-col overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <StatusBar />
+        <Header title="Dashboard" />
 
-          <div className="px-5 pb-3 pt-4">
-            <div className="grid grid-cols-3 gap-2.5">
-              <StatCard
-                label="Budget übrig"
-                value="€125"
-                icon={<DollarSignIcon />}
-                iconClassName="text-accent"
-              />
-              <StatCard
-                label="Gespart"
-                value="€108"
-                icon={<TrendingUpIcon />}
-                iconClassName="text-emerald-400"
-              />
-              <StatCard
-                label="Einkauf"
-                value="Sa."
-                icon={<CalendarIcon />}
-                iconClassName="text-primary"
-              />
-            </div>
-          </div>
-
-          <div className="flex-1 space-y-2.5 px-5">
-            <h3 className="mb-1 text-xs font-bold text-foreground">Schnellzugriff</h3>
-            <QuickAccessItem
-              icon={<ShoppingCartIcon className="text-muted-foreground" />}
-              title="Einkaufsliste"
-              subtitle="18 Produkte · €87.50"
-              onClick={() => onNavigate?.("11-shopping-list")}
+        <div className="px-5 pb-3 pt-4">
+          <div className="grid grid-cols-3 gap-2.5">
+            <StatCard
+              label="Budget übrig"
+              value={`€${budgetRemaining}`}
+              icon={<DollarSignIcon />}
+              iconClassName="text-accent"
             />
-            <QuickAccessItem
-              icon={<MessageSquareIcon className="text-muted-foreground" />}
-              title="KI-Assistent"
-              subtitle="Fragen Sie nach Tipps"
-              onClick={() => onNavigate?.("09-ai-assistant")}
+            <StatCard
+              label="Gespart"
+              value="€108"
+              icon={<TrendingUpIcon />}
+              iconClassName="text-emerald-400"
             />
-            <QuickAccessItem
-              icon={<BarChartIcon className="text-muted-foreground" />}
-              title="Analyse"
-              subtitle="Verbrauch ansehen"
-              onClick={() => onNavigate?.("10-analytics")}
+            <StatCard
+              label="Einkauf"
+              value="Sa."
+              icon={<CalendarIcon />}
+              iconClassName="text-primary"
             />
-            <QuickAccessItem
-              icon={<UserIcon className="text-muted-foreground" />}
-              title="Profil"
-              subtitle="Einstellungen verwalten"
-              onClick={() => onNavigate?.("06-profile")}
-            />
-          </div>
-
-          <div className="px-5 pb-5 pt-3">
-            <div className="rounded-xl border border-accent/25 bg-accent/10 p-3.5">
-              <div className="flex items-start gap-2.5">
-                <SparklesIcon size={14} className="mt-0.5 text-accent" />
-                <div>
-                  <p className="mb-1 text-xs font-bold text-foreground">KI-Tipp</p>
-                  <p className="text-[10px] text-muted-foreground">
-                    Wechseln Sie zu Aldi und sparen Sie €22/Monat
-                  </p>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
-      </AppShell>
-    </PreviewShell>
+
+        <div className="flex-1 space-y-2.5 px-5">
+          <h3 className="mb-1 text-xs font-bold text-foreground">Heute wichtig</h3>
+          <QuickAccessItem
+            icon={<ShoppingCartIcon className="text-muted-foreground" />}
+            title="Wochenplan"
+            subtitle={`${planLines.length} Produkte · €${planTotal.toFixed(2)}`}
+            onClick={() => onNavigate?.("11-shopping-list")}
+          />
+          <QuickAccessItem
+            icon={<BarChartIcon className="text-muted-foreground" />}
+            title="Analyse"
+            subtitle="Verbrauch ansehen"
+            onClick={() => onNavigate?.("10-analytics")}
+          />
+          <QuickAccessItem
+            icon={<UserIcon className="text-muted-foreground" />}
+            title="Profil"
+            subtitle="Haushalt verwalten"
+            onClick={() => onNavigate?.("06-profile")}
+          />
+        </div>
+      </div>
+    </AppShell>
   );
 }

@@ -1,0 +1,1 @@
+export { ShoppingCompletedScreen } from "./ShoppingCompletedScreen";

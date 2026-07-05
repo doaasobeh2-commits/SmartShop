@@ -10,3 +10,7 @@ export * from "./subscription";
 export * from "./flyer";
 export * from "./manual-offers";
 export * from "./community";
+export * from "./plan";
+export * from "./memory";
+export * from "./knowledge";
+export * from "./services";

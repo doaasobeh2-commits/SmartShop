@@ -2,7 +2,6 @@ import {
   AppShell,
   Button,
   Header,
-  PreviewShell,
   SparklesIcon,
   StatusBar,
 } from "@smart-shop/shared";
@@ -67,8 +66,7 @@ function PlanCard({
 
 export function PremiumSubscriptionScreen({ onBack }: ScreenNavigationProps = {}) {
   return (
-    <PreviewShell screenNumber={13}>
-      <AppShell>
+    <AppShell>
         <div className="flex h-full flex-col overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <StatusBar />
           <Header
@@ -114,6 +112,5 @@ export function PremiumSubscriptionScreen({ onBack }: ScreenNavigationProps = {}
           </div>
         </div>
       </AppShell>
-    </PreviewShell>
   );
 }

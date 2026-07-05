@@ -1,0 +1,145 @@
+import type {
+  HouseholdSetupSnapshot,
+  WeeklyHouseholdPlan,
+  PlanLine,
+  BasketLineView,
+  PurchaseLine,
+  HouseholdTimelineEvent,
+  HouseholdMemory,
+  HouseholdKnowledge,
+} from "@smart-shop/core";
+
+const STORAGE_KEYS = {
+  session: "smartshop.session",
+  household: "smartshop.household",
+  setupCompleted: "smartshop.setupCompleted",
+  weeklyPlan: "smartshop.weeklyPlan",
+  timeline: "smartshop.timeline",
+  memory: "smartshop.memory",
+  knowledge: "smartshop.knowledge",
+  basket: "smartshop.basket",
+  completedTrip: "smartshop.completedTrip",
+} as const;
+
+export type SessionUser = {
+  firstName: string;
+  lastName: string;
+  email: string;
+};
+
+export type SessionState = {
+  isAuthenticated: boolean;
+  user: SessionUser | null;
+  householdSetupCompleted: boolean;
+};
+
+function readJson<T>(key: string, fallback: T): T {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) {
+      return fallback;
+    }
+    return JSON.parse(raw) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+function writeJson<T>(key: string, value: T): void {
+  localStorage.setItem(key, JSON.stringify(value));
+}
+
+export function loadSession(): SessionState {
+  const stored = readJson<Partial<SessionState>>(STORAGE_KEYS.session, {});
+  return {
+    isAuthenticated: stored.isAuthenticated ?? false,
+    user: stored.user ?? null,
+    householdSetupCompleted:
+      stored.householdSetupCompleted ??
+      readJson<boolean>(STORAGE_KEYS.setupCompleted, false),
+  };
+}
+
+export function saveSession(session: SessionState): void {
+  writeJson(STORAGE_KEYS.session, session);
+  writeJson(STORAGE_KEYS.setupCompleted, session.householdSetupCompleted);
+}
+
+export function loadHouseholdSetup(): HouseholdSetupSnapshot | null {
+  return readJson<HouseholdSetupSnapshot | null>(STORAGE_KEYS.household, null);
+}
+
+export function saveHouseholdSetup(setup: HouseholdSetupSnapshot): void {
+  writeJson(STORAGE_KEYS.household, setup);
+}
+
+export function loadWeeklyPlan(): WeeklyHouseholdPlan | null {
+  return readJson<WeeklyHouseholdPlan | null>(STORAGE_KEYS.weeklyPlan, null);
+}
+
+export function saveWeeklyPlan(plan: WeeklyHouseholdPlan): void {
+  writeJson(STORAGE_KEYS.weeklyPlan, plan);
+}
+
+export function loadBasket(): BasketLineView[] {
+  return readJson<BasketLineView[]>(STORAGE_KEYS.basket, []);
+}
+
+export function saveBasket(lines: BasketLineView[]): void {
+  writeJson(STORAGE_KEYS.basket, lines);
+}
+
+export function loadCompletedTrip(): PurchaseLine[] {
+  return readJson<PurchaseLine[]>(STORAGE_KEYS.completedTrip, []);
+}
+
+export function saveCompletedTrip(lines: PurchaseLine[]): void {
+  writeJson(STORAGE_KEYS.completedTrip, lines);
+}
+
+export function appendTimelineEvent(event: HouseholdTimelineEvent): void {
+  const events = readJson<HouseholdTimelineEvent[]>(STORAGE_KEYS.timeline, []);
+  events.push(event);
+  writeJson(STORAGE_KEYS.timeline, events);
+}
+
+export function loadTimelineEvents(): HouseholdTimelineEvent[] {
+  return readJson<HouseholdTimelineEvent[]>(STORAGE_KEYS.timeline, []);
+}
+
+export function loadMemory(householdId: string): HouseholdMemory {
+  const all = readJson<Record<string, HouseholdMemory>>(STORAGE_KEYS.memory, {});
+  return (
+    all[householdId] ?? {
+      householdId,
+      entries: [],
+    }
+  );
+}
+
+export function saveMemory(memory: HouseholdMemory): void {
+  const all = readJson<Record<string, HouseholdMemory>>(STORAGE_KEYS.memory, {});
+  all[memory.householdId] = memory;
+  writeJson(STORAGE_KEYS.memory, all);
+}
+
+export function loadKnowledge(householdId: string): HouseholdKnowledge {
+  const all = readJson<Record<string, HouseholdKnowledge>>(STORAGE_KEYS.knowledge, {});
+  return (
+    all[householdId] ?? {
+      householdId,
+      schemaVersion: 1,
+      facts: [],
+    }
+  );
+}
+
+export function saveKnowledge(knowledge: HouseholdKnowledge): void {
+  const all = readJson<Record<string, HouseholdKnowledge>>(STORAGE_KEYS.knowledge, {});
+  all[knowledge.householdId] = knowledge;
+  writeJson(STORAGE_KEYS.knowledge, all);
+}
+
+export const HOUSEHOLD_ID = "household-local";
+
+export type { PlanLine, BasketLineView, PurchaseLine, WeeklyHouseholdPlan };

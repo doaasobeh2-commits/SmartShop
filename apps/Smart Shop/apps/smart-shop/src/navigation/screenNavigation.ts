@@ -1,20 +1,19 @@
-import type { ScreenId } from "@smart-shop/core/types";
+export const BOTTOM_NAV_TARGETS = {
+  home: "05-dashboard",
+  list: "11-shopping-list",
+  analytics: "10-analytics",
+  profile: "06-profile",
+  notifications: "08-notifications",
+} as const satisfies Record<string, import("@smart-shop/core/types").ScreenId>;
 
-export type AppScreenId = ScreenId;
+export const SHOPPING_FLOW_TARGETS = {
+  basket: "14-shopping-basket",
+  completed: "16-shopping-complete",
+} as const satisfies Record<string, import("@smart-shop/core/types").ScreenId>;
+
+export type AppScreenId = import("@smart-shop/core/types").ScreenId;
 
 export type ScreenNavigationProps = {
   onNavigate?: (screen: AppScreenId) => void;
   onBack?: () => void;
 };
-
-export const BOTTOM_NAV_TARGETS = {
-  home: "05-dashboard",
-  list: "11-shopping-list",
-  analytics: "10-analytics",
-  ai: "09-ai-assistant",
-  notifications: "08-notifications",
-} as const satisfies Record<string, AppScreenId>;
-
-export const SHOPPING_FLOW_TARGETS = {
-  basket: "14-shopping-basket",
-} as const satisfies Record<string, AppScreenId>;

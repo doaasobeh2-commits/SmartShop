@@ -7,3 +7,4 @@ export * from "./preference";
 export * from "./basket";
 export * from "./inventory";
 export * from "./merchant";
+export * from "./household";

@@ -3,10 +3,9 @@
  * Single source of truth for apps, ecosystem, and core.
  */
 export type ScreenId =
+  | "00-splash"
   | "00-welcome"
-  | "01-onboarding-ai"
-  | "02-onboarding-save"
-  | "03-onboarding-family"
+  | "03-login"
   | "04-register"
   | "05-dashboard"
   | "06-profile"
@@ -17,7 +16,9 @@ export type ScreenId =
   | "11-shopping-list"
   | "12-premium-subscription"
   | "13-admin"
-  | "14-shopping-basket";
+  | "14-shopping-basket"
+  | "15-household-wizard"
+  | "16-shopping-complete";
 
 export type ScreenRoute = {
   id: ScreenId;
@@ -27,5 +28,11 @@ export type ScreenRoute = {
 /** Figma-aligned consumer screens (v1 UI complete). */
 export type FigmaScreenId = Exclude<
   ScreenId,
-  "12-premium-subscription" | "13-admin" | "14-shopping-basket"
+  | "00-splash"
+  | "03-login"
+  | "12-premium-subscription"
+  | "13-admin"
+  | "14-shopping-basket"
+  | "15-household-wizard"
+  | "16-shopping-complete"
 >;

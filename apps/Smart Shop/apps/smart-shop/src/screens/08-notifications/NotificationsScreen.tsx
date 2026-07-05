@@ -1,8 +1,6 @@
 import {
   AppShell,
   Header,
-  PreviewShell,
-  SparklesIcon,
   StatusBar,
 } from "@smart-shop/shared";
 import "@smart-shop/shared/styles/tokens.css";
@@ -63,15 +61,10 @@ function notificationCardClass(unread: boolean) {
 
 export function NotificationsScreen({ onBack }: ScreenNavigationProps = {}) {
   return (
-    <PreviewShell screenNumber={9}>
-      <AppShell>
+    <AppShell>
         <div className="flex h-full flex-col overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <StatusBar />
-          <Header
-            title="Benachrichtigungen"
-            onBack={onBack}
-            rightSlot={<SparklesIcon size={14} />}
-          />
+          <Header title="Benachrichtigungen" onBack={onBack} />
 
           <div className="flex-1 space-y-2 px-5 pt-4">
             {NOTIFICATIONS.map((notification) => (
@@ -106,6 +99,5 @@ export function NotificationsScreen({ onBack }: ScreenNavigationProps = {}) {
           </div>
         </div>
       </AppShell>
-    </PreviewShell>
   );
 }

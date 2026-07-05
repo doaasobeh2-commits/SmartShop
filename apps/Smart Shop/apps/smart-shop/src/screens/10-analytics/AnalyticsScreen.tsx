@@ -1,8 +1,6 @@
 import {
   AppShell,
   Header,
-  PreviewShell,
-  SparklesIcon,
   StatusBar,
 } from "@smart-shop/shared";
 import "@smart-shop/shared/styles/tokens.css";
@@ -62,15 +60,10 @@ function WeeklyBarChart({ data }: { data: DailyAmount[] }) {
 
 export function AnalyticsScreen({ onBack }: ScreenNavigationProps = {}) {
   return (
-    <PreviewShell screenNumber={11}>
-      <AppShell>
+    <AppShell>
         <div className="flex h-full flex-col overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <StatusBar />
-          <Header
-            title="Analyse"
-            onBack={onBack}
-            rightSlot={<SparklesIcon size={14} />}
-          />
+          <Header title="Analyse" onBack={onBack} />
 
           <div className="flex-1 space-y-4 px-5 pt-4">
             <div className="grid grid-cols-2 gap-2.5">
@@ -121,6 +114,5 @@ export function AnalyticsScreen({ onBack }: ScreenNavigationProps = {}) {
           </div>
         </div>
       </AppShell>
-    </PreviewShell>
   );
 }

@@ -2,19 +2,18 @@ import { useCallback, useState } from "react";
 import type { ComponentType } from "react";
 import {
   AdminScreen,
-  AiAssistantScreen,
   AnalyticsScreen,
   DashboardScreen,
-  FamilyPetsScreen,
+  HouseholdWizardScreen,
+  LoginScreen,
   NotificationsScreen,
-  OnboardingAiScreen,
-  OnboardingFamilyScreen,
-  OnboardingSaveScreen,
   PremiumSubscriptionScreen,
   ProfileScreen,
   RegisterScreen,
+  ShoppingCompletedScreen,
   ShoppingListScreen,
   ShoppingBasketScreen,
+  SplashScreen,
   WelcomeScreen,
 } from "./screens";
 import type { ScreenRouteName } from "./screens/routes";
@@ -24,25 +23,26 @@ const SCREEN_COMPONENTS: Record<
   ScreenRouteName,
   ComponentType<ScreenNavigationProps>
 > = {
+  "00-splash": SplashScreen,
   "00-welcome": WelcomeScreen,
-  "01-onboarding-ai": OnboardingAiScreen,
-  "02-onboarding-save": OnboardingSaveScreen,
-  "03-onboarding-family": OnboardingFamilyScreen,
+  "03-login": LoginScreen,
   "04-register": RegisterScreen,
   "05-dashboard": DashboardScreen,
   "06-profile": ProfileScreen,
-  "07-family-pets": FamilyPetsScreen,
+  "07-family-pets": ProfileScreen,
   "08-notifications": NotificationsScreen,
-  "09-ai-assistant": AiAssistantScreen,
+  "09-ai-assistant": DashboardScreen,
   "10-analytics": AnalyticsScreen,
   "11-shopping-list": ShoppingListScreen,
   "12-premium-subscription": PremiumSubscriptionScreen,
   "13-admin": AdminScreen,
   "14-shopping-basket": ShoppingBasketScreen,
+  "15-household-wizard": HouseholdWizardScreen,
+  "16-shopping-complete": ShoppingCompletedScreen,
 };
 
 export function App() {
-  const [screenStack, setScreenStack] = useState<ScreenRouteName[]>(["00-welcome"]);
+  const [screenStack, setScreenStack] = useState<ScreenRouteName[]>(["00-splash"]);
 
   const currentScreen = screenStack[screenStack.length - 1];
 

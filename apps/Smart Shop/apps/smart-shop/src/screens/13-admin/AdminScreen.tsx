@@ -1,4 +1,4 @@
-import { AppShell, Header, PreviewShell, StatusBar } from "@smart-shop/shared";
+import { AppShell, Header, StatusBar } from "@smart-shop/shared";
 import "@smart-shop/shared/styles/tokens.css";
 import type { ScreenNavigationProps } from "../../navigation/screenNavigation";
 
@@ -34,8 +34,7 @@ function AdminCard({ title }: AdminCardProps) {
 
 export function AdminScreen({ onBack }: ScreenNavigationProps = {}) {
   return (
-    <PreviewShell screenNumber={14}>
-      <AppShell>
+    <AppShell>
         <div className="flex h-full flex-col overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <StatusBar />
           <Header
@@ -51,6 +50,5 @@ export function AdminScreen({ onBack }: ScreenNavigationProps = {}) {
           </div>
         </div>
       </AppShell>
-    </PreviewShell>
   );
 }
