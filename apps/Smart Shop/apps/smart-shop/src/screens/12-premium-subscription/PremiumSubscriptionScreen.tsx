@@ -71,7 +71,7 @@ export function PremiumSubscriptionScreen({ onBack }: ScreenNavigationProps = {}
           <StatusBar />
           <Header
             title="Premium"
-            subtitle="Mehr sparen mit KI"
+            subtitle="Erweiterte Funktionen"
             onBack={onBack}
             rightSlot={<SparklesIcon size={14} />}
           />
@@ -79,8 +79,8 @@ export function PremiumSubscriptionScreen({ onBack }: ScreenNavigationProps = {}
           <div className="flex-1 space-y-3 px-5 pt-4">
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
               <p className="text-xs leading-relaxed text-muted-foreground">
-                Premium aktiviert echte KI-Funktionen: lokale Angebote, intelligente
-                Einkaufskörbe, Haushaltslernen und versteckte Inventarintelligenz.
+                Premium erweitert SmartShop um zusätzliche Analyse, erweiterte Angebote und
+                tiefere Haushaltsanpassung. Die Free Edition bleibt vollständig nutzbar.
               </p>
             </div>
 
@@ -107,8 +107,10 @@ export function PremiumSubscriptionScreen({ onBack }: ScreenNavigationProps = {}
           </div>
 
           <div className="space-y-2 px-5 pb-5 pt-3">
-            <Button>Premium Monatlich wählen</Button>
-            <Button variant="secondary">Premium Jährlich wählen</Button>
+            <Button disabled>Premium Monatlich wählen</Button>
+            <Button variant="secondary" disabled>
+              Premium Jährlich wählen
+            </Button>
           </div>
         </div>
       </AppShell>

@@ -7,8 +7,9 @@ import type {
   HouseholdTimelineEvent,
   HouseholdMemory,
   HouseholdKnowledge,
+  HiddenInventoryProjection,
 } from "@smart-shop/core";
-import { normalizeHouseholdSetup } from "@smart-shop/core";
+import { normalizeHouseholdSetup, emptyInventoryProjection } from "@smart-shop/core";
 
 const STORAGE_KEYS = {
   session: "smartshop.session",
@@ -20,6 +21,7 @@ const STORAGE_KEYS = {
   knowledge: "smartshop.knowledge",
   basket: "smartshop.basket",
   completedTrip: "smartshop.completedTrip",
+  inventory: "smartshop.inventory",
 } as const;
 
 export type SessionUser = {
@@ -143,6 +145,17 @@ export function saveKnowledge(knowledge: HouseholdKnowledge): void {
   const all = readJson<Record<string, HouseholdKnowledge>>(STORAGE_KEYS.knowledge, {});
   all[knowledge.householdId] = knowledge;
   writeJson(STORAGE_KEYS.knowledge, all);
+}
+
+export function loadInventoryProjection(householdId: string): HiddenInventoryProjection {
+  const all = readJson<Record<string, HiddenInventoryProjection>>(STORAGE_KEYS.inventory, {});
+  return all[householdId] ?? emptyInventoryProjection(householdId);
+}
+
+export function saveInventoryProjection(projection: HiddenInventoryProjection): void {
+  const all = readJson<Record<string, HiddenInventoryProjection>>(STORAGE_KEYS.inventory, {});
+  all[projection.householdId] = projection;
+  writeJson(STORAGE_KEYS.inventory, all);
 }
 
 export const HOUSEHOLD_ID = "household-local";

@@ -1,118 +1,87 @@
 import {
   AppShell,
   Header,
+  StatCard,
   StatusBar,
 } from "@smart-shop/shared";
 import "@smart-shop/shared/styles/tokens.css";
 import type { ScreenNavigationProps } from "../../navigation/screenNavigation";
-import type { CategoryShare, DailyAmount } from "./types";
+import { MainBottomNav } from "../../navigation/MainBottomNav";
+import { useDecisionLayer } from "../../hooks/useDecisionLayer";
 
-const WEEKLY_DATA: DailyAmount[] = [
-  { day: "Mo", amount: 45 },
-  { day: "Di", amount: 38 },
-  { day: "Mi", amount: 52 },
-  { day: "Do", amount: 41 },
-  { day: "Fr", amount: 58 },
-  { day: "Sa", amount: 72 },
-  { day: "So", amount: 65 },
-];
-
-const TOP_CATEGORIES: CategoryShare[] = [
-  { name: "Obst & Gemüse", value: 28 },
-  { name: "Fleisch & Fisch", value: 22 },
-  { name: "Milchprodukte", value: 18 },
-];
-
-const CHART_MAX = 72;
-const CHART_HEIGHT = 110;
-
-function WeeklyBarChart({ data }: { data: DailyAmount[] }) {
+function DollarSignIcon({ size = 14, className = "" }: { size?: number; className?: string }) {
   return (
-    <div className="relative h-[150px]">
-      <div className="absolute inset-x-0 top-0 flex h-[110px] flex-col justify-between">
-        {[0, 1, 2, 3].map((line) => (
-          <div
-            key={line}
-            className="border-t border-dashed border-foreground/10"
-            style={{ opacity: line === 0 ? 0 : 1 }}
-          />
-        ))}
-      </div>
-
-      <div className="absolute bottom-6 left-0 right-0 flex items-end justify-between gap-1.5 px-1">
-        {data.map((entry) => {
-          const barHeight = Math.round((entry.amount / CHART_MAX) * CHART_HEIGHT);
-          return (
-            <div key={entry.day} className="flex flex-1 flex-col items-center gap-2">
-              <div
-                className="w-full rounded-t-md bg-primary"
-                style={{ height: `${barHeight}px` }}
-                aria-hidden
-              />
-              <span className="text-[10px] text-muted-foreground">{entry.day}</span>
-            </div>
-          );
-        })}
-      </div>
-    </div>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <line x1="12" x2="12" y1="2" y2="22" />
+      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+    </svg>
   );
 }
 
-export function AnalyticsScreen({ onBack }: ScreenNavigationProps = {}) {
+function TrendingUpIcon({ size = 14, className = "" }: { size?: number; className?: string }) {
   return (
-    <AppShell>
-        <div className="flex h-full flex-col overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <StatusBar />
-          <Header title="Analyse" onBack={onBack} />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+      <polyline points="16 7 22 7 22 13" />
+    </svg>
+  );
+}
 
-          <div className="flex-1 space-y-4 px-5 pt-4">
-            <div className="grid grid-cols-2 gap-2.5">
-              <div className="rounded-xl border border-border bg-card p-3">
-                <p className="mb-1 text-xs text-muted-foreground">Wochenverbrauch</p>
-                <p
-                  className="text-2xl font-black text-foreground"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
-                  €371
-                </p>
-              </div>
-              <div className="rounded-xl border border-border bg-card p-3">
-                <p className="mb-1 text-xs text-muted-foreground">Ø täglich</p>
-                <p
-                  className="text-2xl font-black text-foreground"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
-                  €53
-                </p>
-              </div>
-            </div>
+function StoreIcon({ size = 14, className = "" }: { size?: number; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <path d="m2 7 4.5-4.5 4 4 5-5L22 7" />
+      <path d="M4 7v13h16V7" />
+      <path d="M9 20v-6h6v6" />
+    </svg>
+  );
+}
 
-            <div className="rounded-xl border border-border bg-card p-3.5">
-              <h3 className="mb-3 text-xs font-bold text-foreground">Täglicher Verbrauch</h3>
-              <WeeklyBarChart data={WEEKLY_DATA} />
-            </div>
+function TagIcon({ size = 14, className = "" }: { size?: number; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" />
+      <circle cx="7.5" cy="7.5" r=".5" fill="currentColor" />
+    </svg>
+  );
+}
 
-            <div className="rounded-xl border border-border bg-card p-3.5">
-              <h3 className="mb-3 text-xs font-bold text-foreground">Top Kategorien</h3>
-              <div className="space-y-2.5">
-                {TOP_CATEGORIES.map((category) => (
-                  <div key={category.name}>
-                    <div className="mb-1 flex items-center justify-between">
-                      <span className="text-xs text-foreground">{category.name}</span>
-                      <span className="text-xs font-bold text-foreground">{category.value}%</span>
-                    </div>
-                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary/30">
-                      <div
-                        className="h-full rounded-full bg-primary"
-                        style={{ width: `${category.value}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+export function AnalyticsScreen({ onNavigate, onBack }: ScreenNavigationProps = {}) {
+  const { analytics } = useDecisionLayer();
+
+  return (
+    <AppShell footer={<MainBottomNav activeId="analytics" onNavigate={onNavigate} />}>
+      <div className="flex h-full flex-col overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <StatusBar />
+        <Header title="Analyse" subtitle="Wie spare ich Geld?" onBack={onBack} />
+
+        <div className="grid grid-cols-2 gap-2.5 px-5 pb-5 pt-4">
+          <StatCard
+            label="Monatsausgaben"
+            value={`€${analytics.monthlySpending.toFixed(0)}`}
+            icon={<DollarSignIcon />}
+            iconClassName="text-primary"
+          />
+          <StatCard
+            label="Ersparnis"
+            value={`€${analytics.savings.toFixed(0)}`}
+            icon={<TrendingUpIcon />}
+            iconClassName="text-emerald-400"
+          />
+          <StatCard
+            label="Lieblingssupermarkt"
+            value={analytics.favouriteSupermarket}
+            icon={<StoreIcon />}
+            iconClassName="text-accent"
+          />
+          <StatCard
+            label="Top-Kategorie"
+            value={analytics.topCategory}
+            icon={<TagIcon />}
+            iconClassName="text-muted-foreground"
+          />
         </div>
-      </AppShell>
+      </div>
+    </AppShell>
   );
 }

@@ -34,8 +34,11 @@ function checkboxClass(checked: boolean) {
     : "h-5 w-5 shrink-0 rounded-md border-2 border-border";
 }
 
-export function ShoppingCompletedScreen({ onNavigate, onBack }: ScreenNavigationProps = {}) {
-  const { basketLines, prepareCompletedTrip, completedTripLines } = useAppState();
+export function ShoppingCompletedScreen({
+  onNavigateRoot,
+  onBack,
+}: ScreenNavigationProps = {}) {
+  const { basketLines, planLines, prepareCompletedTrip, completedTripLines } = useAppState();
   const initialIds = useMemo(
     () => new Set(basketLines.map((line) => line.id)),
     [basketLines],
@@ -46,14 +49,17 @@ export function ShoppingCompletedScreen({ onNavigate, onBack }: ScreenNavigation
   const lines =
     completedTripLines.length > 0
       ? completedTripLines
-      : basketLines.map((item) => ({
-          id: item.id,
-          productName: item.itemLabel,
-          category: "Einkauf",
-          price: item.offerPrice,
-          storeName: item.merchantName,
-          purchased: purchasedIds.has(item.id),
-        }));
+      : basketLines.map((item) => {
+          const planLine = planLines.find((line) => line.id === item.planLineId);
+          return {
+            id: item.id,
+            productName: item.itemLabel,
+            category: planLine?.category ?? "Einkauf",
+            price: item.offerPrice,
+            storeName: item.merchantName,
+            purchased: purchasedIds.has(item.id),
+          };
+        });
 
   const toggleItem = (id: string) => {
     setPurchasedIds((current) => {
@@ -75,7 +81,7 @@ export function ShoppingCompletedScreen({ onNavigate, onBack }: ScreenNavigation
     setIsSaving(true);
     await prepareCompletedTrip(purchasedIds);
     setIsSaving(false);
-    onNavigate?.("05-dashboard");
+    onNavigateRoot?.("05-dashboard");
   };
 
   return (

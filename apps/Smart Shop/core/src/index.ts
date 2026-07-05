@@ -14,3 +14,6 @@ export * from "./plan";
 export * from "./memory";
 export * from "./knowledge";
 export * from "./services";
+export * from "./offers";
+export * from "./inventory";
+export * from "./decision";

@@ -1,3 +1,4 @@
+export type { ShoppingFrequency } from "./HouseholdSetupSnapshot";
 export type { HouseholdSetupSnapshot } from "./HouseholdSetupSnapshot";
 export {
   DEFAULT_HOUSEHOLD_SETUP,

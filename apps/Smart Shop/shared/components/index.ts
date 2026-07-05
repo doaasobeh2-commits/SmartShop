@@ -106,3 +106,12 @@ export type { QuantityStepperProps } from "./grocery/QuantityStepper";
 
 export { SearchBar } from "./grocery/SearchBar";
 export type { SearchBarProps } from "./grocery/SearchBar";
+
+export { DecisionCard } from "./grocery/DecisionCard";
+export type { DecisionCardProps } from "./grocery/DecisionCard";
+
+export { OfferCompactCard } from "./grocery/OfferCompactCard";
+export type { OfferCompactCardProps } from "./grocery/OfferCompactCard";
+
+export { MerchantDetailsSheet } from "./grocery/MerchantDetailsSheet";
+export type { MerchantDetailsSheetProps } from "./grocery/MerchantDetailsSheet";

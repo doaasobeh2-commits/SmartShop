@@ -1,45 +1,37 @@
-import type { ReactNode } from "react";
+import { useState } from "react";
 import {
   AppShell,
   Button,
   Header,
   StatusBar,
 } from "@smart-shop/shared";
-import { formatPetSummary } from "@smart-shop/core";
+import {
+  PET_TYPE_OPTIONS,
+  finalizeHouseholdSetup,
+  type HouseholdPet,
+  type HouseholdSetupSnapshot,
+  type PetType,
+  type ShoppingFrequency,
+} from "@smart-shop/core";
 import "@smart-shop/shared/styles/tokens.css";
 import type { ScreenNavigationProps } from "../../navigation/screenNavigation";
+import { MainBottomNav } from "../../navigation/MainBottomNav";
 import { useAppState } from "../../state/AppProvider";
+import {
+  chipClass,
+  FAMILY_SIZE_OPTIONS,
+  RESTAURANT_OPTIONS,
+  SHOPPING_FREQUENCY_OPTIONS,
+  SHOPPING_PREFERENCE_OPTIONS,
+  sizeButtonClass,
+  SUPERMARKET_OPTIONS,
+} from "../../constants/householdOptions";
 
-type IconProps = {
-  size?: number;
-  className?: string;
-};
-
-function UserIcon({ size = 16, className = "" }: IconProps) {
+function PawPrintIcon({ className = "" }: { className?: string }) {
   return (
     <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden
-    >
-      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-      <circle cx="12" cy="7" r="4" />
-    </svg>
-  );
-}
-
-function PawPrintIcon({ size = 18, className = "" }: IconProps) {
-  return (
-    <svg
-      width={size}
-      height={size}
+      width={15}
+      height={15}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -57,155 +49,356 @@ function PawPrintIcon({ size = 18, className = "" }: IconProps) {
   );
 }
 
-function DollarSignIcon({ size = 16, className = "" }: IconProps) {
+function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden
-    >
-      <line x1="12" x2="12" y1="2" y2="22" />
-      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-    </svg>
+    <div className="rounded-xl border border-border bg-card p-4">
+      <h3 className="mb-3 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+        {title}
+      </h3>
+      {children}
+    </div>
   );
 }
 
-function ArrowRightIcon({ size = 14, className = "" }: IconProps) {
+function FieldLabel({ children }: { children: React.ReactNode }) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden
-    >
-      <path d="M5 12h14" />
-      <path d="m12 5 7 7-7 7" />
-    </svg>
-  );
-}
-
-type ProfileListItemProps = {
-  icon: ReactNode;
-  title: string;
-  subtitle?: string;
-  value?: string;
-};
-
-function ProfileListItem({ icon, title, subtitle, value }: ProfileListItemProps) {
-  return (
-    <button
-      type="button"
-      className="flex w-full items-center gap-3 rounded-xl border border-border bg-card p-3.5 transition-all hover:border-primary/40"
-    >
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary/50">
-        {icon}
-      </div>
-      <div className="min-w-0 flex-1 text-left">
-        <p className="text-sm font-semibold text-foreground">{title}</p>
-        {subtitle ? (
-          <p className="mt-0.5 text-xs text-muted-foreground">{subtitle}</p>
-        ) : null}
-      </div>
-      {value ? (
-        <span className="shrink-0 text-sm font-bold text-primary">{value}</span>
-      ) : null}
-      <ArrowRightIcon className="shrink-0 text-muted-foreground" />
-    </button>
+    <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+      {children}
+    </label>
   );
 }
 
 export function ProfileScreen({ onBack, onNavigate }: ScreenNavigationProps = {}) {
-  const { session, householdSetup, logout } = useAppState();
-  const displayName = session.user
-    ? `${session.user.firstName} ${session.user.lastName}`
-    : "Maria Müller";
-  const email = session.user?.email ?? "maria@beispiel.de";
+  const { session, householdSetup, updateHouseholdSetup, updateSessionUser, logout } = useAppState();
+
+  const [firstName, setFirstName] = useState(session.user?.firstName ?? "");
+  const [lastName, setLastName] = useState(session.user?.lastName ?? "");
+  const [email, setEmail] = useState(session.user?.email ?? "");
+  const [familySize, setFamilySize] = useState(householdSetup.familySize);
+  const [childrenCount, setChildrenCount] = useState(householdSetup.childrenCount);
+  const [hasPets, setHasPets] = useState(householdSetup.hasPets);
+  const [pets, setPets] = useState<HouseholdPet[]>(householdSetup.pets);
+  const [city, setCity] = useState(householdSetup.city);
+  const [supermarkets, setSupermarkets] = useState<string[]>(householdSetup.favouriteSupermarkets);
+  const [restaurants, setRestaurants] = useState<string[]>(householdSetup.favouriteRestaurants);
+  const [budget, setBudget] = useState(householdSetup.monthlyBudget?.toString() ?? "");
+  const [shoppingFrequency, setShoppingFrequency] = useState<ShoppingFrequency>(
+    householdSetup.shoppingFrequency,
+  );
+  const [shoppingPreferences, setShoppingPreferences] = useState<string[]>(
+    householdSetup.shoppingPreferences,
+  );
+  const [petSelectionHint, setPetSelectionHint] = useState(false);
+  const [savedHint, setSavedHint] = useState(false);
+
+  const toggleListItem = (list: string[], value: string, setter: (next: string[]) => void) => {
+    if (list.includes(value)) {
+      setter(list.filter((item) => item !== value));
+      return;
+    }
+    setter([...list, value]);
+  };
+
+  const togglePetType = (type: PetType) => {
+    setPetSelectionHint(false);
+    if (pets.some((pet) => pet.type === type)) {
+      setPets(pets.filter((pet) => pet.type !== type));
+      return;
+    }
+    setPets([...pets, { type, quantity: 1 }]);
+  };
+
+  const setPetQuantity = (type: PetType, quantity: number) => {
+    const nextQuantity = Math.max(1, Math.min(9, quantity));
+    setPets(
+      pets.map((pet) => (pet.type === type ? { ...pet, quantity: nextQuantity } : pet)),
+    );
+  };
+
+  const toggleHasPets = () => {
+    setHasPets((current) => {
+      const next = !current;
+      if (!next) {
+        setPets([]);
+        setPetSelectionHint(false);
+      }
+      return next;
+    });
+  };
+
+  const handleSave = () => {
+    if (hasPets && pets.length === 0) {
+      setPetSelectionHint(true);
+      return;
+    }
+
+    if (session.user) {
+      updateSessionUser({
+        firstName: firstName.trim() || session.user.firstName,
+        lastName: lastName.trim() || session.user.lastName,
+        email: email.trim() || session.user.email,
+      });
+    }
+
+    const setup: HouseholdSetupSnapshot = finalizeHouseholdSetup({
+      familySize,
+      childrenCount,
+      hasPets,
+      pets,
+      city: city.trim() || "St. Pölten",
+      favouriteSupermarkets: supermarkets.length > 0 ? supermarkets : ["Billa"],
+      favouriteRestaurants: restaurants,
+      monthlyBudget: budget ? Number(budget) : undefined,
+      shoppingFrequency,
+      shoppingPreferences,
+    });
+
+    updateHouseholdSetup(setup);
+    setSavedHint(true);
+    window.setTimeout(() => setSavedHint(false), 2000);
+  };
 
   return (
-    <AppShell>
+    <AppShell footer={<MainBottomNav activeId="profile" onNavigate={onNavigate} />}>
       <div className="flex h-full flex-col overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <StatusBar />
-        <Header title="Profil" subtitle="Wer ist mein Haushalt?" onBack={onBack} />
+        <Header title="Profil" subtitle="Haushalt bearbeiten" onBack={onBack} />
 
         <div className="flex-1 space-y-3 px-5 pt-4">
-          <div className="rounded-xl border border-border bg-card p-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/30 bg-primary/15">
-                <UserIcon size={24} className="text-primary" />
+          <SectionCard title="Konto">
+            <div className="space-y-3">
+              <div>
+                <FieldLabel>Vorname</FieldLabel>
+                <input
+                  type="text"
+                  value={firstName}
+                  onChange={(event) => setFirstName(event.target.value)}
+                  className="w-full rounded-xl border border-border bg-secondary/20 px-3.5 py-3 text-sm text-foreground focus:outline-none"
+                />
               </div>
               <div>
-                <h3
-                  className="text-base font-bold text-foreground"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
-                  {displayName}
-                </h3>
-                <p className="text-xs text-muted-foreground">{email}</p>
+                <FieldLabel>Nachname</FieldLabel>
+                <input
+                  type="text"
+                  value={lastName}
+                  onChange={(event) => setLastName(event.target.value)}
+                  className="w-full rounded-xl border border-border bg-secondary/20 px-3.5 py-3 text-sm text-foreground focus:outline-none"
+                />
+              </div>
+              <div>
+                <FieldLabel>E-Mail</FieldLabel>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  className="w-full rounded-xl border border-border bg-secondary/20 px-3.5 py-3 text-sm text-foreground focus:outline-none"
+                />
               </div>
             </div>
-          </div>
+          </SectionCard>
 
-          <div className="space-y-2">
-            <h3 className="mb-2 text-xs font-bold text-foreground">Haushalt</h3>
-            <ProfileListItem
-              icon={<UserIcon className="text-muted-foreground" />}
-              title="Familie"
-              subtitle={`${householdSetup.familySize} Personen · ${householdSetup.childrenCount} Kinder`}
+          <SectionCard title="Haushalt">
+            <div className="space-y-4">
+              <div>
+                <FieldLabel>Familiengröße</FieldLabel>
+                <div className="flex gap-1.5">
+                  {FAMILY_SIZE_OPTIONS.slice(0, 6).map((size) => (
+                    <button
+                      key={size}
+                      type="button"
+                      onClick={() => setFamilySize(size)}
+                      className={sizeButtonClass(familySize === size)}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => setFamilySize(7)}
+                    className={sizeButtonClass(familySize === 7)}
+                  >
+                    7+
+                  </button>
+                </div>
+              </div>
+              <div>
+                <FieldLabel>Kinder</FieldLabel>
+                <div className="flex gap-1.5">
+                  {[0, 1, 2, 3, 4].map((count) => (
+                    <button
+                      key={count}
+                      type="button"
+                      onClick={() => setChildrenCount(count)}
+                      className={sizeButtonClass(childrenCount === count)}
+                    >
+                      {count}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </SectionCard>
+
+          <SectionCard title="Haustiere">
+            <button
+              type="button"
+              onClick={toggleHasPets}
+              className="mb-3 flex w-full items-center justify-between rounded-xl border border-border bg-secondary/20 p-3"
+            >
+              <div className="flex items-center gap-3">
+                <PawPrintIcon className={hasPets ? "text-accent" : "text-muted-foreground"} />
+                <span className="text-sm font-semibold text-foreground">Haustiere im Haushalt</span>
+              </div>
+              <span className="text-xs font-bold text-primary">{hasPets ? "Ja" : "Nein"}</span>
+            </button>
+            {hasPets ? (
+              <>
+                <div className="flex flex-wrap gap-2">
+                  {PET_TYPE_OPTIONS.map((option) => (
+                    <button
+                      key={option.type}
+                      type="button"
+                      onClick={() => togglePetType(option.type)}
+                      className={chipClass(pets.some((pet) => pet.type === option.type))}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+                {pets.length > 0 ? (
+                  <div className="mt-3 space-y-2">
+                    {pets.map((pet) => {
+                      const label =
+                        PET_TYPE_OPTIONS.find((option) => option.type === pet.type)?.label ??
+                        pet.type;
+                      return (
+                        <div
+                          key={pet.type}
+                          className="flex items-center justify-between rounded-xl border border-border bg-secondary/20 px-3 py-2.5"
+                        >
+                          <span className="text-sm font-semibold text-foreground">{label}</span>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setPetQuantity(pet.type, pet.quantity - 1)}
+                              className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-card text-sm font-bold"
+                            >
+                              −
+                            </button>
+                            <span className="min-w-[1.25rem] text-center text-sm font-bold">
+                              {pet.quantity}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => setPetQuantity(pet.type, pet.quantity + 1)}
+                              className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-card text-sm font-bold"
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : null}
+                {petSelectionHint ? (
+                  <p className="mt-2 text-xs font-semibold text-amber-600">
+                    Bitte wähle mindestens eine Tierart.
+                  </p>
+                ) : null}
+              </>
+            ) : null}
+          </SectionCard>
+
+          <SectionCard title="Stadt">
+            <input
+              type="text"
+              value={city}
+              onChange={(event) => setCity(event.target.value)}
+              placeholder="St. Pölten"
+              className="w-full rounded-xl border border-border bg-secondary/20 px-3.5 py-3 text-sm text-foreground focus:outline-none"
             />
-            <ProfileListItem
-              icon={<PawPrintIcon className="text-muted-foreground" />}
-              title="Haustiere"
-              subtitle={formatPetSummary(householdSetup.pets)}
-              value={householdSetup.hasPets ? undefined : "Nein"}
+          </SectionCard>
+
+          <SectionCard title="Supermärkte">
+            <div className="flex flex-wrap gap-2">
+              {SUPERMARKET_OPTIONS.map((store) => (
+                <button
+                  key={store}
+                  type="button"
+                  onClick={() => toggleListItem(supermarkets, store, setSupermarkets)}
+                  className={chipClass(supermarkets.includes(store))}
+                >
+                  {store}
+                </button>
+              ))}
+            </div>
+          </SectionCard>
+
+          <SectionCard title="Restaurants">
+            <div className="flex flex-wrap gap-2">
+              {RESTAURANT_OPTIONS.map((restaurant) => (
+                <button
+                  key={restaurant}
+                  type="button"
+                  onClick={() => toggleListItem(restaurants, restaurant, setRestaurants)}
+                  className={chipClass(restaurants.includes(restaurant))}
+                >
+                  {restaurant}
+                </button>
+              ))}
+            </div>
+          </SectionCard>
+
+          <SectionCard title="Budget">
+            <FieldLabel>Monatsbudget (€)</FieldLabel>
+            <input
+              type="number"
+              value={budget}
+              onChange={(event) => setBudget(event.target.value)}
+              placeholder="380"
+              className="w-full rounded-xl border border-border bg-secondary/20 px-3.5 py-3 text-sm text-foreground focus:outline-none"
             />
-            <ProfileListItem
-              icon={<UserIcon className="text-muted-foreground" />}
-              title="Stadt"
-              value={householdSetup.city}
-            />
-            <ProfileListItem
-              icon={<UserIcon className="text-muted-foreground" />}
-              title="Supermärkte"
-              subtitle={householdSetup.favouriteSupermarkets.join(", ")}
-            />
-            <ProfileListItem
-              icon={<UserIcon className="text-muted-foreground" />}
-              title="Restaurants"
-              subtitle={
-                householdSetup.favouriteRestaurants.length > 0
-                  ? householdSetup.favouriteRestaurants.join(", ")
-                  : "Keine ausgewählt"
-              }
-            />
-            <ProfileListItem
-              icon={<DollarSignIcon className="text-muted-foreground" />}
-              title="Budget"
-              value={
-                householdSetup.monthlyBudget
-                  ? `€${householdSetup.monthlyBudget}`
-                  : "Nicht gesetzt"
-              }
-            />
-          </div>
+          </SectionCard>
+
+          <SectionCard title="Einkaufshäufigkeit">
+            <div className="flex flex-wrap gap-2">
+              {SHOPPING_FREQUENCY_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setShoppingFrequency(option.value)}
+                  className={chipClass(shoppingFrequency === option.value)}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </SectionCard>
+
+          <SectionCard title="Einkaufspräferenzen">
+            <div className="flex flex-wrap gap-2">
+              {SHOPPING_PREFERENCE_OPTIONS.map((preference) => (
+                <button
+                  key={preference}
+                  type="button"
+                  onClick={() =>
+                    toggleListItem(shoppingPreferences, preference, setShoppingPreferences)
+                  }
+                  className={chipClass(shoppingPreferences.includes(preference))}
+                >
+                  {preference}
+                </button>
+              ))}
+            </div>
+          </SectionCard>
         </div>
 
         <div className="space-y-2 px-5 pb-5 pt-3">
-          <Button onClick={() => onNavigate?.("15-household-wizard")}>
-            Haushalt bearbeiten
-          </Button>
+          {savedHint ? (
+            <p className="text-center text-xs font-semibold text-primary">Gespeichert</p>
+          ) : null}
+          <Button onClick={handleSave}>Änderungen speichern</Button>
           <button
             type="button"
             onClick={() => {

@@ -5,7 +5,8 @@ export type HouseholdMemoryEntryType =
   | "trip_count"
   | "preferred_store"
   | "pet_count"
-  | "pet_household";
+  | "pet_household"
+  | "estimated_savings";
 
 export type HouseholdMemoryEntry = {
   id: string;

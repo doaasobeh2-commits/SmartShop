@@ -36,6 +36,7 @@ import {
 } from "../state/localStore";
 import { completeShoppingTrip } from "../services/tripCompletionService";
 import { syncHouseholdSetupToMemory } from "../services/householdSetupService";
+import { applyTripSideEffects } from "../services/tripSideEffectsService";
 
 type AppContextValue = {
   session: SessionState;
@@ -43,10 +44,13 @@ type AppContextValue = {
   planLines: PlanLine[];
   basketLines: BasketLineView[];
   completedTripLines: PurchaseLine[];
+  decisionVersion: number;
   login: (user: SessionUser) => void;
   register: (user: SessionUser) => void;
   logout: () => void;
   completeHouseholdSetup: (setup: HouseholdSetupSnapshot) => void;
+  updateHouseholdSetup: (setup: HouseholdSetupSnapshot) => void;
+  updateSessionUser: (user: SessionUser) => void;
   updatePlanLines: (lines: PlanLine[]) => void;
   startShoppingFromPlan: () => void;
   prepareCompletedTrip: (purchasedIds: Set<string>) => Promise<void>;
@@ -77,6 +81,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [completedTripLines, setCompletedTripLines] = useState<PurchaseLine[]>(() =>
     loadCompletedTrip(),
   );
+  const [decisionVersion, setDecisionVersion] = useState(0);
 
   const persistSession = useCallback((next: SessionState) => {
     setSession(next);
@@ -127,6 +132,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
       saveSession(next);
       return next;
     });
+    setDecisionVersion((version) => version + 1);
+  }, []);
+
+  const updateHouseholdSetup = useCallback((setup: HouseholdSetupSnapshot) => {
+    const finalized = finalizeHouseholdSetup(setup);
+    saveHouseholdSetup(finalized);
+    setHouseholdSetup(finalized);
+    syncHouseholdSetupToMemory(HOUSEHOLD_ID, finalized);
+    const plan = generateWeeklyPlan(finalized, HOUSEHOLD_ID);
+    saveWeeklyPlan(plan);
+    setPlanLines(plan.lines);
+    setDecisionVersion((version) => version + 1);
+  }, []);
+
+  const updateSessionUser = useCallback((user: SessionUser) => {
+    setSession((previous) => {
+      const next = { ...previous, user };
+      saveSession(next);
+      return next;
+    });
   }, []);
 
   const updatePlanLines = useCallback((lines: PlanLine[]) => {
@@ -145,7 +170,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const prepareCompletedTrip = useCallback(
     async (purchasedIds: Set<string>) => {
-      const lines = buildPurchaseLines(basketLines, purchasedIds);
+      const lines = buildPurchaseLines(basketLines, purchasedIds, planLines);
       setCompletedTripLines(lines);
       saveCompletedTrip(lines);
 
@@ -164,13 +189,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
         lines,
       });
 
+      applyTripSideEffects(lines);
+
       const refreshedPlan = generateWeeklyPlan(householdSetup, HOUSEHOLD_ID);
       saveWeeklyPlan(refreshedPlan);
       setPlanLines(refreshedPlan.lines);
       setBasketLines([]);
       saveBasket([]);
+      setDecisionVersion((version) => version + 1);
     },
-    [basketLines, householdSetup],
+    [basketLines, householdSetup, planLines],
   );
 
   const resolveEntryScreen = useCallback((): ScreenId => {
@@ -190,10 +218,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       planLines,
       basketLines,
       completedTripLines,
+      decisionVersion,
       login,
       register,
       logout,
       completeHouseholdSetup,
+      updateHouseholdSetup,
+      updateSessionUser,
       updatePlanLines,
       startShoppingFromPlan,
       prepareCompletedTrip,
@@ -205,10 +236,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       planLines,
       basketLines,
       completedTripLines,
+      decisionVersion,
       login,
       register,
       logout,
       completeHouseholdSetup,
+      updateHouseholdSetup,
+      updateSessionUser,
       updatePlanLines,
       startShoppingFromPlan,
       prepareCompletedTrip,

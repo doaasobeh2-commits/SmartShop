@@ -1,6 +1,8 @@
 import type { HouseholdPet } from "./HouseholdPet";
 import { normalizePets } from "./HouseholdPet";
 
+export type ShoppingFrequency = "weekly" | "biweekly" | "monthly";
+
 export type HouseholdSetupSnapshot = {
   familySize: number;
   childrenCount: number;
@@ -10,6 +12,8 @@ export type HouseholdSetupSnapshot = {
   favouriteSupermarkets: string[];
   favouriteRestaurants: string[];
   monthlyBudget?: number;
+  shoppingFrequency: ShoppingFrequency;
+  shoppingPreferences: string[];
 };
 
 export const DEFAULT_HOUSEHOLD_SETUP: HouseholdSetupSnapshot = {
@@ -20,6 +24,8 @@ export const DEFAULT_HOUSEHOLD_SETUP: HouseholdSetupSnapshot = {
   city: "St. Pölten",
   favouriteSupermarkets: ["Billa"],
   favouriteRestaurants: [],
+  shoppingFrequency: "weekly",
+  shoppingPreferences: [],
 };
 
 export function normalizeHouseholdSetup(
@@ -43,6 +49,8 @@ export function normalizeHouseholdSetup(
       setup.favouriteSupermarkets?.length ? setup.favouriteSupermarkets : ["Billa"],
     favouriteRestaurants: setup.favouriteRestaurants ?? [],
     monthlyBudget: setup.monthlyBudget,
+    shoppingFrequency: setup.shoppingFrequency ?? "weekly",
+    shoppingPreferences: setup.shoppingPreferences ?? [],
   };
 }
 

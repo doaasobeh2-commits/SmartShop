@@ -41,13 +41,19 @@ export function generateBasketFromPlan(
 export function buildPurchaseLines(
   basket: BasketLineView[],
   purchasedIds: Set<string>,
+  planLines: PlanLine[] = [],
 ): PurchaseLine[] {
-  return basket.map((item) => ({
-    id: item.id,
-    productName: item.itemLabel,
-    category: "Einkauf",
-    price: item.offerPrice,
-    storeName: item.merchantName,
-    purchased: purchasedIds.has(item.id),
-  }));
+  const planById = new Map(planLines.map((line) => [line.id, line]));
+
+  return basket.map((item) => {
+    const planLine = planById.get(item.planLineId);
+    return {
+      id: item.id,
+      productName: item.itemLabel,
+      category: planLine?.category ?? "Einkauf",
+      price: item.offerPrice,
+      storeName: item.merchantName,
+      purchased: purchasedIds.has(item.id),
+    };
+  });
 }

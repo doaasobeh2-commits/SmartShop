@@ -50,11 +50,15 @@ export function App() {
     setScreenStack((stack) => [...stack, screen]);
   }, []);
 
+  const onNavigateRoot = useCallback((screen: ScreenRouteName) => {
+    setScreenStack([screen]);
+  }, []);
+
   const onBack = useCallback(() => {
     setScreenStack((stack) => (stack.length > 1 ? stack.slice(0, -1) : stack));
   }, []);
 
   const CurrentScreen = SCREEN_COMPONENTS[currentScreen];
 
-  return <CurrentScreen onNavigate={onNavigate} onBack={onBack} />;
+  return <CurrentScreen onNavigate={onNavigate} onNavigateRoot={onNavigateRoot} onBack={onBack} />;
 }

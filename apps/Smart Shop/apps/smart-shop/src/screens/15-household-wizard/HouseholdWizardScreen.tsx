@@ -14,10 +14,13 @@ import {
 import "@smart-shop/shared/styles/tokens.css";
 import type { ScreenNavigationProps } from "../../navigation/screenNavigation";
 import { useAppState } from "../../state/AppProvider";
-
-const SUPERMARKET_OPTIONS = ["Billa", "Merkur", "Hofer", "Lidl", "Spar"] as const;
-const RESTAURANT_OPTIONS = ["Kebap Haus", "Pizzeria Roma", "Sushi Bar", "Café Central"] as const;
-const FAMILY_SIZE_OPTIONS = [1, 2, 3, 4, 5, 6, 7] as const;
+import {
+  chipClass,
+  FAMILY_SIZE_OPTIONS,
+  RESTAURANT_OPTIONS,
+  sizeButtonClass,
+  SUPERMARKET_OPTIONS,
+} from "../../constants/householdOptions";
 
 const SETUP_NOTE =
   "Diese Einrichtung wird nur einmal angezeigt. Du kannst alles später im Profil bearbeiten.";
@@ -42,18 +45,6 @@ function PawPrintIcon({ className = "" }: { className?: string }) {
       <path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z" />
     </svg>
   );
-}
-
-function chipClass(active: boolean) {
-  return active
-    ? "rounded-xl border border-primary bg-primary px-3 py-2 text-xs font-bold text-white"
-    : "rounded-xl border border-border bg-card px-3 py-2 text-xs font-bold text-muted-foreground";
-}
-
-function sizeButtonClass(isActive: boolean) {
-  return isActive
-    ? "flex-1 h-9 rounded-xl border border-primary bg-primary text-xs font-bold text-white shadow-md shadow-primary-30 transition-all"
-    : "flex-1 h-9 rounded-xl border border-border bg-card text-xs font-bold text-muted-foreground transition-all";
 }
 
 export function HouseholdWizardScreen({ onNavigate }: ScreenNavigationProps = {}) {
@@ -123,6 +114,8 @@ export function HouseholdWizardScreen({ onNavigate }: ScreenNavigationProps = {}
         favouriteSupermarkets: supermarkets.length > 0 ? supermarkets : ["Billa"],
         favouriteRestaurants: restaurants,
         monthlyBudget: budget ? Number(budget) : undefined,
+        shoppingFrequency: "weekly",
+        shoppingPreferences: [],
       }),
     );
     onNavigate?.("05-dashboard");

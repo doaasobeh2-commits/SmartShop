@@ -7,7 +7,9 @@ import {
 import "@smart-shop/shared/styles/tokens.css";
 import type { ScreenNavigationProps } from "../../navigation/screenNavigation";
 import { SHOPPING_FLOW_TARGETS } from "../../navigation/screenNavigation";
+import { MainBottomNav } from "../../navigation/MainBottomNav";
 import { useAppState } from "../../state/AppProvider";
+import { planStoreHint } from "../../constants/householdOptions";
 
 type IconProps = {
   size?: number;
@@ -46,7 +48,7 @@ function itemNameClass(checked: boolean) {
 }
 
 export function ShoppingListScreen({ onNavigate, onBack }: ScreenNavigationProps = {}) {
-  const { planLines, updatePlanLines, startShoppingFromPlan } = useAppState();
+  const { planLines, updatePlanLines, startShoppingFromPlan, householdSetup } = useAppState();
 
   const toggleItem = (index: number) => {
     updatePlanLines(
@@ -60,13 +62,18 @@ export function ShoppingListScreen({ onNavigate, onBack }: ScreenNavigationProps
   const checkedCount = planLines.filter((item) => item.checked).length;
   const progress = planLines.length > 0 ? (checkedCount / planLines.length) * 100 : 0;
 
+  const uncheckedCount = planLines.filter((item) => !item.checked).length;
+
   const handleStartShopping = () => {
+    if (uncheckedCount === 0) {
+      return;
+    }
     startShoppingFromPlan();
     onNavigate?.(SHOPPING_FLOW_TARGETS.basket);
   };
 
   return (
-    <AppShell>
+    <AppShell footer={<MainBottomNav activeId="plan" onNavigate={onNavigate} />}>
       <div className="flex h-full flex-col overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <StatusBar />
         <Header title="Wochenplan" subtitle="Was soll ich diese Woche kaufen?" onBack={onBack} />
@@ -101,7 +108,9 @@ export function ShoppingListScreen({ onNavigate, onBack }: ScreenNavigationProps
               </div>
               <div className="flex-1">
                 <p className={itemNameClass(item.checked)}>{item.name}</p>
-                <p className="text-xs text-muted-foreground">{item.category}</p>
+                <p className="text-xs text-muted-foreground">
+                  {item.category} · {planStoreHint(index, householdSetup.favouriteSupermarkets)}
+                </p>
               </div>
               <span className="text-sm font-bold text-foreground">€{item.price.toFixed(2)}</span>
             </button>
@@ -118,7 +127,9 @@ export function ShoppingListScreen({ onNavigate, onBack }: ScreenNavigationProps
               €{total.toFixed(2)}
             </span>
           </div>
-          <Button onClick={handleStartShopping}>Einkauf starten</Button>
+          <Button onClick={handleStartShopping} disabled={uncheckedCount === 0}>
+            {uncheckedCount === 0 ? "Alle Artikel erledigt" : "Einkauf starten"}
+          </Button>
         </div>
       </div>
     </AppShell>
