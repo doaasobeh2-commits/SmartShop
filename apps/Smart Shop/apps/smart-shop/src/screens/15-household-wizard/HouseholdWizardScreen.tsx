@@ -5,6 +5,12 @@ import {
   SparklesIcon,
   StatusBar,
 } from "@smart-shop/shared";
+import {
+  PET_TYPE_OPTIONS,
+  finalizeHouseholdSetup,
+  type HouseholdPet,
+  type PetType,
+} from "@smart-shop/core";
 import "@smart-shop/shared/styles/tokens.css";
 import type { ScreenNavigationProps } from "../../navigation/screenNavigation";
 import { useAppState } from "../../state/AppProvider";
@@ -56,6 +62,8 @@ export function HouseholdWizardScreen({ onNavigate }: ScreenNavigationProps = {}
   const [familySize, setFamilySize] = useState(householdSetup.familySize);
   const [childrenCount, setChildrenCount] = useState(householdSetup.childrenCount);
   const [hasPets, setHasPets] = useState(householdSetup.hasPets);
+  const [pets, setPets] = useState<HouseholdPet[]>(householdSetup.pets);
+  const [petSelectionHint, setPetSelectionHint] = useState(false);
   const [city, setCity] = useState(householdSetup.city);
   const [supermarkets, setSupermarkets] = useState<string[]>(
     householdSetup.favouriteSupermarkets.length > 0
@@ -77,20 +85,54 @@ export function HouseholdWizardScreen({ onNavigate }: ScreenNavigationProps = {}
     setter([...list, value]);
   };
 
-  const finishSetup = () => {
-    completeHouseholdSetup({
-      familySize,
-      childrenCount,
-      hasPets,
-      city: city.trim() || "St. Pölten",
-      favouriteSupermarkets: supermarkets.length > 0 ? supermarkets : ["Billa"],
-      favouriteRestaurants: restaurants,
-      monthlyBudget: budget ? Number(budget) : undefined,
+  const togglePetType = (type: PetType) => {
+    setPetSelectionHint(false);
+    if (pets.some((pet) => pet.type === type)) {
+      setPets(pets.filter((pet) => pet.type !== type));
+      return;
+    }
+    setPets([...pets, { type, quantity: 1 }]);
+  };
+
+  const setPetQuantity = (type: PetType, quantity: number) => {
+    const nextQuantity = Math.max(1, Math.min(9, quantity));
+    setPets(
+      pets.map((pet) => (pet.type === type ? { ...pet, quantity: nextQuantity } : pet)),
+    );
+  };
+
+  const toggleHasPets = () => {
+    setHasPets((current) => {
+      const next = !current;
+      if (!next) {
+        setPets([]);
+        setPetSelectionHint(false);
+      }
+      return next;
     });
+  };
+
+  const finishSetup = () => {
+    completeHouseholdSetup(
+      finalizeHouseholdSetup({
+        familySize,
+        childrenCount,
+        hasPets,
+        pets,
+        city: city.trim() || "St. Pölten",
+        favouriteSupermarkets: supermarkets.length > 0 ? supermarkets : ["Billa"],
+        favouriteRestaurants: restaurants,
+        monthlyBudget: budget ? Number(budget) : undefined,
+      }),
+    );
     onNavigate?.("05-dashboard");
   };
 
   const nextStep = () => {
+    if (step === 1 && hasPets && pets.length === 0) {
+      setPetSelectionHint(true);
+      return;
+    }
     if (step >= 5) {
       finishSetup();
       return;
@@ -185,7 +227,7 @@ export function HouseholdWizardScreen({ onNavigate }: ScreenNavigationProps = {}
 
               <button
                 type="button"
-                onClick={() => setHasPets((value) => !value)}
+                onClick={toggleHasPets}
                 className="flex w-full items-center justify-between rounded-xl border border-border bg-card p-3.5"
               >
                 <div className="flex items-center gap-3">
@@ -210,6 +252,71 @@ export function HouseholdWizardScreen({ onNavigate }: ScreenNavigationProps = {}
                   />
                 </div>
               </button>
+
+              {hasPets ? (
+                <div className="space-y-3 rounded-xl border border-border bg-card p-3.5">
+                  <label className="block text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    Tierart
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {PET_TYPE_OPTIONS.map((option) => (
+                      <button
+                        key={option.type}
+                        type="button"
+                        onClick={() => togglePetType(option.type)}
+                        className={chipClass(pets.some((pet) => pet.type === option.type))}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {pets.length > 0 ? (
+                    <div className="space-y-2 pt-1">
+                      {pets.map((pet) => {
+                        const label =
+                          PET_TYPE_OPTIONS.find((option) => option.type === pet.type)?.label ??
+                          pet.type;
+                        return (
+                          <div
+                            key={pet.type}
+                            className="flex items-center justify-between rounded-xl border border-border bg-secondary/20 px-3 py-2.5"
+                          >
+                            <span className="text-sm font-semibold text-foreground">{label}</span>
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setPetQuantity(pet.type, pet.quantity - 1)}
+                                className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-card text-sm font-bold text-foreground"
+                                aria-label={`${label} verringern`}
+                              >
+                                −
+                              </button>
+                              <span className="min-w-[1.25rem] text-center text-sm font-bold text-foreground">
+                                {pet.quantity}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => setPetQuantity(pet.type, pet.quantity + 1)}
+                                className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-card text-sm font-bold text-foreground"
+                                aria-label={`${label} erhöhen`}
+                              >
+                                +
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : null}
+
+                  {petSelectionHint ? (
+                    <p className="text-xs font-semibold text-amber-600">
+                      Bitte wähle mindestens eine Tierart.
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
             </>
           ) : null}
 

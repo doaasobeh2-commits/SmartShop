@@ -4,3 +4,4 @@ export type {
   HouseholdMemory,
   HouseholdMemoryStore,
 } from "./HouseholdMemory";
+export { applySetupToMemory } from "./applySetupToMemory";

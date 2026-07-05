@@ -5,6 +5,7 @@ import {
   Header,
   StatusBar,
 } from "@smart-shop/shared";
+import { formatPetSummary } from "@smart-shop/core";
 import "@smart-shop/shared/styles/tokens.css";
 import type { ScreenNavigationProps } from "../../navigation/screenNavigation";
 import { useAppState } from "../../state/AppProvider";
@@ -167,7 +168,8 @@ export function ProfileScreen({ onBack, onNavigate }: ScreenNavigationProps = {}
             <ProfileListItem
               icon={<PawPrintIcon className="text-muted-foreground" />}
               title="Haustiere"
-              value={householdSetup.hasPets ? "Ja" : "Nein"}
+              subtitle={formatPetSummary(householdSetup.pets)}
+              value={householdSetup.hasPets ? undefined : "Nein"}
             />
             <ProfileListItem
               icon={<UserIcon className="text-muted-foreground" />}

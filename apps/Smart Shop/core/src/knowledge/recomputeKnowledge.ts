@@ -135,6 +135,23 @@ export function recomputeKnowledgeFromMemory(
     );
   }
 
+  const petEntries = memory.entries.filter((entry) => entry.type === "pet_count");
+  for (const pet of petEntries) {
+    facts = upsertFact(
+      facts,
+      "pet_household",
+      pet.key,
+      String(pet.value),
+    );
+  }
+
+  const hasPets = memory.entries.find(
+    (entry) => entry.type === "pet_household" && entry.key === "active",
+  );
+  if (hasPets && Number(hasPets.value) > 0) {
+    facts = upsertFact(facts, "pet_household", "status", "active");
+  }
+
   facts = applyKnowledgeDecay(facts);
 
   return {

@@ -8,6 +8,7 @@ import type {
   HouseholdMemory,
   HouseholdKnowledge,
 } from "@smart-shop/core";
+import { normalizeHouseholdSetup } from "@smart-shop/core";
 
 const STORAGE_KEYS = {
   session: "smartshop.session",
@@ -66,7 +67,11 @@ export function saveSession(session: SessionState): void {
 }
 
 export function loadHouseholdSetup(): HouseholdSetupSnapshot | null {
-  return readJson<HouseholdSetupSnapshot | null>(STORAGE_KEYS.household, null);
+  const stored = readJson<HouseholdSetupSnapshot | null>(STORAGE_KEYS.household, null);
+  if (!stored) {
+    return null;
+  }
+  return normalizeHouseholdSetup(stored);
 }
 
 export function saveHouseholdSetup(setup: HouseholdSetupSnapshot): void {

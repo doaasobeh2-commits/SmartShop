@@ -10,8 +10,10 @@ import {
   generateBasketFromPlan,
   generateWeeklyPlan,
   buildPurchaseLines,
+  finalizeHouseholdSetup,
   type HouseholdSetupSnapshot,
   DEFAULT_HOUSEHOLD_SETUP,
+  normalizeHouseholdSetup,
 } from "@smart-shop/core";
 import type { ScreenId } from "@smart-shop/core/types";
 import {
@@ -33,6 +35,7 @@ import {
   type PurchaseLine,
 } from "../state/localStore";
 import { completeShoppingTrip } from "../services/tripCompletionService";
+import { syncHouseholdSetupToMemory } from "../services/householdSetupService";
 
 type AppContextValue = {
   session: SessionState;
@@ -65,7 +68,7 @@ function ensureWeeklyPlan(setup: HouseholdSetupSnapshot): PlanLine[] {
 export function AppProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<SessionState>(() => loadSession());
   const [householdSetup, setHouseholdSetup] = useState<HouseholdSetupSnapshot>(
-    () => loadHouseholdSetup() ?? DEFAULT_HOUSEHOLD_SETUP,
+    () => normalizeHouseholdSetup(loadHouseholdSetup() ?? DEFAULT_HOUSEHOLD_SETUP),
   );
   const [planLines, setPlanLines] = useState<PlanLine[]>(() =>
     ensureWeeklyPlan(loadHouseholdSetup() ?? DEFAULT_HOUSEHOLD_SETUP),
@@ -112,9 +115,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [persistSession]);
 
   const completeHouseholdSetup = useCallback((setup: HouseholdSetupSnapshot) => {
-    saveHouseholdSetup(setup);
-    setHouseholdSetup(setup);
-    const plan = generateWeeklyPlan(setup, HOUSEHOLD_ID);
+    const finalized = finalizeHouseholdSetup(setup);
+    saveHouseholdSetup(finalized);
+    setHouseholdSetup(finalized);
+    syncHouseholdSetupToMemory(HOUSEHOLD_ID, finalized);
+    const plan = generateWeeklyPlan(finalized, HOUSEHOLD_ID);
     saveWeeklyPlan(plan);
     setPlanLines(plan.lines);
     setSession((previous) => {

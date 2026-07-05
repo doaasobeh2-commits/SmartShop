@@ -1,4 +1,5 @@
 import type { HouseholdSetupSnapshot } from "../models/household/HouseholdSetupSnapshot";
+import type { PetType } from "../models/household/HouseholdPet";
 import type { PlanLine, WeeklyHouseholdPlan } from "./WeeklyHouseholdPlan";
 
 const BASE_STAPLES: Omit<PlanLine, "id" | "checked">[] = [
@@ -15,9 +16,15 @@ const CHILD_ITEMS: Omit<PlanLine, "id" | "checked">[] = [
   { name: "Apfelsaft (1L)", category: "Getränke", price: 1.79 },
 ];
 
-const PET_ITEMS: Omit<PlanLine, "id" | "checked">[] = [
-  { name: "Hundefutter (1kg)", category: "Haustier", price: 4.99 },
-];
+const PET_PRODUCTS: Record<PetType, Omit<PlanLine, "id" | "checked">> = {
+  dog: { name: "Hundefutter (1kg)", category: "Haustier", price: 4.99 },
+  cat: { name: "Katzenfutter (1kg)", category: "Haustier", price: 3.99 },
+  bird: { name: "Vogelfutter (500g)", category: "Haustier", price: 2.49 },
+  fish: { name: "Fischfutter (100g)", category: "Haustier", price: 1.99 },
+  rabbit: { name: "Kaninchenfutter (1kg)", category: "Haustier", price: 3.49 },
+  reptile: { name: "Reptilienfutter", category: "Haustier", price: 5.99 },
+  other: { name: "Haustierbedarf", category: "Haustier", price: 2.99 },
+};
 
 function weekStartIso(date = new Date()): string {
   const day = date.getDay();
@@ -46,8 +53,21 @@ export function generateWeeklyPlan(
     items.push(...CHILD_ITEMS);
   }
 
-  if (setup.hasPets) {
-    items.push(...PET_ITEMS);
+  if (setup.hasPets && setup.pets.length > 0) {
+    for (const pet of setup.pets) {
+      const product = PET_PRODUCTS[pet.type];
+      for (let index = 0; index < pet.quantity; index += 1) {
+        items.push({
+          ...product,
+          name:
+            pet.quantity > 1
+              ? `${product.name} (${index + 1}/${pet.quantity})`
+              : product.name,
+        });
+      }
+    }
+  } else if (setup.hasPets) {
+    items.push(PET_PRODUCTS.dog);
   }
 
   if (setup.familySize >= 4) {

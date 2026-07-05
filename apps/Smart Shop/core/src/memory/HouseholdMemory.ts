@@ -3,7 +3,9 @@ export type HouseholdMemoryEntryType =
   | "store_visit"
   | "category_spend"
   | "trip_count"
-  | "preferred_store";
+  | "preferred_store"
+  | "pet_count"
+  | "pet_household";
 
 export type HouseholdMemoryEntry = {
   id: string;
