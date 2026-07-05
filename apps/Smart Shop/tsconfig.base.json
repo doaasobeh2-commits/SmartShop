@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "baseUrl": ".",
+    "paths": {
+      "@smart-shop/app/*": ["apps/smart-shop/src/*"],
+      "@smart-shop/shared/*": ["shared/components/*"],
+      "@smart-shop/core/*": ["core/src/*"],
+      "@smart-shop/ecosystem/*": ["ecosystem/src/*"]
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "smart-shop",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*",
+    "shared",
+    "core",
+    "ecosystem"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=@smart-shop/app",
+    "build": "npm run build --workspace=@smart-shop/app",
+    "build:web": "npm run build:web --workspace=@smart-shop/app",
+    "cap:sync": "npm run cap:sync --workspace=@smart-shop/app",
+    "android:open": "npm run android:open --workspace=@smart-shop/app",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

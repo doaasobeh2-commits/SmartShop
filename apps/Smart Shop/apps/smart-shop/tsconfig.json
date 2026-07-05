@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@smart-shop/app/*": ["./src/*"],
+      "@smart-shop/shared": ["../../shared/index.ts"],
+      "@smart-shop/shared/*": ["../../shared/*"],
+      "@smart-shop/core/*": ["../../core/src/*"],
+      "@smart-shop/ecosystem/*": ["../../ecosystem/src/*"]
+    }
+  },
+  "include": ["src"],
+  "references": [
+    { "path": "../../shared" },
+    { "path": "../../core" },
+    { "path": "../../ecosystem" }
+  ]
+}

@@ -1,0 +1,16 @@
+node_modules
+dist
+.DS_Store
+*.local
+.env
+.env.*
+!.env.example
+coverage
+.vite
+*.log
+
+# Capacitor Android build artifacts
+apps/smart-shop/android/.gradle
+apps/smart-shop/android/app/build
+apps/smart-shop/android/build
+apps/smart-shop/android/local.properties
