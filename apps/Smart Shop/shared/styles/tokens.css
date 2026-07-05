@@ -37,6 +37,7 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --app-safe-top: max(env(safe-area-inset-top, 0px), 2.5rem);
   --gradient-app-background: radial-gradient(
       ellipse 80% 60% at 50% 0%,
       rgba(99, 102, 241, 0.12) 0%,

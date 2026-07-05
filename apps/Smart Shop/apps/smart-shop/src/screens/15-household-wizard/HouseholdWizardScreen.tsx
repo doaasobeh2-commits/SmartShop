@@ -3,7 +3,6 @@ import {
   AppShell,
   Button,
   SparklesIcon,
-  StatusBar,
 } from "@smart-shop/shared";
 import {
   PET_TYPE_OPTIONS,
@@ -148,8 +147,6 @@ export function HouseholdWizardScreen({ onNavigate }: ScreenNavigationProps = {}
   return (
     <AppShell>
       <div className="flex h-full flex-col overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <StatusBar />
-
         <div className="px-5 pb-3 pt-6">
           <div className="mb-4 flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-primary/40 bg-primary/25">

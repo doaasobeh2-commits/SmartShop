@@ -4,7 +4,6 @@ import {
   Button,
   LoginLink,
   SparklesIcon,
-  StatusBar,
 } from "@smart-shop/shared";
 import "@smart-shop/shared/styles/tokens.css";
 import type { ScreenNavigationProps } from "../../navigation/screenNavigation";
@@ -97,8 +96,6 @@ export function LoginScreen({
   return (
     <AppShell>
       <div className="flex h-full flex-col overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <StatusBar />
-
         <div className="px-5 pb-4 pt-6">
           {canGoBack ? (
             <button

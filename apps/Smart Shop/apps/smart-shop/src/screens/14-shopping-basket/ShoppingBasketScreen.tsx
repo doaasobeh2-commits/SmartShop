@@ -3,7 +3,6 @@ import {
   AppShell,
   Button,
   Header,
-  StatusBar,
 } from "@smart-shop/shared";
 import "@smart-shop/shared/styles/tokens.css";
 import {
@@ -41,7 +40,6 @@ export function ShoppingBasketScreen({ onNavigate, onBack }: ScreenNavigationPro
   return (
     <AppShell>
       <div className="flex h-full flex-col overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <StatusBar />
         <Header
           title="Einkaufskorb"
           subtitle={`${householdSetup.city} · regelbasiert`}

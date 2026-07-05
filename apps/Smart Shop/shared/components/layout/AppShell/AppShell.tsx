@@ -10,7 +10,7 @@ export function AppShell({ children, footer, className = "", ...props }: AppShel
   return (
     <PhoneFrame className={className} {...props}>
       <div className="flex h-full flex-col">
-        <div className="flex-1 overflow-hidden">{children}</div>
+        <div className="flex-1 overflow-hidden pt-[var(--app-safe-top)]">{children}</div>
         {footer}
       </div>
     </PhoneFrame>

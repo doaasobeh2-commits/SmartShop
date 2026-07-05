@@ -3,7 +3,6 @@ import {
   AppShell,
   Button,
   Header,
-  StatusBar,
 } from "@smart-shop/shared";
 import {
   STARTER_INVENTORY_CATALOG,
@@ -275,7 +274,6 @@ export function InventoryOffersScreen({ onBack }: ScreenNavigationProps = {}) {
   return (
     <AppShell>
       <div className="flex h-full flex-col overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <StatusBar />
         <Header
           title="Vorräte & Angebote"
           subtitle="Basis-Vorräte und lokale Angebote"

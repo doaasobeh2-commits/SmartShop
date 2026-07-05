@@ -3,7 +3,6 @@ import {
   AppShell,
   Button,
   Header,
-  StatusBar,
 } from "@smart-shop/shared";
 import {
   PET_TYPE_OPTIONS,
@@ -173,7 +172,6 @@ export function ProfileScreen({ onBack, onNavigate, onNavigateRoot }: ScreenNavi
   return (
     <AppShell footer={<MainBottomNav activeId="profile" onNavigate={onNavigate} />}>
       <div className="flex h-full flex-col overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <StatusBar />
         <Header title="Profil" subtitle="Haushalt bearbeiten" onBack={onBack} />
 
         <div className="flex-1 space-y-3 px-5 pt-4">

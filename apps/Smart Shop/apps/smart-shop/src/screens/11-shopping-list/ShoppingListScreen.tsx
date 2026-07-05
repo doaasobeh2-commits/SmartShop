@@ -2,7 +2,6 @@ import {
   AppShell,
   Button,
   Header,
-  StatusBar,
 } from "@smart-shop/shared";
 import "@smart-shop/shared/styles/tokens.css";
 import type { ScreenNavigationProps } from "../../navigation/screenNavigation";
@@ -75,7 +74,6 @@ export function ShoppingListScreen({ onNavigate, onBack }: ScreenNavigationProps
   return (
     <AppShell footer={<MainBottomNav activeId="plan" onNavigate={onNavigate} />}>
       <div className="flex h-full flex-col overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <StatusBar />
         <Header title="Wochenplan" subtitle="Was soll ich diese Woche kaufen?" onBack={onBack} />
 
         <div className="px-5 pb-3 pt-4">

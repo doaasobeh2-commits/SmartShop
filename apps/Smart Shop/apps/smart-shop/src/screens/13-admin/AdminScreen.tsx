@@ -3,7 +3,6 @@ import {
   AppShell,
   Button,
   Header,
-  StatusBar,
 } from "@smart-shop/shared";
 import "@smart-shop/shared/styles/tokens.css";
 import type { ScreenNavigationProps } from "../../navigation/screenNavigation";
@@ -636,7 +635,6 @@ export function AdminScreen({ onBack, onNavigateRoot }: ScreenNavigationProps = 
   return (
     <AppShell>
       <div className="flex h-full flex-col overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <StatusBar />
         <Header
           title={section ? sectionTitle : "Admin"}
           subtitle="Pilot-Daten verwalten"

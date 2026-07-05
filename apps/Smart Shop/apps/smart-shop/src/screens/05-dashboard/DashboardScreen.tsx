@@ -5,7 +5,6 @@ import {
   Header,
   MerchantDetailsSheet,
   OfferCompactCard,
-  StatusBar,
 } from "@smart-shop/shared";
 import type { DashboardCard } from "@smart-shop/core";
 import "@smart-shop/shared/styles/tokens.css";
@@ -67,7 +66,6 @@ export function DashboardScreen({ onNavigate }: ScreenNavigationProps = {}) {
   return (
     <AppShell footer={<MainBottomNav activeId="home" onNavigate={onNavigate} />}>
       <div className="flex h-full flex-col overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <StatusBar />
         <Header
           title="Dashboard"
           subtitle="Was ist heute wichtig?"

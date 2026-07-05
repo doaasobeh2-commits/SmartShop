@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { AppShell, SparklesIcon, StatusBar } from "@smart-shop/shared";
+import { AppShell, SparklesIcon } from "@smart-shop/shared";
 import { gradients, shadows } from "@smart-shop/shared/tokens";
 import "@smart-shop/shared/styles/tokens.css";
 import type { ScreenNavigationProps } from "../../navigation/screenNavigation";
@@ -18,7 +18,6 @@ export function SplashScreen({ onNavigate }: ScreenNavigationProps = {}) {
   return (
     <AppShell>
       <div className="flex h-full flex-col">
-        <StatusBar />
         <div className="flex flex-1 flex-col items-center justify-center px-8 text-center">
           <div
             className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl"

@@ -3,7 +3,6 @@ import {
   Button,
   Header,
   SparklesIcon,
-  StatusBar,
 } from "@smart-shop/shared";
 import { SUBSCRIPTION_PLANS } from "@smart-shop/core";
 import "@smart-shop/shared/styles/tokens.css";
@@ -68,7 +67,6 @@ export function PremiumSubscriptionScreen({ onBack }: ScreenNavigationProps = {}
   return (
     <AppShell>
         <div className="flex h-full flex-col overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <StatusBar />
           <Header
             title="Premium"
             subtitle="Erweiterte Funktionen"

@@ -69,8 +69,6 @@ export type { PhoneFrameProps } from "./layout/PhoneFrame";
 export { AppShell } from "./layout/AppShell";
 export type { AppShellProps } from "./layout/AppShell";
 
-export { StatusBar } from "./layout/StatusBar";
-
 export { ProgressDots } from "./layout/ProgressDots";
 export type { ProgressDotsProps } from "./layout/ProgressDots";
 
