@@ -25,7 +25,7 @@ export function StatCard({
           {icon}
         </div>
       ) : null}
-      <div className="text-xl font-black text-[var(--foreground)]">{value}</div>
+      <div className="truncate text-xl font-black text-[var(--foreground)]">{value}</div>
       <div className="mt-0.5 text-[10px] text-[var(--muted-foreground)]">{label}</div>
     </div>
   );

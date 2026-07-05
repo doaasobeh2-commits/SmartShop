@@ -17,6 +17,7 @@ import "@smart-shop/shared/styles/tokens.css";
 import type { ScreenNavigationProps } from "../../navigation/screenNavigation";
 import { MainBottomNav } from "../../navigation/MainBottomNav";
 import { useAppState } from "../../state/AppProvider";
+import { isAdminEmail } from "../../auth/adminAccess";
 import {
   chipClass,
   FAMILY_SIZE_OPTIONS,
@@ -68,8 +69,9 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function ProfileScreen({ onBack, onNavigate }: ScreenNavigationProps = {}) {
+export function ProfileScreen({ onBack, onNavigate, onNavigateRoot }: ScreenNavigationProps = {}) {
   const { session, householdSetup, updateHouseholdSetup, updateSessionUser, logout } = useAppState();
+  const showAdmin = isAdminEmail(session.user?.email);
 
   const [firstName, setFirstName] = useState(session.user?.firstName ?? "");
   const [lastName, setLastName] = useState(session.user?.lastName ?? "");
@@ -90,6 +92,7 @@ export function ProfileScreen({ onBack, onNavigate }: ScreenNavigationProps = {}
   );
   const [petSelectionHint, setPetSelectionHint] = useState(false);
   const [savedHint, setSavedHint] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const toggleListItem = (list: string[], value: string, setter: (next: string[]) => void) => {
     if (list.includes(value)) {
@@ -406,6 +409,22 @@ export function ProfileScreen({ onBack, onNavigate }: ScreenNavigationProps = {}
             </div>
             <span className="text-xs font-bold text-primary">Öffnen</span>
           </button>
+
+          {showAdmin ? (
+            <button
+              type="button"
+              onClick={() => onNavigate?.("13-admin")}
+              className="flex w-full items-center justify-between rounded-xl border border-border bg-card p-4 text-left transition-all hover:border-primary/40"
+            >
+              <div>
+                <p className="text-sm font-semibold text-foreground">Admin</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  Pilot-Daten und Verwaltung
+                </p>
+              </div>
+              <span className="text-xs font-bold text-primary">Öffnen</span>
+            </button>
+          ) : null}
         </div>
 
         <div className="space-y-2 px-5 pb-5 pt-3">
@@ -415,16 +434,49 @@ export function ProfileScreen({ onBack, onNavigate }: ScreenNavigationProps = {}
           <Button onClick={handleSave}>Änderungen speichern</Button>
           <button
             type="button"
-            onClick={() => {
-              logout();
-              onNavigate?.("00-welcome");
-            }}
+            onClick={() => setShowLogoutConfirm(true)}
             className="w-full py-3 text-sm font-bold text-muted-foreground"
           >
             Abmelden
           </button>
         </div>
       </div>
+
+      {showLogoutConfirm ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-5">
+          <div
+            className="w-full max-w-sm rounded-2xl border border-border bg-card p-5"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="logout-dialog-title"
+          >
+            <h2
+              id="logout-dialog-title"
+              className="text-lg font-black text-foreground"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              Abmelden
+            </h2>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+              Möchtest du dich wirklich abmelden?
+            </p>
+            <div className="mt-5 grid grid-cols-2 gap-2">
+              <Button variant="secondary" onClick={() => setShowLogoutConfirm(false)}>
+                Abbrechen
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowLogoutConfirm(false);
+                  logout();
+                  onNavigateRoot?.("03-login");
+                }}
+              >
+                Abmelden
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </AppShell>
   );
 }

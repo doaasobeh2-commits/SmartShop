@@ -9,6 +9,8 @@ import {
 import "@smart-shop/shared/styles/tokens.css";
 import type { ScreenNavigationProps } from "../../navigation/screenNavigation";
 import { useAppState } from "../../state/AppProvider";
+import { saveLastLoginEmail } from "../../state/localStore";
+import { isEmailRegistered, saveRegisteredUser } from "../../auth/registeredUsers";
 
 function UserIcon({ size = 13 }: { size?: number }) {
   return (
@@ -112,20 +114,55 @@ function EyeOffIcon({ size = 14 }: { size?: number }) {
   );
 }
 
-export function RegisterScreen({ onNavigate }: ScreenNavigationProps = {}) {
+function isValidEmail(value: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+export function RegisterScreen({ onNavigate, onNavigateRoot }: ScreenNavigationProps = {}) {
   const { register } = useAppState();
   const [showPassword, setShowPassword] = useState(false);
-  const [firstName, setFirstName] = useState("Maria");
-  const [lastName, setLastName] = useState("Müller");
-  const [email, setEmail] = useState("maria@beispiel.de");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   const handleRegister = () => {
-    register({
-      firstName: firstName.trim() || "Maria",
-      lastName: lastName.trim() || "Müller",
-      email: email.trim() || "maria@beispiel.de",
-    });
-    onNavigate?.("15-household-wizard");
+    setError(null);
+    const trimmedEmail = email.trim().toLowerCase();
+
+    if (!firstName.trim() || !lastName.trim()) {
+      setError("Bitte Vor- und Nachname eingeben.");
+      return;
+    }
+    if (!trimmedEmail || !isValidEmail(trimmedEmail)) {
+      setError("Bitte gültige E-Mail eingeben.");
+      return;
+    }
+    if (isEmailRegistered(trimmedEmail)) {
+      setError("Diese E-Mail ist bereits registriert.");
+      return;
+    }
+    if (password.length < 8) {
+      setError("Passwort muss mindestens 8 Zeichen haben.");
+      return;
+    }
+    if (password !== passwordConfirm) {
+      setError("Passwörter stimmen nicht überein.");
+      return;
+    }
+
+    const user = {
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      email: trimmedEmail,
+    };
+
+    saveRegisteredUser(user);
+    saveLastLoginEmail(trimmedEmail);
+    register(user);
+    onNavigateRoot?.("15-household-wizard");
   };
 
   return (
@@ -162,7 +199,8 @@ export function RegisterScreen({ onNavigate }: ScreenNavigationProps = {}) {
                   type="text"
                   value={firstName}
                   onChange={(event) => setFirstName(event.target.value)}
-                  placeholder="Maria"
+                  placeholder="Vorname"
+                  autoComplete="given-name"
                   className="min-w-0 flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none"
                 />
               </div>
@@ -176,8 +214,9 @@ export function RegisterScreen({ onNavigate }: ScreenNavigationProps = {}) {
                   type="text"
                   value={lastName}
                   onChange={(event) => setLastName(event.target.value)}
-                  placeholder="Müller"
-                  className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none"
+                  placeholder="Nachname"
+                  autoComplete="family-name"
+                  className="min-w-0 flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none"
                 />
               </div>
             </div>
@@ -193,8 +232,9 @@ export function RegisterScreen({ onNavigate }: ScreenNavigationProps = {}) {
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                placeholder="maria@beispiel.de"
-                className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none"
+                placeholder="name@beispiel.de"
+                autoComplete="email"
+                className="min-w-0 flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none"
               />
             </div>
           </div>
@@ -207,8 +247,11 @@ export function RegisterScreen({ onNavigate }: ScreenNavigationProps = {}) {
               <LockIcon />
               <input
                 type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
                 placeholder="Mindestens 8 Zeichen"
-                className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none"
+                autoComplete="new-password"
+                className="min-w-0 flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none"
               />
               <button
                 type="button"
@@ -219,6 +262,25 @@ export function RegisterScreen({ onNavigate }: ScreenNavigationProps = {}) {
               </button>
             </div>
           </div>
+
+          <div>
+            <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+              Passwort bestätigen
+            </label>
+            <div className="flex items-center gap-2.5 rounded-xl border border-border bg-card px-3.5 py-3">
+              <LockIcon />
+              <input
+                type={showPassword ? "text" : "password"}
+                value={passwordConfirm}
+                onChange={(event) => setPasswordConfirm(event.target.value)}
+                placeholder="Passwort wiederholen"
+                autoComplete="new-password"
+                className="min-w-0 flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none"
+              />
+            </div>
+          </div>
+
+          {error ? <p className="text-xs font-semibold text-amber-600">{error}</p> : null}
         </div>
 
         <div className="space-y-2 px-5 pb-5 pt-3">

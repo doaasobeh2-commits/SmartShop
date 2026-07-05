@@ -16,6 +16,7 @@ export type ScreenNavigationProps = {
   onNavigate?: (screen: AppScreenId) => void;
   onNavigateRoot?: (screen: AppScreenId) => void;
   onBack?: () => void;
+  canGoBack?: boolean;
 };
 
 export type MainNavId = keyof typeof BOTTOM_NAV_TARGETS;

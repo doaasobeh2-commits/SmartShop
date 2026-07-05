@@ -159,6 +159,12 @@ export function HouseholdWizardScreen({ onNavigate }: ScreenNavigationProps = {}
               EINRICHTUNG · {step}/5
             </span>
           </div>
+          <div className="mb-3 h-1.5 w-full overflow-hidden rounded-full bg-secondary/30">
+            <div
+              className="h-full rounded-full bg-primary transition-all"
+              style={{ width: `${(step / 5) * 100}%` }}
+            />
+          </div>
           <p className="mb-3 text-xs leading-relaxed text-muted-foreground">{SETUP_NOTE}</p>
           <h2
             className="text-xl font-black text-foreground"
@@ -379,6 +385,15 @@ export function HouseholdWizardScreen({ onNavigate }: ScreenNavigationProps = {}
           <Button onClick={nextStep}>
             {step === 5 ? "Smart Shopping starten" : "Weiter"}
           </Button>
+          {step > 1 ? (
+            <button
+              type="button"
+              onClick={() => setStep((current) => current - 1)}
+              className="w-full py-3 text-sm font-bold text-muted-foreground"
+            >
+              Zurück
+            </button>
+          ) : null}
           {step === 4 || step === 5 ? (
             <button
               type="button"

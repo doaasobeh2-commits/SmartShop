@@ -9,7 +9,9 @@ import {
 import "@smart-shop/shared/styles/tokens.css";
 import type { ScreenNavigationProps } from "../../navigation/screenNavigation";
 import { useAppState } from "../../state/AppProvider";
-import { loadSession } from "../../state/localStore";
+import { loadSetupCompleted, loadLastLoginEmail, saveLastLoginEmail } from "../../state/localStore";
+import { userFromLoginEmail } from "../../auth/userFromLoginEmail";
+import { loadRegisteredUser } from "../../auth/registeredUsers";
 
 function MailIcon({ size = 14 }: { size?: number }) {
   return (
@@ -51,19 +53,39 @@ function LockIcon({ size = 14 }: { size?: number }) {
   );
 }
 
-export function LoginScreen({ onNavigate, onBack }: ScreenNavigationProps = {}) {
+function isValidEmail(value: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+export function LoginScreen({
+  onNavigate,
+  onNavigateRoot,
+  onBack,
+  canGoBack = false,
+}: ScreenNavigationProps = {}) {
   const { login } = useAppState();
-  const [email, setEmail] = useState("maria@beispiel.de");
+  const [email, setEmail] = useState(() => loadLastLoginEmail());
   const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   const handleLogin = () => {
-    login({
-      firstName: "Maria",
-      lastName: "Müller",
-      email: email.trim() || "maria@beispiel.de",
-    });
-    const setupDone = loadSession().householdSetupCompleted;
-    onNavigate?.(setupDone ? "05-dashboard" : "15-household-wizard");
+    setError(null);
+    const trimmedEmail = email.trim().toLowerCase();
+
+    if (!trimmedEmail || !isValidEmail(trimmedEmail)) {
+      setError("Bitte gültige E-Mail eingeben.");
+      return;
+    }
+    if (!password.trim()) {
+      setError("Bitte Passwort eingeben.");
+      return;
+    }
+
+    saveLastLoginEmail(trimmedEmail);
+    const registered = loadRegisteredUser(trimmedEmail);
+    login(registered ? { ...registered, email: trimmedEmail } : userFromLoginEmail(trimmedEmail));
+    const setupDone = loadSetupCompleted();
+    onNavigateRoot?.(setupDone ? "05-dashboard" : "15-household-wizard");
   };
 
   return (
@@ -72,13 +94,15 @@ export function LoginScreen({ onNavigate, onBack }: ScreenNavigationProps = {}) 
         <StatusBar />
 
         <div className="px-5 pb-4 pt-6">
-          <button
-            type="button"
-            onClick={onBack}
-            className="mb-4 text-xs font-bold text-primary"
-          >
-            ← Zurück
-          </button>
+          {canGoBack ? (
+            <button
+              type="button"
+              onClick={onBack}
+              className="mb-4 text-xs font-bold text-primary"
+            >
+              ← Zurück
+            </button>
+          ) : null}
           <div className="mb-5 flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-primary/40 bg-primary/25">
               <SparklesIcon size={13} className="text-primary" />
@@ -106,8 +130,9 @@ export function LoginScreen({ onNavigate, onBack }: ScreenNavigationProps = {}) 
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                placeholder="maria@beispiel.de"
-                className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none"
+                placeholder="name@beispiel.de"
+                autoComplete="email"
+                className="min-w-0 flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none"
               />
             </div>
           </div>
@@ -123,10 +148,17 @@ export function LoginScreen({ onNavigate, onBack }: ScreenNavigationProps = {}) 
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 placeholder="Passwort"
-                className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none"
+                autoComplete="current-password"
+                className="min-w-0 flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none"
               />
             </div>
           </div>
+
+          {error ? <p className="text-xs font-semibold text-amber-600">{error}</p> : null}
+
+          <p className="text-[10px] leading-relaxed text-muted-foreground">
+            Passwort vergessen? In dieser Version nicht verfügbar.
+          </p>
         </div>
 
         <div className="space-y-2 px-5 pb-5 pt-3">

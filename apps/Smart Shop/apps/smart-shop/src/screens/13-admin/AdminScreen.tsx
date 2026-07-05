@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   AppShell,
   Button,
@@ -7,6 +7,8 @@ import {
 } from "@smart-shop/shared";
 import "@smart-shop/shared/styles/tokens.css";
 import type { ScreenNavigationProps } from "../../navigation/screenNavigation";
+import { useAppState } from "../../state/AppProvider";
+import { isAdminEmail } from "../../auth/adminAccess";
 import {
   adminStatistics,
   loadAdminData,
@@ -106,7 +108,24 @@ function StatRow({ label, value }: { label: string; value: number }) {
   );
 }
 
-export function AdminScreen({ onBack }: ScreenNavigationProps = {}) {
+function EmptyListMessage() {
+  return (
+    <div className="rounded-xl border border-border bg-card p-4 text-center">
+      <p className="text-sm text-muted-foreground">Keine Einträge</p>
+    </div>
+  );
+}
+
+export function AdminScreen({ onBack, onNavigateRoot }: ScreenNavigationProps = {}) {
+  const { session } = useAppState();
+  const isAdmin = isAdminEmail(session.user?.email);
+
+  useEffect(() => {
+    if (!isAdmin) {
+      onNavigateRoot?.("05-dashboard");
+    }
+  }, [isAdmin, onNavigateRoot]);
+
   const [data, setData] = useState<AdminData>(() => loadAdminData());
   const [section, setSection] = useState<AdminSectionId | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -115,8 +134,16 @@ export function AdminScreen({ onBack }: ScreenNavigationProps = {}) {
   const [formPrice, setFormPrice] = useState("");
   const [formNormalPrice, setFormNormalPrice] = useState("");
   const [formEmail, setFormEmail] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<{
+    label: string;
+    onConfirm: () => void;
+  } | null>(null);
 
   const stats = useMemo(() => adminStatistics(data), [data]);
+
+  if (!isAdmin) {
+    return null;
+  }
 
   const persist = (next: AdminData) => {
     setData(next);
@@ -478,69 +505,127 @@ export function AdminScreen({ onBack }: ScreenNavigationProps = {}) {
           Hinzufügen
         </Button>
         {section === "products"
-          ? data.products.map((item) => (
+          ? data.products.length === 0
+            ? <EmptyListMessage />
+            : data.products.map((item) => (
               <ListRow
                 key={item.id}
                 title={item.name}
                 subtitle={item.category}
                 onEdit={() => startEditProduct(item)}
-                onDelete={() => persist({ ...data, products: deleteFrom(data.products, item.id) })}
+                onDelete={() =>
+                  setDeleteTarget({
+                    label: item.name,
+                    onConfirm: () => {
+                      persist({ ...data, products: deleteFrom(data.products, item.id) });
+                      setDeleteTarget(null);
+                    },
+                  })
+                }
               />
             ))
           : null}
         {section === "categories"
-          ? data.categories.map((item) => (
+          ? data.categories.length === 0
+            ? <EmptyListMessage />
+            : data.categories.map((item) => (
               <ListRow
                 key={item.id}
                 title={item.name}
                 onEdit={() => startEditCategory(item)}
-                onDelete={() => persist({ ...data, categories: deleteFrom(data.categories, item.id) })}
+                onDelete={() =>
+                  setDeleteTarget({
+                    label: item.name,
+                    onConfirm: () => {
+                      persist({ ...data, categories: deleteFrom(data.categories, item.id) });
+                      setDeleteTarget(null);
+                    },
+                  })
+                }
               />
             ))
           : null}
         {section === "stores"
-          ? data.stores.map((item) => (
+          ? data.stores.length === 0
+            ? <EmptyListMessage />
+            : data.stores.map((item) => (
               <ListRow
                 key={item.id}
                 title={item.name}
                 subtitle={`${item.address}, ${item.city}`}
                 onEdit={() => startEditStore(item)}
-                onDelete={() => persist({ ...data, stores: deleteFrom(data.stores, item.id) })}
+                onDelete={() =>
+                  setDeleteTarget({
+                    label: item.name,
+                    onConfirm: () => {
+                      persist({ ...data, stores: deleteFrom(data.stores, item.id) });
+                      setDeleteTarget(null);
+                    },
+                  })
+                }
               />
             ))
           : null}
         {section === "restaurants"
-          ? data.restaurants.map((item) => (
+          ? data.restaurants.length === 0
+            ? <EmptyListMessage />
+            : data.restaurants.map((item) => (
               <ListRow
                 key={item.id}
                 title={item.name}
                 subtitle={item.address}
                 onEdit={() => startEditRestaurant(item)}
                 onDelete={() =>
-                  persist({ ...data, restaurants: deleteFrom(data.restaurants, item.id) })
+                  setDeleteTarget({
+                    label: item.name,
+                    onConfirm: () => {
+                      persist({ ...data, restaurants: deleteFrom(data.restaurants, item.id) });
+                      setDeleteTarget(null);
+                    },
+                  })
                 }
               />
             ))
           : null}
         {section === "offers"
-          ? data.offers.map((item) => (
+          ? data.offers.length === 0
+            ? <EmptyListMessage />
+            : data.offers.map((item) => (
               <ListRow
                 key={item.id}
                 title={item.productName}
                 subtitle={`${item.merchantName} · €${item.offerPrice.toFixed(2)}`}
                 onEdit={() => startEditOffer(item)}
-                onDelete={() => persist({ ...data, offers: deleteFrom(data.offers, item.id) })}
+                onDelete={() =>
+                  setDeleteTarget({
+                    label: item.productName,
+                    onConfirm: () => {
+                      persist({ ...data, offers: deleteFrom(data.offers, item.id) });
+                      setDeleteTarget(null);
+                    },
+                  })
+                }
               />
             ))
           : null}
         {section === "users"
-          ? data.users.map((item) => (
+          ? data.users.length === 0
+            ? <EmptyListMessage />
+            : data.users.map((item) => (
               <ListRow
                 key={item.id}
                 title={item.name}
                 subtitle={`${item.email} · ${item.role}`}
                 onEdit={() => startEditUser(item)}
-                onDelete={() => persist({ ...data, users: deleteFrom(data.users, item.id) })}
+                onDelete={() =>
+                  setDeleteTarget({
+                    label: item.name,
+                    onConfirm: () => {
+                      persist({ ...data, users: deleteFrom(data.users, item.id) });
+                      setDeleteTarget(null);
+                    },
+                  })
+                }
               />
             ))
           : null}
@@ -582,6 +667,28 @@ export function AdminScreen({ onBack }: ScreenNavigationProps = {}) {
             : renderSectionContent()}
         </div>
       </div>
+
+      {deleteTarget ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-5">
+          <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-5">
+            <h2
+              className="text-lg font-black text-foreground"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              Löschen
+            </h2>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+              „{deleteTarget.label}" wirklich löschen?
+            </p>
+            <div className="mt-5 grid grid-cols-2 gap-2">
+              <Button variant="secondary" onClick={() => setDeleteTarget(null)}>
+                Abbrechen
+              </Button>
+              <Button onClick={deleteTarget.onConfirm}>Löschen</Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </AppShell>
   );
 }

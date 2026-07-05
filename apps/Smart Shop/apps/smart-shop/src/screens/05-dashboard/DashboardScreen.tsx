@@ -60,6 +60,10 @@ export function DashboardScreen({ onNavigate }: ScreenNavigationProps = {}) {
   const [detailsOfferId, setDetailsOfferId] = useState<string | null>(null);
   const details = detailsOfferId ? openDetails(detailsOfferId) : null;
 
+  const renderedCards = dashboardCards
+    .map((card) => renderCard(card, offers, onNavigate, setDetailsOfferId))
+    .filter(Boolean);
+
   return (
     <AppShell footer={<MainBottomNav activeId="home" onNavigate={onNavigate} />}>
       <div className="flex h-full flex-col overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -73,8 +77,12 @@ export function DashboardScreen({ onNavigate }: ScreenNavigationProps = {}) {
         />
 
         <div className="flex-1 space-y-2.5 px-5 pb-5 pt-4">
-          {dashboardCards.map((card) =>
-            renderCard(card, offers, onNavigate, setDetailsOfferId),
+          {renderedCards.length === 0 ? (
+            <div className="rounded-xl border border-border bg-card p-4 text-center">
+              <p className="text-sm text-muted-foreground">Alles ruhig heute.</p>
+            </div>
+          ) : (
+            renderedCards
           )}
         </div>
       </div>

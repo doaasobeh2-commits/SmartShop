@@ -41,15 +41,15 @@ export function MerchantDetailsSheet({
       />
       <div className="relative z-10 max-h-[85vh] w-full max-w-md overflow-y-auto rounded-t-2xl border border-border bg-card p-5 pb-6">
         <div className="mb-4 flex items-start justify-between gap-3">
-          <div>
+          <div className="min-w-0 flex-1">
             <h2
-              className="text-lg font-black text-foreground"
+              className="truncate text-lg font-black text-foreground"
               style={{ fontFamily: "var(--font-display)" }}
             >
               {merchantName}
             </h2>
             {productName ? (
-              <p className="mt-1 text-sm font-medium text-foreground">{productName}</p>
+              <p className="mt-1 truncate text-sm font-medium text-foreground">{productName}</p>
             ) : null}
           </div>
           <button
@@ -82,7 +82,7 @@ export function MerchantDetailsSheet({
               <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                 Adresse
               </p>
-              <p className="text-sm text-foreground">{address}</p>
+              <p className="text-sm text-foreground break-words">{address}</p>
             </div>
           ) : null}
           {phone ? (
@@ -108,6 +108,9 @@ export function MerchantDetailsSheet({
               </p>
               <p className="truncate text-sm text-primary">{website}</p>
             </div>
+          ) : null}
+          {!address && !phone && !openingHours && !website ? (
+            <p className="text-sm text-muted-foreground">Keine Kontaktdaten hinterlegt.</p>
           ) : null}
         </div>
 

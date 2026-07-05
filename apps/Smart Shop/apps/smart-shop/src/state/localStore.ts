@@ -22,6 +22,7 @@ const STORAGE_KEYS = {
   basket: "smartshop.basket",
   completedTrip: "smartshop.completedTrip",
   inventory: "smartshop.inventory",
+  lastEmail: "smartshop.lastEmail",
 } as const;
 
 export type SessionUser = {
@@ -66,6 +67,32 @@ export function loadSession(): SessionState {
 export function saveSession(session: SessionState): void {
   writeJson(STORAGE_KEYS.session, session);
   writeJson(STORAGE_KEYS.setupCompleted, session.householdSetupCompleted);
+}
+
+/** Clears login session but keeps household setup and app data. */
+export function clearLoginSession(): void {
+  const setupCompleted = readJson<boolean>(STORAGE_KEYS.setupCompleted, false);
+  saveSession({
+    isAuthenticated: false,
+    user: null,
+    householdSetupCompleted: setupCompleted,
+  });
+}
+
+export function loadSetupCompleted(): boolean {
+  return readJson<boolean>(STORAGE_KEYS.setupCompleted, false);
+}
+
+export function loadLastLoginEmail(): string {
+  return readJson<string>(STORAGE_KEYS.lastEmail, "");
+}
+
+export function saveLastLoginEmail(email: string): void {
+  const trimmed = email.trim().toLowerCase();
+  if (!trimmed) {
+    return;
+  }
+  writeJson(STORAGE_KEYS.lastEmail, trimmed);
 }
 
 export function loadHouseholdSetup(): HouseholdSetupSnapshot | null {

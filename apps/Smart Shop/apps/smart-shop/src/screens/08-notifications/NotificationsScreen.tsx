@@ -63,12 +63,16 @@ export function NotificationsScreen({ onNavigate, onBack }: ScreenNavigationProp
                 className={`w-full text-left ${notificationCardClass(notification.unread)}`}
               >
                 <div className="mb-1 flex items-start justify-between gap-2">
-                  <h4 className="text-sm font-bold text-foreground">{notification.title}</h4>
+                  <h4 className="min-w-0 flex-1 truncate text-sm font-bold text-foreground">
+                    {notification.title}
+                  </h4>
                   {notification.unread ? (
                     <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-accent" />
                   ) : null}
                 </div>
-                <p className="mb-2 text-xs text-muted-foreground">{notification.description}</p>
+                <p className="mb-2 line-clamp-2 text-xs text-muted-foreground">
+                  {notification.description}
+                </p>
                 <div className="flex items-center gap-1.5">
                   <ClockIcon className="text-muted-foreground/60" />
                   <span className="text-[10px] text-muted-foreground/60">

@@ -103,26 +103,36 @@ export function ShoppingCompletedScreen({
         </div>
 
         <div className="flex-1 space-y-2 px-5">
-          {lines.map((line) => {
-            const checked = purchasedIds.has(line.id);
-            return (
-              <button
-                key={line.id}
-                type="button"
-                onClick={() => toggleItem(line.id)}
-                className="flex w-full items-center gap-3 rounded-xl border border-border bg-card p-3 text-left"
-              >
-                <div className={checkboxClass(checked)}>
-                  {checked ? <CheckIcon className="text-white" /> : null}
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-foreground">{line.productName}</p>
-                  <p className="text-xs text-muted-foreground">{line.storeName}</p>
-                </div>
-                <span className="text-sm font-bold text-foreground">€{line.price.toFixed(2)}</span>
-              </button>
-            );
-          })}
+          {lines.length === 0 ? (
+            <div className="rounded-xl border border-border bg-card p-4 text-center">
+              <p className="text-sm text-muted-foreground">Keine Artikel im Einkaufskorb.</p>
+            </div>
+          ) : (
+            lines.map((line) => {
+              const checked = purchasedIds.has(line.id);
+              return (
+                <button
+                  key={line.id}
+                  type="button"
+                  onClick={() => toggleItem(line.id)}
+                  className="flex w-full items-center gap-3 rounded-xl border border-border bg-card p-3 text-left"
+                >
+                  <div className={checkboxClass(checked)}>
+                    {checked ? <CheckIcon className="text-white" /> : null}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-foreground">{line.productName}</p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {line.storeName} · {line.category}
+                    </p>
+                  </div>
+                  <span className="shrink-0 text-sm font-bold text-foreground">
+                    €{line.price.toFixed(2)}
+                  </span>
+                </button>
+              );
+            })
+          )}
         </div>
 
         <div className="space-y-2 px-5 pb-5 pt-3">
@@ -135,7 +145,7 @@ export function ShoppingCompletedScreen({
               €{purchasedTotal.toFixed(2)}
             </span>
           </div>
-          <Button onClick={handleConfirm} disabled={isSaving}>
+          <Button onClick={handleConfirm} disabled={isSaving || lines.length === 0}>
             {isSaving ? "Speichern…" : "Bestätigen"}
           </Button>
         </div>

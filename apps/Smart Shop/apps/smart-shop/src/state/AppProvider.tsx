@@ -28,6 +28,9 @@ import {
   saveHouseholdSetup,
   saveSession,
   saveWeeklyPlan,
+  clearLoginSession,
+  loadSetupCompleted,
+  saveLastLoginEmail,
   type SessionState,
   type SessionUser,
   type BasketLineView,
@@ -91,7 +94,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(
     (user: SessionUser) => {
-      const setupCompleted = loadSession().householdSetupCompleted;
+      const setupCompleted = loadSetupCompleted();
       persistSession({
         isAuthenticated: true,
         user,
@@ -113,12 +116,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
 
   const logout = useCallback(() => {
-    persistSession({
+    const current = loadSession();
+    if (current.user?.email) {
+      saveLastLoginEmail(current.user.email);
+    }
+    clearLoginSession();
+    setSession({
       isAuthenticated: false,
       user: null,
-      householdSetupCompleted: false,
+      householdSetupCompleted: loadSetupCompleted(),
     });
-  }, [persistSession]);
+  }, []);
 
   const completeHouseholdSetup = useCallback((setup: HouseholdSetupSnapshot) => {
     const finalized = finalizeHouseholdSetup(setup);

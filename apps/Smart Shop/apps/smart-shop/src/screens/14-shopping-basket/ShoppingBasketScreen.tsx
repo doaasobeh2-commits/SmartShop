@@ -68,13 +68,15 @@ export function ShoppingBasketScreen({ onNavigate, onBack }: ScreenNavigationPro
           ) : (
             groupedLines.map(([merchantName, items]) => (
               <div key={merchantName} className="space-y-2">
-                <h3 className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                <h3 className="truncate text-xs font-bold uppercase tracking-wide text-muted-foreground">
                   {merchantName}
                 </h3>
                 {items.map((item) => (
                   <div key={item.id} className="rounded-xl border border-border bg-card p-3">
                     <div className="mb-1 flex items-center justify-between gap-2">
-                      <span className="text-xs font-semibold text-primary">{item.merchantName}</span>
+                      <span className="min-w-0 truncate text-xs font-semibold text-primary">
+                        {item.merchantName}
+                      </span>
                       <span
                         className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${statusClass(item.status)}`}
                       >
@@ -82,9 +84,9 @@ export function ShoppingBasketScreen({ onNavigate, onBack }: ScreenNavigationPro
                       </span>
                     </div>
                     <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <p className="text-sm font-medium text-foreground">{item.itemLabel}</p>
-                        <p className="mt-0.5 text-xs text-muted-foreground">{item.validityLabel}</p>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-foreground">{item.itemLabel}</p>
+                        <p className="mt-0.5 truncate text-xs text-muted-foreground">{item.validityLabel}</p>
                       </div>
                       <span className="shrink-0 text-sm font-bold text-foreground">
                         €{item.offerPrice.toFixed(2)}

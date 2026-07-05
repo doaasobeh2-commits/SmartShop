@@ -62,5 +62,5 @@ export function App() {
 
   const CurrentScreen = SCREEN_COMPONENTS[currentScreen];
 
-  return <CurrentScreen onNavigate={onNavigate} onNavigateRoot={onNavigateRoot} onBack={onBack} />;
+  return <CurrentScreen onNavigate={onNavigate} onNavigateRoot={onNavigateRoot} onBack={onBack} canGoBack={screenStack.length > 1} />;
 }
