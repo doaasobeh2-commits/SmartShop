@@ -10,6 +10,7 @@ export { NotificationsScreen } from "./08-notifications";
 export { AiAssistantScreen } from "./09-ai-assistant";
 export { AnalyticsScreen } from "./10-analytics";
 export { ShoppingListScreen } from "./11-shopping-list";
+export { ShoppingBasketScreen } from "./14-shopping-basket";
 export { PremiumSubscriptionScreen } from "./12-premium-subscription";
 export { AdminScreen } from "./13-admin";
 

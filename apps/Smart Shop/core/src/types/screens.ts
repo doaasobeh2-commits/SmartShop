@@ -16,7 +16,8 @@ export type ScreenId =
   | "10-analytics"
   | "11-shopping-list"
   | "12-premium-subscription"
-  | "13-admin";
+  | "13-admin"
+  | "14-shopping-basket";
 
 export type ScreenRoute = {
   id: ScreenId;
@@ -26,5 +27,5 @@ export type ScreenRoute = {
 /** Figma-aligned consumer screens (v1 UI complete). */
 export type FigmaScreenId = Exclude<
   ScreenId,
-  "12-premium-subscription" | "13-admin"
+  "12-premium-subscription" | "13-admin" | "14-shopping-basket"
 >;

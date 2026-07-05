@@ -17,6 +17,7 @@ export const SCREEN_ORDER: readonly ScreenId[] = [
   "11-shopping-list",
   "12-premium-subscription",
   "13-admin",
+  "14-shopping-basket",
 ] as const;
 
 export const FIGMA_SCREEN_ORDER: readonly ScreenId[] = SCREEN_ORDER.slice(0, 12);
@@ -36,6 +37,7 @@ export const SCREEN_ROUTES: readonly ScreenRoute[] = [
   { id: "11-shopping-list", path: "/shopping-list" },
   { id: "12-premium-subscription", path: "/premium" },
   { id: "13-admin", path: "/admin" },
+  { id: "14-shopping-basket", path: "/shopping-basket" },
 ] as const;
 
 export const SCREEN_PATH_BY_ID: Record<ScreenId, string> = Object.fromEntries(

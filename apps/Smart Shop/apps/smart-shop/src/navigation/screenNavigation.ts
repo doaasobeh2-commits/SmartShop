@@ -14,3 +14,7 @@ export const BOTTOM_NAV_TARGETS = {
   ai: "09-ai-assistant",
   notifications: "08-notifications",
 } as const satisfies Record<string, AppScreenId>;
+
+export const SHOPPING_FLOW_TARGETS = {
+  basket: "14-shopping-basket",
+} as const satisfies Record<string, AppScreenId>;

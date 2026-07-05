@@ -14,6 +14,7 @@ import {
   ProfileScreen,
   RegisterScreen,
   ShoppingListScreen,
+  ShoppingBasketScreen,
   WelcomeScreen,
 } from "./screens";
 import type { ScreenRouteName } from "./screens/routes";
@@ -37,6 +38,7 @@ const SCREEN_COMPONENTS: Record<
   "11-shopping-list": ShoppingListScreen,
   "12-premium-subscription": PremiumSubscriptionScreen,
   "13-admin": AdminScreen,
+  "14-shopping-basket": ShoppingBasketScreen,
 };
 
 export function App() {

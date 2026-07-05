@@ -9,6 +9,7 @@ import {
 } from "@smart-shop/shared";
 import "@smart-shop/shared/styles/tokens.css";
 import type { ScreenNavigationProps } from "../../navigation/screenNavigation";
+import { SHOPPING_FLOW_TARGETS } from "../../navigation/screenNavigation";
 import type { ShoppingItem } from "./types";
 
 type IconProps = {
@@ -55,7 +56,7 @@ function itemNameClass(checked: boolean) {
     : "text-sm font-medium text-foreground";
 }
 
-export function ShoppingListScreen({ onBack }: ScreenNavigationProps = {}) {
+export function ShoppingListScreen({ onNavigate, onBack }: ScreenNavigationProps = {}) {
   const [items, setItems] = useState<ShoppingItem[]>(INITIAL_ITEMS);
 
   const toggleItem = (index: number) => {
@@ -129,7 +130,9 @@ export function ShoppingListScreen({ onBack }: ScreenNavigationProps = {}) {
                 €{total.toFixed(2)}
               </span>
             </div>
-            <Button>Einkauf starten</Button>
+            <Button onClick={() => onNavigate?.(SHOPPING_FLOW_TARGETS.basket)}>
+              Einkauf starten
+            </Button>
           </div>
         </div>
       </AppShell>
