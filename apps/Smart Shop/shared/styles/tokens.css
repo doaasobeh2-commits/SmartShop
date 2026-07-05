@@ -39,6 +39,8 @@
   --radius-xl: calc(var(--radius) + 4px);
   --app-safe-top: max(env(safe-area-inset-top, 0px), 2.5rem);
   --app-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --app-home-indicator-inset: 0.75rem;
+  --app-content-bottom: var(--app-home-indicator-inset);
   --phone-frame-max-width: 390px;
   --phone-frame-height: min(844px, 100dvh);
   --phone-frame-radius: 44px;

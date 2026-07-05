@@ -95,7 +95,7 @@ export function LoginScreen({
 
   return (
     <AppShell>
-      <div className="flex h-full flex-col overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="screen-scroll">
         <div className="px-5 pb-4 pt-6">
           {canGoBack ? (
             <button

@@ -65,7 +65,7 @@ export function DashboardScreen({ onNavigate }: ScreenNavigationProps = {}) {
 
   return (
     <AppShell footer={<MainBottomNav activeId="home" onNavigate={onNavigate} />}>
-      <div className="flex h-full flex-col overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="screen-scroll">
         <Header
           title="Dashboard"
           subtitle="Was ist heute wichtig?"

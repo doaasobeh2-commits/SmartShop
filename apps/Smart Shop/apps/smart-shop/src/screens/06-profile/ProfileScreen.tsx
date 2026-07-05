@@ -171,7 +171,7 @@ export function ProfileScreen({ onBack, onNavigate, onNavigateRoot }: ScreenNavi
 
   return (
     <AppShell footer={<MainBottomNav activeId="profile" onNavigate={onNavigate} />}>
-      <div className="flex h-full flex-col overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="screen-scroll">
         <Header title="Profil" subtitle="Haushalt bearbeiten" onBack={onBack} />
 
         <div className="flex-1 space-y-3 px-5 pt-4">
@@ -450,7 +450,7 @@ export function ProfileScreen({ onBack, onNavigate, onNavigateRoot }: ScreenNavi
       </div>
 
       {showLogoutConfirm ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-5">
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 p-5">
           <div
             className="w-full max-w-sm rounded-2xl border border-border bg-card p-5"
             role="dialog"

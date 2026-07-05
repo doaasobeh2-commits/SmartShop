@@ -39,7 +39,7 @@ export function ShoppingBasketScreen({ onNavigate, onBack }: ScreenNavigationPro
 
   return (
     <AppShell>
-      <div className="flex h-full flex-col overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="screen-scroll">
         <Header
           title="Einkaufskorb"
           subtitle={`${householdSetup.city} · regelbasiert`}

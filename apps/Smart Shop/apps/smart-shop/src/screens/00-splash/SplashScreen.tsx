@@ -17,7 +17,7 @@ export function SplashScreen({ onNavigate }: ScreenNavigationProps = {}) {
 
   return (
     <AppShell>
-      <div className="flex h-full flex-col">
+      <div className="screen-stack">
         <div className="flex flex-1 flex-col items-center justify-center px-8 text-center">
           <div
             className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl"

@@ -32,14 +32,14 @@ export function MerchantDetailsSheet({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0">
+    <div className="absolute inset-0 z-50 flex items-end justify-center bg-black/50 p-0">
       <button
         type="button"
         className="absolute inset-0"
         aria-label="Schließen"
         onClick={onClose}
       />
-      <div className="relative z-10 max-h-[85vh] w-full max-w-md overflow-y-auto rounded-t-2xl border border-border bg-card p-5 pb-6">
+      <div className="relative z-10 max-h-[85vh] w-full overflow-y-auto rounded-t-2xl border border-border bg-card p-5 pb-6">
         <div className="mb-4 flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <h2

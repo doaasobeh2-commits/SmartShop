@@ -44,7 +44,7 @@ export function NotificationsScreen({ onNavigate, onBack }: ScreenNavigationProp
 
   return (
     <AppShell>
-      <div className="flex h-full flex-col overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="screen-scroll">
         <Header title="Benachrichtigungen" subtitle="Was braucht Aufmerksamkeit?" onBack={onBack} />
 
         <div className="flex-1 space-y-2 px-5 pt-4">

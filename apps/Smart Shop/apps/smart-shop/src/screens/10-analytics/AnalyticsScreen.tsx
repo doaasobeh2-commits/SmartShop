@@ -50,7 +50,7 @@ export function AnalyticsScreen({ onNavigate, onBack }: ScreenNavigationProps = 
 
   return (
     <AppShell footer={<MainBottomNav activeId="analytics" onNavigate={onNavigate} />}>
-      <div className="flex h-full flex-col overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="screen-scroll">
         <Header title="Analyse" subtitle="Wie spare ich Geld?" onBack={onBack} />
 
         <div className="grid grid-cols-2 gap-2.5 px-5 pb-5 pt-4">

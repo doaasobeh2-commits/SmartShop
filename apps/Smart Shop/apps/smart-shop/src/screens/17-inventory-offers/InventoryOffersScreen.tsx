@@ -273,7 +273,7 @@ export function InventoryOffersScreen({ onBack }: ScreenNavigationProps = {}) {
 
   return (
     <AppShell>
-      <div className="flex h-full flex-col overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="screen-scroll">
         <Header
           title="Vorräte & Angebote"
           subtitle="Basis-Vorräte und lokale Angebote"

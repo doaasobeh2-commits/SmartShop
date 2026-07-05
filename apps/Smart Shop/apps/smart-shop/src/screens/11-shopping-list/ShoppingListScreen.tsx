@@ -73,7 +73,7 @@ export function ShoppingListScreen({ onNavigate, onBack }: ScreenNavigationProps
 
   return (
     <AppShell footer={<MainBottomNav activeId="plan" onNavigate={onNavigate} />}>
-      <div className="flex h-full flex-col overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="screen-scroll">
         <Header title="Wochenplan" subtitle="Was soll ich diese Woche kaufen?" onBack={onBack} />
 
         <div className="px-5 pb-3 pt-4">

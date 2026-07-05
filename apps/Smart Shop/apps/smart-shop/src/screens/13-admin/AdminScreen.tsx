@@ -634,7 +634,7 @@ export function AdminScreen({ onBack, onNavigateRoot }: ScreenNavigationProps = 
 
   return (
     <AppShell>
-      <div className="flex h-full flex-col overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="screen-scroll">
         <Header
           title={section ? sectionTitle : "Admin"}
           subtitle="Pilot-Daten verwalten"
@@ -667,7 +667,7 @@ export function AdminScreen({ onBack, onNavigateRoot }: ScreenNavigationProps = 
       </div>
 
       {deleteTarget ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-5">
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 p-5">
           <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-5">
             <h2
               className="text-lg font-black text-foreground"
