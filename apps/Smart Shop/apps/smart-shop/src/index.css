@@ -18,7 +18,7 @@
     margin: 0;
     min-height: 100dvh;
     overflow: hidden;
-    background: var(--gradient-app-background);
+    background: var(--background);
   }
 
   #root {
@@ -33,23 +33,27 @@
 }
 
 @media (min-width: 481px) {
+  body,
+  #root {
+    background: var(--gradient-app-background);
+  }
+
   #root {
     align-items: center;
     padding: 1rem;
-    background: var(--gradient-app-background);
   }
 }
 
 @layer components {
   .app-screen-host {
-    @apply isolate flex min-h-0 w-full flex-1 flex-col bg-background;
+    @apply flex min-h-0 w-full flex-1 flex-col;
   }
 
   .screen-scroll {
-    @apply isolate flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto bg-background [scrollbar-width:none] [&::-webkit-scrollbar]:hidden;
+    @apply flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto bg-background [scrollbar-width:none] [&::-webkit-scrollbar]:hidden;
   }
 
   .screen-stack {
-    @apply isolate flex min-h-0 w-full flex-1 flex-col overflow-x-hidden bg-background;
+    @apply flex min-h-0 w-full flex-1 flex-col overflow-x-hidden bg-background;
   }
 }

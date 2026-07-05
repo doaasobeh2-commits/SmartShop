@@ -37,16 +37,8 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --app-safe-top: max(env(safe-area-inset-top, 0px), 2.5rem);
-  --app-safe-bottom: env(safe-area-inset-bottom, 0px);
-  --app-home-indicator-inset: 0.75rem;
-  --app-content-bottom: var(--app-home-indicator-inset);
-  --phone-frame-max-width: 390px;
-  --phone-frame-height: min(844px, 100dvh);
-  --phone-frame-radius: 44px;
-  --phone-frame-border: 2px solid rgba(255, 255, 255, 0.08);
-  --phone-frame-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6), 0 30px 80px rgba(0, 0, 0, 0.7),
-    0 0 60px rgba(99, 102, 241, 0.15);
+  --app-max-width: 100%;
+  --app-height: 100dvh;
   --gradient-app-background: radial-gradient(
       ellipse 80% 60% at 50% 0%,
       rgba(99, 102, 241, 0.12) 0%,
@@ -54,17 +46,12 @@
     ),
     #07091c;
   --gradient-brand: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-  --shadow-phone-frame: 0 0 0 1px rgba(0, 0, 0, 0.6),
-    0 30px 80px rgba(0, 0, 0, 0.7), 0 0 60px rgba(99, 102, 241, 0.15);
   --shadow-button-primary: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
 }
 
-@media (max-width: 480px) {
+@media (min-width: 481px) {
   :root {
-    --phone-frame-max-width: 100%;
-    --phone-frame-height: 100dvh;
-    --phone-frame-radius: 0px;
-    --phone-frame-border: none;
-    --phone-frame-shadow: none;
+    --app-max-width: 390px;
+    --app-height: min(844px, 100dvh);
   }
 }
