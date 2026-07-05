@@ -55,6 +55,7 @@ type AppContextValue = {
   startShoppingFromPlan: () => void;
   prepareCompletedTrip: (purchasedIds: Set<string>) => Promise<void>;
   resolveEntryScreen: () => ScreenId;
+  bumpDecisionVersion: () => void;
 };
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -211,6 +212,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return "05-dashboard";
   }, [session]);
 
+  const bumpDecisionVersion = useCallback(() => {
+    setDecisionVersion((version) => version + 1);
+  }, []);
+
   const value = useMemo(
     () => ({
       session,
@@ -229,6 +234,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       startShoppingFromPlan,
       prepareCompletedTrip,
       resolveEntryScreen,
+      bumpDecisionVersion,
     }),
     [
       session,
@@ -247,6 +253,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       startShoppingFromPlan,
       prepareCompletedTrip,
       resolveEntryScreen,
+      bumpDecisionVersion,
     ],
   );
 

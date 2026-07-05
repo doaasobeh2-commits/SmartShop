@@ -7,3 +7,5 @@ export {
   resolveMerchantDetails,
 } from "./OfferEngine";
 export { createPilotOfferSources } from "./pilotOffers";
+export { mergeUserCapturedOffers } from "./mergeUserCapturedOffers";
+export type { UserCapturedOfferRecord } from "./mergeUserCapturedOffers";

@@ -18,7 +18,8 @@ export type ScreenId =
   | "13-admin"
   | "14-shopping-basket"
   | "15-household-wizard"
-  | "16-shopping-complete";
+  | "16-shopping-complete"
+  | "17-inventory-offers";
 
 export type ScreenRoute = {
   id: ScreenId;

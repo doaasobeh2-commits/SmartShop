@@ -392,6 +392,20 @@ export function ProfileScreen({ onBack, onNavigate }: ScreenNavigationProps = {}
               ))}
             </div>
           </SectionCard>
+
+          <button
+            type="button"
+            onClick={() => onNavigate?.("17-inventory-offers")}
+            className="flex w-full items-center justify-between rounded-xl border border-border bg-card p-4 text-left transition-all hover:border-primary/40"
+          >
+            <div>
+              <p className="text-sm font-semibold text-foreground">Vorräte & Angebote</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Basis-Vorräte pflegen und lokale Angebote erfassen
+              </p>
+            </div>
+            <span className="text-xs font-bold text-primary">Öffnen</span>
+          </button>
         </div>
 
         <div className="space-y-2 px-5 pb-5 pt-3">

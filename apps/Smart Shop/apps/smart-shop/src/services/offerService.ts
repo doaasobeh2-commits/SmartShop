@@ -1,6 +1,7 @@
 import {
   buildOfferViews,
   createPilotOfferSources,
+  mergeUserCapturedOffers,
   resolveMerchantDetails,
   type MerchantDetailsView,
   type OfferSourceBundle,
@@ -8,14 +9,21 @@ import {
 } from "@smart-shop/core";
 import { loadHouseholdSetup } from "../state/localStore";
 import { normalizeHouseholdSetup, DEFAULT_HOUSEHOLD_SETUP } from "@smart-shop/core";
+import { loadUserCapturedOffers } from "./userOfferStore";
 
-let cachedSources: OfferSourceBundle | null = null;
+let cachedPilotSources: OfferSourceBundle | null = null;
+
+function getPilotSources(): OfferSourceBundle {
+  if (!cachedPilotSources) {
+    cachedPilotSources = createPilotOfferSources();
+  }
+  return cachedPilotSources;
+}
 
 export function getOfferSources(): OfferSourceBundle {
-  if (!cachedSources) {
-    cachedSources = createPilotOfferSources();
-  }
-  return cachedSources;
+  const setup = normalizeHouseholdSetup(loadHouseholdSetup() ?? DEFAULT_HOUSEHOLD_SETUP);
+  const pilot = getPilotSources();
+  return mergeUserCapturedOffers(pilot, loadUserCapturedOffers(), setup.city);
 }
 
 export function getOfferViews(): OfferView[] {

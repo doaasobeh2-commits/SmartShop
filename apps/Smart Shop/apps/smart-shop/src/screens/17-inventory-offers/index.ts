@@ -1,0 +1,1 @@
+export { InventoryOffersScreen } from "./InventoryOffersScreen";

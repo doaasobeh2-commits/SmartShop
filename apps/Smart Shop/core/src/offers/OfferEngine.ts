@@ -86,7 +86,8 @@ export function buildOfferViews(
         storeProfileIds.has(offer.storeId) &&
         isActiveOffer(offer.offerEndDate, offer.status) &&
         (favouriteStores.size === 0 ||
-          favouriteStores.has(offer.merchantName.toLowerCase())),
+          favouriteStores.has(offer.merchantName.toLowerCase()) ||
+          offer.familyId === "local"),
     )
     .map(toStoreOfferView);
 
@@ -102,7 +103,8 @@ export function buildOfferViews(
         restaurantProfileIds.has(offer.restaurantId) &&
         isActiveOffer(offer.offerEndDate ?? new Date().toISOString(), offer.status) &&
         (favouriteRestaurants.size === 0 ||
-          favouriteRestaurants.has(offer.merchantName.toLowerCase())),
+          favouriteRestaurants.has(offer.merchantName.toLowerCase()) ||
+          offer.familyId === "local"),
     )
     .map(toRestaurantOfferView);
 

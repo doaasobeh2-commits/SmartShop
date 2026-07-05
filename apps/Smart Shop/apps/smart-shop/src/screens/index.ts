@@ -12,6 +12,7 @@ export { HouseholdWizardScreen } from "./15-household-wizard";
 export { ShoppingCompletedScreen } from "./16-shopping-complete";
 export { PremiumSubscriptionScreen } from "./12-premium-subscription";
 export { AdminScreen } from "./13-admin";
+export { InventoryOffersScreen } from "./17-inventory-offers";
 
 export { screenRoutes } from "./routes";
 export type { ScreenRoute, ScreenRouteName } from "./routes";

@@ -5,6 +5,7 @@ import {
   AnalyticsScreen,
   DashboardScreen,
   HouseholdWizardScreen,
+  InventoryOffersScreen,
   LoginScreen,
   NotificationsScreen,
   PremiumSubscriptionScreen,
@@ -39,6 +40,7 @@ const SCREEN_COMPONENTS: Record<
   "14-shopping-basket": ShoppingBasketScreen,
   "15-household-wizard": HouseholdWizardScreen,
   "16-shopping-complete": ShoppingCompletedScreen,
+  "17-inventory-offers": InventoryOffersScreen,
 };
 
 export function App() {
