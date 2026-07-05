@@ -11,6 +11,7 @@ import type { ScreenNavigationProps } from "../../navigation/screenNavigation";
 import { useAppState } from "../../state/AppProvider";
 import { saveLastLoginEmail } from "../../state/localStore";
 import { isEmailRegistered, saveRegisteredUser } from "../../auth/registeredUsers";
+import { normalizeSessionUser } from "../../auth/adminAccess";
 
 function UserIcon({ size = 13 }: { size?: number }) {
   return (
@@ -161,7 +162,7 @@ export function RegisterScreen({ onNavigate, onNavigateRoot }: ScreenNavigationP
 
     saveRegisteredUser(user);
     saveLastLoginEmail(trimmedEmail);
-    register(user);
+    register(normalizeSessionUser(user));
     onNavigateRoot?.("15-household-wizard");
   };
 

@@ -40,6 +40,7 @@ import {
 import { completeShoppingTrip } from "../services/tripCompletionService";
 import { syncHouseholdSetupToMemory } from "../services/householdSetupService";
 import { applyTripSideEffects } from "../services/tripSideEffectsService";
+import { normalizeSessionUser } from "../auth/adminAccess";
 
 type AppContextValue = {
   session: SessionState;
@@ -97,7 +98,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const setupCompleted = loadSetupCompleted();
       persistSession({
         isAuthenticated: true,
-        user,
+        user: normalizeSessionUser(user),
         householdSetupCompleted: setupCompleted,
       });
     },
@@ -108,7 +109,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     (user: SessionUser) => {
       persistSession({
         isAuthenticated: true,
-        user,
+        user: normalizeSessionUser(user),
         householdSetupCompleted: false,
       });
     },
@@ -157,7 +158,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const updateSessionUser = useCallback((user: SessionUser) => {
     setSession((previous) => {
-      const next = { ...previous, user };
+      const next = { ...previous, user: normalizeSessionUser(user) };
       saveSession(next);
       return next;
     });

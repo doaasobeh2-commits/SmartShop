@@ -12,6 +12,7 @@ import { useAppState } from "../../state/AppProvider";
 import { loadSetupCompleted, loadLastLoginEmail, saveLastLoginEmail } from "../../state/localStore";
 import { userFromLoginEmail } from "../../auth/userFromLoginEmail";
 import { loadRegisteredUser } from "../../auth/registeredUsers";
+import { isAdminEmail, normalizeSessionUser } from "../../auth/adminAccess";
 
 function MailIcon({ size = 14 }: { size?: number }) {
   return (
@@ -83,7 +84,12 @@ export function LoginScreen({
 
     saveLastLoginEmail(trimmedEmail);
     const registered = loadRegisteredUser(trimmedEmail);
-    login(registered ? { ...registered, email: trimmedEmail } : userFromLoginEmail(trimmedEmail));
+    const user = isAdminEmail(trimmedEmail)
+      ? userFromLoginEmail(trimmedEmail)
+      : registered
+        ? { ...registered, email: trimmedEmail }
+        : userFromLoginEmail(trimmedEmail);
+    login(normalizeSessionUser(user));
     const setupDone = loadSetupCompleted();
     onNavigateRoot?.(setupDone ? "05-dashboard" : "15-household-wizard");
   };

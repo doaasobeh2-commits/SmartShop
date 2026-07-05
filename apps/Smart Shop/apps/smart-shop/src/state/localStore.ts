@@ -10,6 +10,7 @@ import type {
   HiddenInventoryProjection,
 } from "@smart-shop/core";
 import { normalizeHouseholdSetup, emptyInventoryProjection } from "@smart-shop/core";
+import { normalizeSessionUser } from "../auth/adminAccess";
 
 const STORAGE_KEYS = {
   session: "smartshop.session",
@@ -55,9 +56,10 @@ function writeJson<T>(key: string, value: T): void {
 
 export function loadSession(): SessionState {
   const stored = readJson<Partial<SessionState>>(STORAGE_KEYS.session, {});
+  const user = stored.user ? normalizeSessionUser(stored.user) : null;
   return {
     isAuthenticated: stored.isAuthenticated ?? false,
-    user: stored.user ?? null,
+    user,
     householdSetupCompleted:
       stored.householdSetupCompleted ??
       readJson<boolean>(STORAGE_KEYS.setupCompleted, false),
@@ -65,8 +67,12 @@ export function loadSession(): SessionState {
 }
 
 export function saveSession(session: SessionState): void {
-  writeJson(STORAGE_KEYS.session, session);
-  writeJson(STORAGE_KEYS.setupCompleted, session.householdSetupCompleted);
+  const normalized: SessionState = {
+    ...session,
+    user: session.user ? normalizeSessionUser(session.user) : null,
+  };
+  writeJson(STORAGE_KEYS.session, normalized);
+  writeJson(STORAGE_KEYS.setupCompleted, normalized.householdSetupCompleted);
 }
 
 /** Clears login session but keeps household setup and app data. */

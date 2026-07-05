@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   AppShell,
   Button,
@@ -17,7 +17,7 @@ import "@smart-shop/shared/styles/tokens.css";
 import type { ScreenNavigationProps } from "../../navigation/screenNavigation";
 import { MainBottomNav } from "../../navigation/MainBottomNav";
 import { useAppState } from "../../state/AppProvider";
-import { isAdminEmail } from "../../auth/adminAccess";
+import { isAdminEmail, normalizeEmail } from "../../auth/adminAccess";
 import {
   chipClass,
   FAMILY_SIZE_OPTIONS,
@@ -94,6 +94,15 @@ export function ProfileScreen({ onBack, onNavigate, onNavigateRoot }: ScreenNavi
   const [savedHint, setSavedHint] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
+  useEffect(() => {
+    if (!session.user) {
+      return;
+    }
+    setFirstName(session.user.firstName);
+    setLastName(session.user.lastName);
+    setEmail(session.user.email);
+  }, [session.user]);
+
   const toggleListItem = (list: string[], value: string, setter: (next: string[]) => void) => {
     if (list.includes(value)) {
       setter(list.filter((item) => item !== value));
@@ -139,7 +148,7 @@ export function ProfileScreen({ onBack, onNavigate, onNavigateRoot }: ScreenNavi
       updateSessionUser({
         firstName: firstName.trim() || session.user.firstName,
         lastName: lastName.trim() || session.user.lastName,
-        email: email.trim() || session.user.email,
+        email: normalizeEmail(email) || session.user.email,
       });
     }
 
@@ -199,6 +208,22 @@ export function ProfileScreen({ onBack, onNavigate, onNavigateRoot }: ScreenNavi
               </div>
             </div>
           </SectionCard>
+
+          {showAdmin ? (
+            <button
+              type="button"
+              onClick={() => onNavigate?.("13-admin")}
+              className="flex w-full items-center justify-between rounded-xl border border-border bg-card p-4 text-left transition-all hover:border-primary/40"
+            >
+              <div>
+                <p className="text-sm font-semibold text-foreground">Admin</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  Pilot-Daten und Verwaltung
+                </p>
+              </div>
+              <span className="text-xs font-bold text-primary">Öffnen</span>
+            </button>
+          ) : null}
 
           <SectionCard title="Haushalt">
             <div className="space-y-4">
@@ -409,22 +434,6 @@ export function ProfileScreen({ onBack, onNavigate, onNavigateRoot }: ScreenNavi
             </div>
             <span className="text-xs font-bold text-primary">Öffnen</span>
           </button>
-
-          {showAdmin ? (
-            <button
-              type="button"
-              onClick={() => onNavigate?.("13-admin")}
-              className="flex w-full items-center justify-between rounded-xl border border-border bg-card p-4 text-left transition-all hover:border-primary/40"
-            >
-              <div>
-                <p className="text-sm font-semibold text-foreground">Admin</p>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  Pilot-Daten und Verwaltung
-                </p>
-              </div>
-              <span className="text-xs font-bold text-primary">Öffnen</span>
-            </button>
-          ) : null}
         </div>
 
         <div className="space-y-2 px-5 pb-5 pt-3">
