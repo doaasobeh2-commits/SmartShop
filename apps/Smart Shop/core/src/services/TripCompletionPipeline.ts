@@ -7,6 +7,9 @@ import type {
   ShoppingCompletedEvent,
   StoreVisitedEvent,
 } from "../timeline/HouseholdTimeline";
+import type { HypothesisPersistence } from "../intelligence/hypotheses/HouseholdHypothesis";
+import { extractPurchaseSignals, extractLocaleContextSignals } from "../intelligence/signals";
+import { runInferencePipeline } from "../intelligence/inference/InferencePipeline";
 
 export type CompletedTripInput = {
   householdId: string;
@@ -15,6 +18,13 @@ export type CompletedTripInput = {
   totalAmount: number;
   currency: string;
   lines: PurchaseLine[];
+  /** Optional locale context for cultural inference — not user preference forms. */
+  localeContext?: {
+    city?: string;
+    countryCode?: string;
+    languageCode?: string;
+    region?: string;
+  };
 };
 
 function createId(prefix: string): string {
@@ -26,6 +36,7 @@ export async function processTripCompletion(
   timelineWriter: HouseholdTimelineWriter,
   memoryStore: HouseholdMemoryStore,
   knowledgeStore: HouseholdKnowledgeStore,
+  hypothesisStore?: HypothesisPersistence,
 ): Promise<void> {
   const occurredAt = new Date().toISOString();
   const purchasedLines = input.lines.filter((line) => line.purchased);
@@ -70,4 +81,23 @@ export async function processTripCompletion(
   const existingKnowledge = await knowledgeStore.get(input.householdId);
   const updatedKnowledge = recomputeKnowledgeFromMemory(updatedMemory, existingKnowledge);
   await knowledgeStore.save(updatedKnowledge);
+
+  if (hypothesisStore) {
+    const occurredAt = new Date().toISOString();
+    const purchaseSignals = extractPurchaseSignals(input.householdId, input.lines, occurredAt);
+    const localeSignals = input.localeContext
+      ? extractLocaleContextSignals(
+          { householdId: input.householdId, ...input.localeContext },
+          occurredAt,
+        )
+      : [];
+
+    const existingHypotheses = await hypothesisStore.get(input.householdId);
+    const updatedHypotheses = runInferencePipeline({
+      householdId: input.householdId,
+      signals: [...purchaseSignals, ...localeSignals],
+      existing: existingHypotheses,
+    });
+    await hypothesisStore.save(updatedHypotheses);
+  }
 }

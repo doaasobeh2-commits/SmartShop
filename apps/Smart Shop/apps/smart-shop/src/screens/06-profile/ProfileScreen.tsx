@@ -22,7 +22,6 @@ import {
   FAMILY_SIZE_OPTIONS,
   RESTAURANT_OPTIONS,
   SHOPPING_FREQUENCY_OPTIONS,
-  SHOPPING_PREFERENCE_OPTIONS,
   sizeButtonClass,
   SUPERMARKET_OPTIONS,
 } from "../../constants/householdOptions";
@@ -85,9 +84,6 @@ export function ProfileScreen({ onBack, onNavigate, onNavigateRoot }: ScreenNavi
   const [budget, setBudget] = useState(householdSetup.monthlyBudget?.toString() ?? "");
   const [shoppingFrequency, setShoppingFrequency] = useState<ShoppingFrequency>(
     householdSetup.shoppingFrequency,
-  );
-  const [shoppingPreferences, setShoppingPreferences] = useState<string[]>(
-    householdSetup.shoppingPreferences,
   );
   const [petSelectionHint, setPetSelectionHint] = useState(false);
   const [savedHint, setSavedHint] = useState(false);
@@ -161,7 +157,7 @@ export function ProfileScreen({ onBack, onNavigate, onNavigateRoot }: ScreenNavi
       favouriteRestaurants: restaurants,
       monthlyBudget: budget ? Number(budget) : undefined,
       shoppingFrequency,
-      shoppingPreferences,
+      shoppingPreferences: [],
     });
 
     updateHouseholdSetup(setup);
@@ -397,23 +393,6 @@ export function ProfileScreen({ onBack, onNavigate, onNavigateRoot }: ScreenNavi
                   className={chipClass(shoppingFrequency === option.value)}
                 >
                   {option.label}
-                </button>
-              ))}
-            </div>
-          </SectionCard>
-
-          <SectionCard title="Einkaufspräferenzen">
-            <div className="flex flex-wrap gap-2">
-              {SHOPPING_PREFERENCE_OPTIONS.map((preference) => (
-                <button
-                  key={preference}
-                  type="button"
-                  onClick={() =>
-                    toggleListItem(shoppingPreferences, preference, setShoppingPreferences)
-                  }
-                  className={chipClass(shoppingPreferences.includes(preference))}
-                >
-                  {preference}
                 </button>
               ))}
             </div>

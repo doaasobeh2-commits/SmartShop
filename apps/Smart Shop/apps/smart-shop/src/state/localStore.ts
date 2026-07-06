@@ -7,9 +7,10 @@ import type {
   HouseholdTimelineEvent,
   HouseholdMemory,
   HouseholdKnowledge,
+  HouseholdHypothesisStore,
   HiddenInventoryProjection,
 } from "@smart-shop/core";
-import { normalizeHouseholdSetup, emptyInventoryProjection } from "@smart-shop/core";
+import { normalizeHouseholdSetup, emptyInventoryProjection, emptyHypothesisStore } from "@smart-shop/core";
 import { normalizeSessionUser } from "../auth/adminAccess";
 
 const STORAGE_KEYS = {
@@ -20,6 +21,7 @@ const STORAGE_KEYS = {
   timeline: "smartshop.timeline",
   memory: "smartshop.memory",
   knowledge: "smartshop.knowledge",
+  hypotheses: "smartshop.hypotheses",
   basket: "smartshop.basket",
   completedTrip: "smartshop.completedTrip",
   inventory: "smartshop.inventory",
@@ -178,6 +180,17 @@ export function saveKnowledge(knowledge: HouseholdKnowledge): void {
   const all = readJson<Record<string, HouseholdKnowledge>>(STORAGE_KEYS.knowledge, {});
   all[knowledge.householdId] = knowledge;
   writeJson(STORAGE_KEYS.knowledge, all);
+}
+
+export function loadHypotheses(householdId: string): HouseholdHypothesisStore {
+  const all = readJson<Record<string, HouseholdHypothesisStore>>(STORAGE_KEYS.hypotheses, {});
+  return all[householdId] ?? emptyHypothesisStore(householdId);
+}
+
+export function saveHypotheses(store: HouseholdHypothesisStore): void {
+  const all = readJson<Record<string, HouseholdHypothesisStore>>(STORAGE_KEYS.hypotheses, {});
+  all[store.householdId] = store;
+  writeJson(STORAGE_KEYS.hypotheses, all);
 }
 
 export function loadInventoryProjection(householdId: string): HiddenInventoryProjection {

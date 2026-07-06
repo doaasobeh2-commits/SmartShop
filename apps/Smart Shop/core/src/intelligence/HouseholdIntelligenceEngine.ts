@@ -1,7 +1,12 @@
 /**
  * Household Intelligence Engine (HIE).
- * Hidden future orchestration layer — not a screen, backend, or AI runtime.
+ * Invisible intelligence layer — UI stays simple; complexity lives here.
+ * Applications contribute behavioral signals; engines consume confidence-based hypotheses.
  */
+import type { BehavioralSignalBatch } from "./signals/BehavioralSignal";
+import type { HouseholdHypothesisStore } from "./hypotheses/HouseholdHypothesis";
+import type { HouseholdIntelligenceState } from "./HouseholdIntelligenceState";
+
 export type HouseholdIntelligenceEngine = {
   readonly family: FamilyEngineContract;
   readonly shopping: ShoppingEngineContract;
@@ -13,6 +18,22 @@ export type HouseholdIntelligenceEngine = {
   readonly nutrition: NutritionEngineContract;
   readonly learning: LearningEngineContract;
   readonly decision: DecisionEngineContract;
+  readonly signals: SignalIngestionContract;
+  readonly hypotheses: HypothesisEngineContract;
+};
+
+export type SignalIngestionContract = {
+  /** Apps contribute raw behavioral signals — never user preference forms. */
+  ingest(batch: BehavioralSignalBatch): Promise<void>;
+};
+
+export type HypothesisEngineContract = {
+  /** Internal read — for SmartShop, Recipe AI, Fitness AI engines only. */
+  getStore(householdId: string): Promise<HouseholdHypothesisStore>;
+  /** Re-run inference from accumulated signals and memory. */
+  reinfer(householdId: string): Promise<HouseholdHypothesisStore>;
+  /** Unified state snapshot for platform services. */
+  getState(householdId: string): Promise<HouseholdIntelligenceState>;
 };
 
 export type FamilyEngineContract = {

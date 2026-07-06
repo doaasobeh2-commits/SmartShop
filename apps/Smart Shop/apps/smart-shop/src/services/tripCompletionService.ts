@@ -4,14 +4,17 @@ import {
   type HouseholdTimelineWriter,
   type HouseholdMemoryStore,
   type HouseholdKnowledgeStore,
+  type HypothesisPersistence,
 } from "@smart-shop/core";
 import {
   appendTimelineEvent,
   HOUSEHOLD_ID,
   loadKnowledge,
   loadMemory,
+  loadHypotheses,
   saveKnowledge,
   saveMemory,
+  saveHypotheses,
 } from "../state/localStore";
 
 const timelineWriter: HouseholdTimelineWriter = {
@@ -38,11 +41,21 @@ const knowledgeStore: HouseholdKnowledgeStore = {
   },
 };
 
+const hypothesisStore: HypothesisPersistence = {
+  async get(householdId) {
+    return loadHypotheses(householdId);
+  },
+  async save(store) {
+    saveHypotheses(store);
+  },
+};
+
 export async function completeShoppingTrip(input: Omit<CompletedTripInput, "householdId">) {
   await processTripCompletion(
     { ...input, householdId: HOUSEHOLD_ID },
     timelineWriter,
     memoryStore,
     knowledgeStore,
+    hypothesisStore,
   );
 }

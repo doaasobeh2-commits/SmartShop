@@ -197,6 +197,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         totalAmount: purchasedTotal,
         currency: "EUR",
         lines,
+        localeContext: {
+          city: householdSetup.city,
+          countryCode: "at",
+          languageCode: "de",
+        },
       });
 
       applyTripSideEffects(lines);

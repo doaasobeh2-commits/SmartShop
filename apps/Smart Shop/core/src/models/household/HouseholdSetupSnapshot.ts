@@ -13,6 +13,7 @@ export type HouseholdSetupSnapshot = {
   favouriteRestaurants: string[];
   monthlyBudget?: number;
   shoppingFrequency: ShoppingFrequency;
+  /** @deprecated Inferred by Household Intelligence — do not collect via UI. */
   shoppingPreferences: string[];
 };
 
