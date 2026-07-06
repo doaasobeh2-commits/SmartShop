@@ -96,7 +96,29 @@ These are inferred from shopping history, meal history, recipe acceptance, seaso
 4. Locale context signals from household city/country/language
 5. `runInferencePipeline()` updates hypothesis store
 
-### Recipe AI / Fitness AI (future)
+### Recipe AI (signal foundation — ready for app integration)
+
+Recipe AI will contribute behavioral signals through `RecipeAiIntelligenceService` once the app is designed and built:
+
+| Action | Signal category | Effect |
+|--------|-----------------|--------|
+| User saves a recipe | `recipe_accepted` | Reinforces cuisine affinity hypotheses |
+| User dismisses a recipe | `recipe_rejected` | Weakens matching cuisine hypotheses |
+| User cooks a meal | `meal_cooked` | Stronger cuisine reinforcement |
+
+```typescript
+import { recordRecipeAccepted, recordMealCooked } from "../services/intelligenceService";
+
+await recordRecipeAccepted({
+  recipeId: "rec-001",
+  recipeName: "Mercimek Çorbası",
+  cuisineTags: ["turkish"],
+});
+```
+
+No Recipe AI UI ships until Figma design is approved. Implementation resumes from `RecipeAI/docs/V1_PRODUCT_BLUEPRINT.md`.
+
+### Recipe AI / Fitness AI (future apps)
 
 Use `ecosystem/src/intelligence/PlatformIntelligenceBridge` to contribute signals and read hypotheses.
 

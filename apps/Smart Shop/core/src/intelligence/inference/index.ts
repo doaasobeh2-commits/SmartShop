@@ -7,3 +7,10 @@ export {
   matchKeyword,
 } from "./cuisineAffinityRules";
 export type { CuisineAffinityRule, LocaleCuisineBoost } from "./cuisineAffinityRules";
+export {
+  RECIPE_CUISINE_TAG_MAP,
+  inferCuisineLabelsFromRecipe,
+  RECIPE_ACCEPTED_BASE_CONFIDENCE,
+  MEAL_COOKED_BASE_CONFIDENCE,
+  RECIPE_REJECTED_PENALTY,
+} from "./recipeAffinityRules";

@@ -1,7 +1,8 @@
-import type { HouseholdHypothesisStore } from "../hypotheses/HouseholdHypothesis";
+import type { HouseholdHypothesis, HouseholdHypothesisStore } from "../hypotheses/HouseholdHypothesis";
 import {
   applyHypothesisDecay,
   upsertHypothesis,
+  weakenHypothesis,
 } from "../hypotheses/hypothesisMutations";
 import type { BehavioralSignal } from "../signals/BehavioralSignal";
 import {
@@ -10,6 +11,12 @@ import {
   LOCALE_CUISINE_BOOSTS,
   matchKeyword,
 } from "./cuisineAffinityRules";
+import {
+  MEAL_COOKED_BASE_CONFIDENCE,
+  RECIPE_ACCEPTED_BASE_CONFIDENCE,
+  RECIPE_REJECTED_PENALTY,
+  inferCuisineLabelsFromRecipe,
+} from "./recipeAffinityRules";
 
 export type InferenceContext = {
   householdId: string;
@@ -53,6 +60,75 @@ function collectLocaleCodes(signals: BehavioralSignal[]): {
   }
 
   return { countryCodes, languageCodes };
+}
+
+function parseRecipeCuisineTags(payload: Record<string, string | number | boolean>): string[] {
+  const raw = payload.cuisineTags;
+  if (typeof raw !== "string" || raw.length === 0) {
+    return [];
+  }
+  return raw.split(",").map((tag) => tag.trim()).filter(Boolean);
+}
+
+function applyRecipeSignals(
+  hypotheses: HouseholdHypothesis[],
+  householdId: string,
+  signals: BehavioralSignal[],
+): HouseholdHypothesis[] {
+  let next = [...hypotheses];
+
+  for (const signal of signals) {
+    if (
+      signal.category !== "recipe_accepted" &&
+      signal.category !== "meal_cooked" &&
+      signal.category !== "recipe_rejected"
+    ) {
+      continue;
+    }
+
+    const recipeName =
+      typeof signal.payload.recipeName === "string" ? signal.payload.recipeName : "";
+    const cuisineLabels = inferCuisineLabelsFromRecipe(
+      recipeName,
+      parseRecipeCuisineTags(signal.payload),
+    );
+
+    if (cuisineLabels.length === 0) {
+      continue;
+    }
+
+    const baseConfidence =
+      signal.category === "meal_cooked"
+        ? MEAL_COOKED_BASE_CONFIDENCE
+        : RECIPE_ACCEPTED_BASE_CONFIDENCE;
+
+    for (const label of cuisineLabels) {
+      if (signal.category === "recipe_rejected") {
+        const existing = next.find(
+          (item) => item.domain === "cuisine_affinity" && item.label === label,
+        );
+        if (existing) {
+          next = next.map((item) =>
+            item.id === existing.id
+              ? weakenHypothesis(item, signal.id, RECIPE_REJECTED_PENALTY)
+              : item,
+          );
+        }
+        continue;
+      }
+
+      next = upsertHypothesis(
+        next,
+        householdId,
+        "cuisine_affinity",
+        label,
+        signal.id,
+        baseConfidence,
+      );
+    }
+  }
+
+  return next;
 }
 
 export function runInferencePipeline(context: InferenceContext): HouseholdHypothesisStore {
@@ -142,6 +218,8 @@ export function runInferencePipeline(context: InferenceContext): HouseholdHypoth
       );
     }
   }
+
+  hypotheses = applyRecipeSignals(hypotheses, context.householdId, context.signals);
 
   hypotheses = applyHypothesisDecay(hypotheses);
 
