@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "paths": {
+      "@recipe-ai/app/*": ["./src/*"],
+      "@recipe-ai/shared": ["../../shared/components/index.ts"],
+      "@recipe-ai/shared/*": ["../../shared/*"],
+      "@recipe-ai/core": ["../../core/src/index.ts"],
+      "@recipe-ai/core/*": ["../../core/src/*"]
+    }
+  },
+  "include": ["src"]
+}

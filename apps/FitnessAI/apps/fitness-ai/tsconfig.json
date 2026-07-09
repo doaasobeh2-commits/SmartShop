@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@fitness-ai/app/*": ["./src/*"],
+      "@fitness-ai/shared": ["../../shared/components/index.ts"],
+      "@fitness-ai/shared/*": ["../../shared/*"],
+      "@fitness-ai/core": ["../../core/src/index.ts"],
+      "@fitness-ai/core/*": ["../../core/src/*"]
+    }
+  },
+  "include": ["src"]
+}

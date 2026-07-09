@@ -1,0 +1,12 @@
+---
+description: RecipeAI — read Fadi-Core-Platform first; master vision locked
+alwaysApply: true
+---
+
+# RecipeAI
+
+**Read first:** `Fadi-Core-Platform/AGENTS.md` · `products/recipeai.md` · `docs/MASTER_PRODUCT_VISION.md`
+
+**Master vision locked.** UI at `apps/recipe-ai/` (Vite + React). Logic spec: `docs/V1_PRODUCT_BLUEPRINT.md`.
+
+Household meal decision engine — not a recipe library. SmartShop owns household graph.

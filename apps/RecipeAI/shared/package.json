@@ -1,0 +1,25 @@
+{
+  "name": "@recipe-ai/shared",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./components/index.ts",
+  "types": "./components/index.ts",
+  "exports": {
+    ".": "./components/index.ts",
+    "./styles/tokens.css": "./styles/tokens.css",
+    "./styles": "./styles/design.ts",
+    "./atmosphere": "./styles/atmosphere.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "typescript": "^5.7.2"
+  }
+}

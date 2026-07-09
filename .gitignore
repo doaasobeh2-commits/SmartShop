@@ -1,0 +1,6 @@
+# Fadi-Core-Platform — docs only
+# Application code lives in apps/ (Phase 1) or sibling repos (Phase 2)
+
+node_modules/
+.DS_Store
+Thumbs.db

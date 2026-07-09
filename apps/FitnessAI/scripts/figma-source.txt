@@ -1,0 +1,1831 @@
+import { useState, useRef, CSSProperties } from "react";
+import {
+  AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip,
+  ResponsiveContainer, PieChart, Pie, Cell,
+} from "recharts";
+import {
+  Home, Utensils, Dumbbell, Sparkles, User, ChevronRight, ChevronLeft,
+  ArrowRight, Droplets, Footprints, Flame, Moon, Heart, Activity,
+  TrendingUp, Bell, Shield, Globe, Bluetooth, Download,
+  Plus, Check, Send, Zap, Target, Clock, Trophy, Play, Crown,
+  Edit, LogOut, Eye, EyeOff, BarChart2, Lightbulb,
+  Wind, Leaf, RefreshCw, ChevronDown, Apple,
+} from "lucide-react";
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+type Flow = "welcome" | "onboarding" | "auth" | "app";
+type AppScreen = "dashboard" | "nutrition" | "workout" | "ai" | "progress" | "analytics" | "health" | "premium" | "profile";
+type Lang = "en" | "ar" | "de";
+
+// ─── i18n ─────────────────────────────────────────────────────────────────────
+const T: Record<Lang, Record<string, string>> = {
+  en: {
+    dir: "ltr", appName: "Fitness AI", tagline: "Your intelligent health & fitness companion",
+    getStarted: "Get Started", login: "Log In", home: "Home", nutrition: "Nutrition",
+    workout: "Workout", ai: "AI Coach", profile: "Profile", dashboard: "Dashboard",
+    goodMorning: "Good Morning", calories: "Calories", protein: "Protein",
+    carbs: "Carbs", fat: "Fat", water: "Water", steps: "Steps",
+    progress: "Progress", analytics: "Analytics", health: "Health", premium: "Premium",
+  },
+  ar: {
+    dir: "rtl", appName: "فيتنس AI", tagline: "رفيقك الذكي للصحة واللياقة البدنية",
+    getStarted: "ابدأ الآن", login: "تسجيل الدخول", home: "الرئيسية", nutrition: "التغذية",
+    workout: "التمرين", ai: "مدرب AI", profile: "الملف", dashboard: "لوحة التحكم",
+    goodMorning: "صباح الخير", calories: "السعرات", protein: "بروتين",
+    carbs: "كربوهيدرات", fat: "دهون", water: "ماء", steps: "خطوات",
+    progress: "التقدم", analytics: "التحليل", health: "الصحة", premium: "مميز",
+  },
+  de: {
+    dir: "ltr", appName: "Fitness KI", tagline: "Ihr intelligenter Gesundheits- und Fitnessbegleiter",
+    getStarted: "Jetzt starten", login: "Anmelden", home: "Start", nutrition: "Ernährung",
+    workout: "Training", ai: "KI-Coach", profile: "Profil", dashboard: "Dashboard",
+    goodMorning: "Guten Morgen", calories: "Kalorien", protein: "Protein",
+    carbs: "Kohlenhydrate", fat: "Fett", water: "Wasser", steps: "Schritte",
+    progress: "Fortschritt", analytics: "Analytik", health: "Gesundheit", premium: "Premium",
+  },
+};
+
+// ─── Mock Data ─────────────────────────────────────────────────────────────────
+const weightData = [
+  { m: "Jan", v: 82.4 }, { m: "Feb", v: 81.2 }, { m: "Mar", v: 80.1 },
+  { m: "Apr", v: 79.3 }, { m: "May", v: 78.5 }, { m: "Jun", v: 77.4 },
+  { m: "Jul", v: 76.2 },
+];
+const caloriesWeekData = [
+  { d: "Mon", in: 2100, out: 1850 }, { d: "Tue", in: 1950, out: 2100 },
+  { d: "Wed", in: 2280, out: 1950 }, { d: "Thu", in: 1820, out: 2020 },
+  { d: "Fri", in: 2050, out: 1920 }, { d: "Sat", in: 2200, out: 2300 },
+  { d: "Sun", in: 1900, out: 1780 },
+];
+const sleepData = [
+  { d: "Mon", h: 7.5 }, { d: "Tue", h: 6.8 }, { d: "Wed", h: 8.2 },
+  { d: "Thu", h: 7.0 }, { d: "Fri", h: 6.5 }, { d: "Sat", h: 8.5 }, { d: "Sun", h: 7.8 },
+];
+const macros = [
+  { name: "Protein", value: 42, color: "#0066FF" },
+  { name: "Carbs", value: 38, color: "#06B6D4" },
+  { name: "Fat", value: 20, color: "#8B5CF6" },
+];
+const workoutWeeks = [
+  { w: "W1", n: 4 }, { w: "W2", n: 5 }, { w: "W3", n: 3 },
+  { w: "W4", n: 6 }, { w: "W5", n: 5 }, { w: "W6", n: 4 },
+];
+
+// ─── Design helpers ───────────────────────────────────────────────────────────
+const GRAD = "linear-gradient(135deg, #0066FF 0%, #06B6D4 100%)";
+const GRAD_SOFT = "linear-gradient(135deg, rgba(0,102,255,0.15) 0%, rgba(6,182,212,0.15) 100%)";
+const GLASS: CSSProperties = {
+  background: "rgba(255,255,255,0.05)",
+  border: "1px solid rgba(255,255,255,0.08)",
+  backdropFilter: "blur(20px)",
+};
+const GLASS_HOVER: CSSProperties = {
+  background: "rgba(255,255,255,0.08)",
+  border: "1px solid rgba(255,255,255,0.14)",
+  backdropFilter: "blur(20px)",
+};
+
+// ─── Shared Components ────────────────────────────────────────────────────────
+
+function GCard({ children, className = "", style = {}, onClick }: {
+  children: React.ReactNode; className?: string;
+  style?: CSSProperties; onClick?: () => void;
+}) {
+  return (
+    <div onClick={onClick} className={`rounded-3xl ${onClick ? "cursor-pointer active:scale-[0.98] transition-transform" : ""} ${className}`} style={{ ...GLASS, ...style }}>
+      {children}
+    </div>
+  );
+}
+
+function GBtn({ children, onClick, className = "", outline = false, sm = false }: {
+  children: React.ReactNode; onClick?: () => void;
+  className?: string; outline?: boolean; sm?: boolean;
+}) {
+  const base = `${sm ? "px-4 py-2.5 text-sm" : "px-6 py-4 text-base"} rounded-2xl font-semibold transition-all active:scale-95 inline-flex items-center justify-center gap-2`;
+  if (outline) return (
+    <button onClick={onClick} className={`${base} border text-blue-400 ${className}`}
+      style={{ borderColor: "rgba(0,102,255,0.4)", background: "rgba(0,102,255,0.08)" }}>
+      {children}
+    </button>
+  );
+  return (
+    <button onClick={onClick} className={`${base} text-white ${className}`}
+      style={{ background: GRAD, boxShadow: "0 4px 24px rgba(0,102,255,0.35)" }}>
+      {children}
+    </button>
+  );
+}
+
+function StatusBar({ time = "9:41" }: { time?: string }) {
+  return (
+    <div className="flex justify-between items-center px-6 pt-4 pb-1">
+      <span className="text-white font-bold text-sm tracking-wide" style={{ fontFamily: "var(--font-display)" }}>{time}</span>
+      <div className="flex items-center gap-1.5">
+        <div className="flex gap-0.5 items-end h-3.5">
+          {[35, 55, 75, 95].map((h, i) => (
+            <div key={i} className={`w-1 rounded-[1px] ${i < 3 ? "bg-white" : "bg-white/25"}`} style={{ height: `${h}%` }} />
+          ))}
+        </div>
+        <div className="w-1 h-1 rounded-full bg-white" />
+        <div className="flex items-center border border-white/50 rounded-sm px-0.5 py-0.5 gap-0.5">
+          <div className="w-4 h-2 rounded-[1px] bg-white" />
+          <div className="w-0.5 h-1 bg-white/40 rounded-full" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ProgressRing({ progress, size = 120, sw = 10, color = "#0066FF", bg = "rgba(255,255,255,0.07)", children }: {
+  progress: number; size?: number; sw?: number; color?: string; bg?: string; children?: React.ReactNode;
+}) {
+  const r = (size - sw) / 2;
+  const circ = 2 * Math.PI * r;
+  const dash = circ * Math.min(progress, 100) / 100;
+  return (
+    <div className="relative flex-shrink-0" style={{ width: size, height: size }}>
+      <svg width={size} height={size} style={{ transform: "rotate(-90deg)", position: "absolute" }}>
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={bg} strokeWidth={sw} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={sw}
+          strokeDasharray={`${dash} ${circ}`} strokeLinecap="round"
+          style={{ filter: `drop-shadow(0 0 6px ${color}90)`, transition: "stroke-dasharray 0.6s ease" }}
+        />
+      </svg>
+      <div className="absolute inset-0 flex items-center justify-center">{children}</div>
+    </div>
+  );
+}
+
+function MetricPill({ icon, label, value, color }: { icon: React.ReactNode; label: string; value: string; color: string }) {
+  return (
+    <div className="flex flex-col items-center gap-1.5 px-4 py-3 rounded-2xl flex-1" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
+      <div style={{ color }}>{icon}</div>
+      <span className="text-white font-bold text-base" style={{ fontFamily: "var(--font-display)" }}>{value}</span>
+      <span className="text-white/40 text-xs font-medium">{label}</span>
+    </div>
+  );
+}
+
+function SectionHeader({ title, action, onAction }: { title: string; action?: string; onAction?: () => void }) {
+  return (
+    <div className="flex items-center justify-between mb-4">
+      <h3 className="text-white font-bold text-lg" style={{ fontFamily: "var(--font-display)" }}>{title}</h3>
+      {action && <button onClick={onAction} className="text-sm font-semibold" style={{ color: "#06B6D4" }}>{action}</button>}
+    </div>
+  );
+}
+
+function Tag({ children, color = "#0066FF" }: { children: React.ReactNode; color?: string }) {
+  return (
+    <span className="px-3 py-1 rounded-full text-xs font-bold" style={{ background: `${color}22`, color, border: `1px solid ${color}44` }}>
+      {children}
+    </span>
+  );
+}
+
+function Switch({ on, onChange }: { on: boolean; onChange: () => void }) {
+  return (
+    <button onClick={onChange} className="relative w-12 h-6 rounded-full transition-all flex items-center px-1"
+      style={{ background: on ? GRAD : "rgba(255,255,255,0.12)", boxShadow: on ? "0 2px 12px rgba(0,102,255,0.4)" : "none" }}>
+      <div className="w-4 h-4 rounded-full bg-white shadow-sm transition-all" style={{ transform: on ? "translateX(24px)" : "translateX(0)" }} />
+    </button>
+  );
+}
+
+// ─── Welcome Screen ───────────────────────────────────────────────────────────
+function WelcomeScreen({ lang, onStart, onLogin }: { lang: Lang; onStart: () => void; onLogin: () => void }) {
+  const t = T[lang];
+  return (
+    <div className="flex flex-col min-h-screen" dir={t.dir}
+      style={{ background: "radial-gradient(ellipse 100% 60% at 50% 0%, #0A1F4D 0%, #050A14 60%)" }}>
+      <StatusBar />
+      {/* Gradient orbs */}
+      <div className="absolute top-20 left-1/2 -translate-x-1/2 w-80 h-80 rounded-full opacity-20 pointer-events-none"
+        style={{ background: "radial-gradient(circle, #0066FF 0%, transparent 70%)", filter: "blur(40px)" }} />
+      <div className="absolute top-40 left-1/4 w-40 h-40 rounded-full opacity-10 pointer-events-none"
+        style={{ background: "radial-gradient(circle, #06B6D4 0%, transparent 70%)", filter: "blur(30px)" }} />
+
+      <div className="flex-1 flex flex-col items-center justify-center px-6 pt-8 pb-4 relative z-10">
+        {/* Logo */}
+        <div className="mb-8 relative">
+          <div className="w-24 h-24 rounded-3xl flex items-center justify-center" style={{ background: GRAD, boxShadow: "0 8px 40px rgba(0,102,255,0.5)" }}>
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+              <path d="M24 8C15.163 8 8 15.163 8 24s7.163 16 16 16 16-7.163 16-16S32.837 8 24 8z" fill="rgba(255,255,255,0.15)" />
+              <path d="M16 24c0-4.418 3.582-8 8-8s8 3.582 8 8-3.582 8-8 8-8-3.582-8-8z" fill="rgba(255,255,255,0.3)" />
+              <circle cx="24" cy="24" r="4" fill="white" />
+              <path d="M24 14v4M24 30v4M14 24h4M30 24h4" stroke="white" strokeWidth="2" strokeLinecap="round" />
+              <path d="M18 18l2.5 2.5M27.5 27.5L30 30M18 30l2.5-2.5M27.5 20.5L30 18" stroke="rgba(255,255,255,0.6)" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+          </div>
+          <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-xl flex items-center justify-center"
+            style={{ background: "linear-gradient(135deg, #00E5FF, #06B6D4)", boxShadow: "0 4px 16px rgba(6,182,212,0.5)" }}>
+            <Sparkles size={14} className="text-white" />
+          </div>
+        </div>
+
+        <h1 className="text-4xl font-black text-white text-center mb-3 tracking-tight" style={{ fontFamily: "var(--font-display)" }}>{t.appName}</h1>
+        <p className="text-white/50 text-center text-base leading-relaxed mb-10 max-w-xs">{t.tagline}</p>
+
+        {/* Feature chips */}
+        <div className="flex flex-wrap gap-3 justify-center mb-10">
+          {[
+            { icon: <Sparkles size={13} />, label: lang === "ar" ? "مدعوم بالذكاء الاصطناعي" : lang === "de" ? "KI-gestützt" : "AI-Powered" },
+            { icon: <Target size={13} />, label: lang === "ar" ? "شخصي" : lang === "de" ? "Personalisiert" : "Personalized" },
+            { icon: <Crown size={13} />, label: lang === "ar" ? "مميز" : lang === "de" ? "Premium" : "Premium" },
+          ].map((f, i) => (
+            <div key={i} className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold"
+              style={{ background: "rgba(0,102,255,0.12)", border: "1px solid rgba(0,102,255,0.25)", color: "#60A5FA" }}>
+              {f.icon}{f.label}
+            </div>
+          ))}
+        </div>
+
+        {/* Preview cards strip */}
+        <div className="flex gap-3 overflow-x-auto pb-2 mb-10 w-full no-scrollbar">
+          {[
+            { icon: <Flame size={18} className="text-orange-400" />, v: "2,340", l: "kcal" },
+            { icon: <Footprints size={18} className="text-cyan-400" />, v: "8,421", l: "steps" },
+            { icon: <Droplets size={18} className="text-blue-400" />, v: "1.8L", l: "water" },
+            { icon: <Heart size={18} className="text-red-400" />, v: "72", l: "BPM" },
+          ].map((c, i) => (
+            <div key={i} className="flex-shrink-0 flex flex-col items-center gap-1 px-5 py-4 rounded-2xl" style={GLASS}>
+              {c.icon}
+              <span className="text-white font-black text-sm" style={{ fontFamily: "var(--font-display)" }}>{c.v}</span>
+              <span className="text-white/40 text-xs">{c.l}</span>
+            </div>
+          ))}
+        </div>
+
+        <GBtn onClick={onStart} className="w-full mb-4">
+          {t.getStarted} <ArrowRight size={18} />
+        </GBtn>
+        <button onClick={onLogin} className="text-white/50 text-sm font-medium hover:text-white/80 transition-colors">
+          {lang === "ar" ? "لديك حساب بالفعل؟" : lang === "de" ? "Bereits Mitglied?" : "Already a member?"}{" "}
+          <span style={{ color: "#06B6D4" }}>{t.login}</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Onboarding ───────────────────────────────────────────────────────────────
+const GOALS = [
+  { id: "lose", icon: "🔥", label: "Lose Weight", de: "Abnehmen", ar: "خسارة الوزن" },
+  { id: "muscle", icon: "💪", label: "Build Muscle", de: "Muskeln aufbauen", ar: "بناء العضلات" },
+  { id: "fit", icon: "⚡", label: "Get Fit", de: "Fit werden", ar: "الحصول على لياقة" },
+  { id: "health", icon: "❤️", label: "Improve Health", de: "Gesundheit verbessern", ar: "تحسين الصحة" },
+  { id: "sport", icon: "🏆", label: "Sport Performance", de: "Sportleistung", ar: "أداء رياضي" },
+  { id: "stress", icon: "🧘", label: "Reduce Stress", de: "Stress abbauen", ar: "تقليل التوتر" },
+];
+const ACTIVITY_LEVELS = [
+  { id: "sed", icon: "🛋️", label: "Sedentary", desc: "Little or no exercise", de: "Sitzend", ar: "خامل" },
+  { id: "light", icon: "🚶", label: "Light", desc: "1–3 days/week", de: "Leicht aktiv", ar: "نشاط خفيف" },
+  { id: "mod", icon: "🏃", label: "Moderate", desc: "3–5 days/week", de: "Mäßig aktiv", ar: "نشاط معتدل" },
+  { id: "active", icon: "🏋️", label: "Very Active", desc: "6–7 days/week", de: "Sehr aktiv", ar: "نشيط جداً" },
+  { id: "athlete", icon: "🥇", label: "Athlete", desc: "2× per day", de: "Sportler", ar: "رياضي محترف" },
+];
+
+function OnboardingScreen({ lang, onDone }: { lang: Lang; onDone: () => void }) {
+  // 3 steps: 0 = Goals, 1 = Personal Profile, 2 = Activity
+  const TOTAL = 3;
+  const [step, setStep] = useState(0);
+  const [goal, setGoal] = useState("lose");
+  const [gender, setGender] = useState("male");
+  const [height, setHeight] = useState(175);
+  const [weight, setWeight] = useState(75);
+  const [age, setAge] = useState(28);
+  const [activity, setActivity] = useState("mod");
+  const t = T[lang];
+
+  const next = () => step < TOTAL - 1 ? setStep(s => s + 1) : onDone();
+  const back = () => step > 0 && setStep(s => s - 1);
+
+  const stepLabels = [
+    lang === "ar" ? "أهدافك" : lang === "de" ? "Deine Ziele" : "Your Goals",
+    lang === "ar" ? "الملف الشخصي" : lang === "de" ? "Persönliches Profil" : "Personal Profile",
+    lang === "ar" ? "مستوى النشاط" : lang === "de" ? "Aktivitätslevel" : "Activity Level",
+  ];
+  const stepSubs = [
+    lang === "ar" ? "ما الذي تريد تحقيقه؟" : lang === "de" ? "Was möchtest du erreichen?" : "What do you want to achieve?",
+    lang === "ar" ? "أخبرنا المزيد عنك" : lang === "de" ? "Erzähl uns von dir" : "Tell us a little about yourself",
+    lang === "ar" ? "كم مرة تتمرن في الأسبوع؟" : lang === "de" ? "Wie aktiv bist du?" : "How active are you currently?",
+  ];
+  const btnLabel = step < TOTAL - 1
+    ? (lang === "ar" ? "متابعة" : lang === "de" ? "Weiter" : "Continue")
+    : (lang === "ar" ? "ابدأ رحلتك" : lang === "de" ? "Starten" : "Start My Journey");
+
+  return (
+    <div className="flex flex-col min-h-screen" dir={t.dir} style={{ background: "#050A14" }}>
+      <StatusBar />
+
+      {/* Header */}
+      <div className="px-6 pt-4 pb-5 flex-shrink-0">
+        <div className="flex items-center gap-4 mb-5">
+          <button
+            onClick={back}
+            className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 transition-opacity"
+            style={{ ...GLASS, opacity: step > 0 ? 1 : 0, pointerEvents: step > 0 ? "auto" : "none" }}>
+            <ChevronLeft size={20} className="text-white" />
+          </button>
+          <div className="flex-1">
+            <div className="flex gap-2 mb-2">
+              {[0, 1, 2].map(i => (
+                <div key={i} className="h-1.5 flex-1 rounded-full transition-all duration-500"
+                  style={{ background: i <= step ? GRAD : "rgba(255,255,255,0.1)" }} />
+              ))}
+            </div>
+            <p className="text-white/40 text-xs font-medium">
+              {lang === "ar" ? `الخطوة ${step + 1} من ${TOTAL}` : lang === "de" ? `Schritt ${step + 1} von ${TOTAL}` : `Step ${step + 1} of ${TOTAL}`}
+            </p>
+          </div>
+        </div>
+        <h2 className="text-2xl font-black text-white" style={{ fontFamily: "var(--font-display)" }}>{stepLabels[step]}</h2>
+        <p className="text-white/40 text-sm mt-1">{stepSubs[step]}</p>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 px-6 overflow-y-auto pb-4">
+
+        {/* ── Step 0: Goals ── */}
+        {step === 0 && (
+          <div className="grid grid-cols-2 gap-3">
+            {GOALS.map(g => (
+              <button key={g.id} onClick={() => setGoal(g.id)}
+                className="flex flex-col items-center gap-3 p-5 rounded-3xl transition-all active:scale-95"
+                style={goal === g.id ? { background: GRAD, boxShadow: "0 4px 24px rgba(0,102,255,0.3)" } : GLASS}>
+                <span className="text-3xl">{g.icon}</span>
+                <span className="text-white font-bold text-sm text-center" style={{ fontFamily: "var(--font-display)" }}>
+                  {lang === "ar" ? g.ar : lang === "de" ? g.de : g.label}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* ── Step 1: Personal Profile (Gender + Height + Weight + Age combined) ── */}
+        {step === 1 && (
+          <div className="flex flex-col gap-4">
+
+            {/* Gender */}
+            <GCard className="p-5">
+              <p className="text-white/40 text-xs font-bold uppercase tracking-widest mb-3">
+                {lang === "ar" ? "الجنس" : lang === "de" ? "Geschlecht" : "Gender"}
+              </p>
+              <div className="flex gap-2">
+                {[
+                  { id: "male",   icon: "♂", label: lang === "ar" ? "ذكر"   : lang === "de" ? "Männlich" : "Male"   },
+                  { id: "female", icon: "♀", label: lang === "ar" ? "أنثى"  : lang === "de" ? "Weiblich" : "Female" },
+                  { id: "other",  icon: "◈", label: lang === "ar" ? "آخر"   : lang === "de" ? "Divers"   : "Other"  },
+                ].map(g => (
+                  <button key={g.id} onClick={() => setGender(g.id)}
+                    className="flex-1 flex flex-col items-center gap-1.5 py-3.5 rounded-2xl transition-all active:scale-95"
+                    style={gender === g.id
+                      ? { background: GRAD, boxShadow: "0 2px 14px rgba(0,102,255,0.35)" }
+                      : { background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                    <span className="text-lg">{g.icon}</span>
+                    <span className="text-white text-xs font-bold">{g.label}</span>
+                  </button>
+                ))}
+              </div>
+            </GCard>
+
+            {/* Height */}
+            <GCard className="p-5">
+              <p className="text-white/40 text-xs font-bold uppercase tracking-widest mb-4">
+                {lang === "ar" ? "الطول" : lang === "de" ? "Größe" : "Height"}
+              </p>
+              <div className="flex items-center justify-between mb-4">
+                <button onClick={() => setHeight(h => Math.max(140, h - 1))}
+                  className="w-12 h-12 rounded-2xl flex items-center justify-center text-white text-xl font-bold active:scale-90 transition-transform"
+                  style={{ background: "rgba(255,255,255,0.08)" }}>−</button>
+                <div className="text-center">
+                  <span className="text-4xl font-black text-white" style={{ fontFamily: "var(--font-display)" }}>{height}</span>
+                  <span className="text-white/40 text-base ml-1.5">cm</span>
+                </div>
+                <button onClick={() => setHeight(h => Math.min(220, h + 1))}
+                  className="w-12 h-12 rounded-2xl flex items-center justify-center text-white text-xl font-bold active:scale-90 transition-transform"
+                  style={{ background: GRAD, boxShadow: "0 2px 12px rgba(0,102,255,0.3)" }}>+</button>
+              </div>
+              <input type="range" min={140} max={220} value={height}
+                onChange={e => setHeight(+e.target.value)}
+                className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
+                style={{ background: `linear-gradient(to right, #0066FF ${((height - 140) / 80) * 100}%, rgba(255,255,255,0.1) 0%)` }} />
+              <div className="flex justify-between text-white/25 text-xs mt-1.5">
+                <span>140</span><span>220 cm</span>
+              </div>
+            </GCard>
+
+            {/* Weight */}
+            <GCard className="p-5">
+              <p className="text-white/40 text-xs font-bold uppercase tracking-widest mb-4">
+                {lang === "ar" ? "الوزن" : lang === "de" ? "Gewicht" : "Weight"}
+              </p>
+              <div className="flex items-center justify-between mb-4">
+                <button onClick={() => setWeight(w => Math.max(30, w - 0.5))}
+                  className="w-12 h-12 rounded-2xl flex items-center justify-center text-white text-xl font-bold active:scale-90 transition-transform"
+                  style={{ background: "rgba(255,255,255,0.08)" }}>−</button>
+                <div className="text-center">
+                  <span className="text-4xl font-black text-white" style={{ fontFamily: "var(--font-display)" }}>{weight.toFixed(1)}</span>
+                  <span className="text-white/40 text-base ml-1.5">kg</span>
+                </div>
+                <button onClick={() => setWeight(w => Math.min(200, w + 0.5))}
+                  className="w-12 h-12 rounded-2xl flex items-center justify-center text-white text-xl font-bold active:scale-90 transition-transform"
+                  style={{ background: GRAD, boxShadow: "0 2px 12px rgba(0,102,255,0.3)" }}>+</button>
+              </div>
+              <input type="range" min={30} max={200} step={0.5} value={weight}
+                onChange={e => setWeight(+e.target.value)}
+                className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
+                style={{ background: `linear-gradient(to right, #06B6D4 ${((weight - 30) / 170) * 100}%, rgba(255,255,255,0.1) 0%)` }} />
+              <div className="flex justify-between text-white/25 text-xs mt-1.5">
+                <span>30</span><span>200 kg</span>
+              </div>
+            </GCard>
+
+            {/* Age */}
+            <GCard className="p-5">
+              <p className="text-white/40 text-xs font-bold uppercase tracking-widest mb-4">
+                {lang === "ar" ? "العمر" : lang === "de" ? "Alter" : "Age"}
+              </p>
+              <div className="flex items-center justify-between">
+                <button onClick={() => setAge(a => Math.max(13, a - 1))}
+                  className="w-12 h-12 rounded-2xl flex items-center justify-center text-white text-xl font-bold active:scale-90 transition-transform"
+                  style={{ background: "rgba(255,255,255,0.08)" }}>−</button>
+                <div className="text-center">
+                  <span className="text-4xl font-black text-white" style={{ fontFamily: "var(--font-display)" }}>{age}</span>
+                  <span className="text-white/40 text-base ml-1.5">
+                    {lang === "ar" ? "سنة" : lang === "de" ? "J." : "yr"}
+                  </span>
+                </div>
+                <button onClick={() => setAge(a => Math.min(99, a + 1))}
+                  className="w-12 h-12 rounded-2xl flex items-center justify-center text-white text-xl font-bold active:scale-90 transition-transform"
+                  style={{ background: GRAD, boxShadow: "0 2px 12px rgba(0,102,255,0.3)" }}>+</button>
+              </div>
+            </GCard>
+
+          </div>
+        )}
+
+        {/* ── Step 2: Activity Level ── */}
+        {step === 2 && (
+          <div className="flex flex-col gap-3">
+            {ACTIVITY_LEVELS.map(a => (
+              <button key={a.id} onClick={() => setActivity(a.id)}
+                className="flex items-center gap-4 p-4 rounded-2xl transition-all active:scale-[0.98]"
+                style={activity === a.id ? { background: GRAD, boxShadow: "0 4px 20px rgba(0,102,255,0.3)" } : GLASS}>
+                <span className="text-2xl w-10">{a.icon}</span>
+                <div className="flex-1 text-left">
+                  <p className="text-white font-bold text-sm" style={{ fontFamily: "var(--font-display)" }}>
+                    {lang === "ar" ? a.ar : lang === "de" ? a.de : a.label}
+                  </p>
+                  <p className="text-white/50 text-xs">{a.desc}</p>
+                </div>
+                {activity === a.id && <Check size={18} className="text-white" />}
+              </button>
+            ))}
+          </div>
+        )}
+
+      </div>
+
+      {/* CTA */}
+      <div className="px-6 py-6 flex-shrink-0">
+        <GBtn onClick={next} className="w-full">
+          {btnLabel} <ArrowRight size={18} />
+        </GBtn>
+      </div>
+    </div>
+  );
+}
+
+// ─── Auth Screen ──────────────────────────────────────────────────────────────
+function AuthScreen({ lang, onDone }: { lang: Lang; onDone: () => void }) {
+  const [tab, setTab] = useState<"login" | "register">("login");
+  const [showPass, setShowPass] = useState(false);
+  const t = T[lang];
+  return (
+    <div className="flex flex-col min-h-screen" dir={t.dir} style={{ background: "#050A14" }}>
+      <StatusBar />
+      <div className="flex-1 px-6 pt-6 pb-8 flex flex-col">
+        <div className="mb-8">
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5" style={{ background: GRAD, boxShadow: "0 4px 20px rgba(0,102,255,0.4)" }}>
+            <Sparkles size={24} className="text-white" />
+          </div>
+          <h1 className="text-3xl font-black text-white" style={{ fontFamily: "var(--font-display)" }}>
+            {tab === "login" ? (lang === "ar" ? "مرحباً بعودتك" : lang === "de" ? "Willkommen zurück" : "Welcome back") : (lang === "ar" ? "إنشاء حساب" : lang === "de" ? "Konto erstellen" : "Create account")}
+          </h1>
+          <p className="text-white/40 text-sm mt-1">
+            {tab === "login" ? (lang === "ar" ? "سجّل دخولك للمتابعة" : lang === "de" ? "Melde dich an um fortzufahren" : "Sign in to continue your journey") : (lang === "ar" ? "انضم إلى ملايين المستخدمين" : lang === "de" ? "Werde Teil von Millionen" : "Join millions achieving their goals")}
+          </p>
+        </div>
+
+        {/* Tab switcher */}
+        <div className="flex rounded-2xl p-1 mb-8" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
+          {(["login", "register"] as const).map(tt => (
+            <button key={tt} onClick={() => setTab(tt)}
+              className="flex-1 py-3 rounded-xl text-sm font-bold transition-all"
+              style={tab === tt ? { background: GRAD, color: "white", boxShadow: "0 2px 12px rgba(0,102,255,0.3)" } : { color: "rgba(255,255,255,0.4)" }}>
+              {tt === "login" ? (lang === "ar" ? "تسجيل الدخول" : lang === "de" ? "Anmelden" : "Sign In") : (lang === "ar" ? "إنشاء حساب" : lang === "de" ? "Registrieren" : "Sign Up")}
+            </button>
+          ))}
+        </div>
+
+        {/* Social auth */}
+        <div className="flex gap-3 mb-6">
+          {[
+            { icon: <Apple size={20} />, label: lang === "de" ? "Apple" : "Apple" },
+            { icon: <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>, label: "Google" },
+          ].map((s, i) => (
+            <button key={i} className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl text-sm font-semibold text-white transition-all active:scale-95" style={GLASS}>
+              {s.icon} {s.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-4 mb-6">
+          <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.08)" }} />
+          <span className="text-white/30 text-xs">{lang === "ar" ? "أو" : lang === "de" ? "oder" : "or"}</span>
+          <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.08)" }} />
+        </div>
+
+        {/* Form */}
+        <div className="flex flex-col gap-4 flex-1">
+          {tab === "register" && (
+            <div>
+              <label className="text-white/50 text-xs font-semibold mb-2 block uppercase tracking-wider">
+                {lang === "ar" ? "الاسم الكامل" : lang === "de" ? "Vollständiger Name" : "Full Name"}
+              </label>
+              <input placeholder={lang === "ar" ? "أحمد محمد" : lang === "de" ? "Max Mustermann" : "Alex Johnson"}
+                className="w-full px-5 py-4 rounded-2xl text-white text-base outline-none"
+                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }} />
+            </div>
+          )}
+          <div>
+            <label className="text-white/50 text-xs font-semibold mb-2 block uppercase tracking-wider">
+              {lang === "ar" ? "البريد الإلكتروني" : lang === "de" ? "E-Mail" : "Email"}
+            </label>
+            <input type="email" placeholder="alex@example.com"
+              className="w-full px-5 py-4 rounded-2xl text-white text-base outline-none"
+              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }} />
+          </div>
+          <div>
+            <label className="text-white/50 text-xs font-semibold mb-2 block uppercase tracking-wider">
+              {lang === "ar" ? "كلمة المرور" : lang === "de" ? "Passwort" : "Password"}
+            </label>
+            <div className="relative">
+              <input type={showPass ? "text" : "password"} placeholder="••••••••••"
+                className="w-full px-5 py-4 rounded-2xl text-white text-base outline-none pr-14"
+                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }} />
+              <button onClick={() => setShowPass(!showPass)} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40">
+                {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+          </div>
+          {tab === "login" && (
+            <button className="text-right text-sm font-semibold" style={{ color: "#06B6D4" }}>
+              {lang === "ar" ? "نسيت كلمة المرور؟" : lang === "de" ? "Passwort vergessen?" : "Forgot password?"}
+            </button>
+          )}
+        </div>
+
+        <div className="mt-auto pt-6">
+          <GBtn onClick={onDone} className="w-full">
+            {tab === "login" ? (lang === "ar" ? "تسجيل الدخول" : lang === "de" ? "Anmelden" : "Sign In") : (lang === "ar" ? "إنشاء حساب" : lang === "de" ? "Registrieren" : "Create Account")}
+          </GBtn>
+          {tab === "register" && (
+            <p className="text-center text-white/30 text-xs mt-4">
+              {lang === "ar" ? "بالتسجيل، أنت توافق على" : lang === "de" ? "Mit der Registrierung stimmen Sie den" : "By signing up, you agree to our"}{" "}
+              <span style={{ color: "#06B6D4" }}>{lang === "ar" ? "الشروط والخصوصية" : lang === "de" ? "AGB & Datenschutz" : "Terms & Privacy"}</span>
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Dashboard Screen ─────────────────────────────────────────────────────────
+function DashboardScreen({ lang }: { lang: Lang }) {
+  const t = T[lang];
+  const today = new Date();
+  const dateStr = today.toLocaleDateString(lang === "ar" ? "ar-SA" : lang === "de" ? "de-DE" : "en-US", { weekday: "long", month: "long", day: "numeric" });
+  return (
+    <div className="flex flex-col gap-5 pb-28" dir={T[lang].dir}>
+      <div className="px-5 pt-2">
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <p className="text-white/40 text-sm font-medium">{dateStr}</p>
+            <h1 className="text-2xl font-black text-white" style={{ fontFamily: "var(--font-display)" }}>
+              {t.goodMorning}, Alex 👋
+            </h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <button className="w-10 h-10 rounded-2xl flex items-center justify-center relative" style={GLASS}>
+              <Bell size={18} className="text-white/70" />
+              <div className="absolute top-2 right-2 w-2 h-2 rounded-full" style={{ background: GRAD }} />
+            </button>
+            <div className="w-10 h-10 rounded-2xl overflow-hidden" style={{ background: GRAD }}>
+              <div className="w-full h-full flex items-center justify-center text-white font-bold text-sm">AJ</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Main calorie card */}
+        <GCard className="p-6 mb-5" style={{ background: "linear-gradient(135deg, rgba(0,102,255,0.15) 0%, rgba(6,182,212,0.08) 100%)", border: "1px solid rgba(0,102,255,0.2)" }}>
+          <div className="flex items-center gap-6">
+            <ProgressRing progress={72} size={120} sw={10} color="#0066FF">
+              <div className="text-center">
+                <p className="text-white font-black text-xl leading-none" style={{ fontFamily: "var(--font-display)" }}>1,680</p>
+                <p className="text-white/40 text-xs mt-0.5">eaten</p>
+              </div>
+            </ProgressRing>
+            <div className="flex-1">
+              <div className="mb-4">
+                <p className="text-white/40 text-xs uppercase tracking-wider mb-1">Daily Goal</p>
+                <p className="text-white font-black text-3xl" style={{ fontFamily: "var(--font-display)" }}>2,340</p>
+                <p className="text-white/50 text-sm">kcal</p>
+              </div>
+              <div className="flex gap-4">
+                <div>
+                  <p className="text-green-400 font-bold text-sm">660</p>
+                  <p className="text-white/30 text-xs">remaining</p>
+                </div>
+                <div>
+                  <p className="text-orange-400 font-bold text-sm">420</p>
+                  <p className="text-white/30 text-xs">burned</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Macro bars */}
+          <div className="flex gap-3 mt-5">
+            {[
+              { l: t.protein, g: 98, tot: 150, c: "#0066FF", pct: 65 },
+              { l: t.carbs, g: 180, tot: 250, c: "#06B6D4", pct: 72 },
+              { l: t.fat, g: 38, tot: 60, c: "#8B5CF6", pct: 63 },
+            ].map((m, i) => (
+              <div key={i} className="flex-1">
+                <div className="flex justify-between mb-1">
+                  <span className="text-white/50 text-xs">{m.l}</span>
+                  <span className="text-white text-xs font-bold">{m.g}g</span>
+                </div>
+                <div className="h-1.5 rounded-full" style={{ background: "rgba(255,255,255,0.08)" }}>
+                  <div className="h-full rounded-full transition-all" style={{ width: `${m.pct}%`, background: m.c, boxShadow: `0 0 6px ${m.c}60` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </GCard>
+
+        {/* Stats row */}
+        <div className="flex gap-3 mb-5">
+          <MetricPill icon={<Droplets size={18} />} label={t.water} value="1.8L" color="#06B6D4" />
+          <MetricPill icon={<Footprints size={18} />} label={t.steps} value="8.4K" color="#10B981" />
+          <MetricPill icon={<Flame size={18} />} label="Active" value="42m" color="#F59E0B" />
+        </div>
+
+        {/* AI Recommendation */}
+        <GCard className="p-5 mb-5" style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.12) 0%, rgba(0,102,255,0.08) 100%)", border: "1px solid rgba(139,92,246,0.2)" }}>
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: "linear-gradient(135deg, #8B5CF6, #0066FF)", boxShadow: "0 4px 16px rgba(139,92,246,0.4)" }}>
+              <Sparkles size={18} className="text-white" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <p className="text-white font-bold text-sm" style={{ fontFamily: "var(--font-display)" }}>AI Recommendation</p>
+                <Tag color="#8B5CF6">New</Tag>
+              </div>
+              <p className="text-white/60 text-sm leading-relaxed">
+                {lang === "ar" ? "أحسنت! لقد اكتملت 72% من هدفك اليومي للسعرات. أضف وجبة خفيفة غنية بالبروتين مثل الزبادي اليوناني لإكمال الهدف."
+                  : lang === "de" ? "Gut gemacht! Du hast 72% deines Tagesziels erreicht. Füge einen proteinreichen Snack wie griechischen Joghurt hinzu."
+                  : "Great progress! You've hit 72% of your daily calorie goal. Add a protein-rich snack like Greek yogurt to stay on track."}
+              </p>
+            </div>
+          </div>
+        </GCard>
+
+        {/* Weekly calories chart */}
+        <SectionHeader title={lang === "ar" ? "السعرات الأسبوعية" : lang === "de" ? "Wöchentliche Kalorien" : "Weekly Calories"} />
+        <GCard className="p-4">
+          <ResponsiveContainer width="100%" height={160}>
+            <AreaChart data={caloriesWeekData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+              <defs>
+                <linearGradient id="cgIn" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#0066FF" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#0066FF" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <XAxis dataKey="d" tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={{ background: "#0A1628", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "#fff", fontSize: 12 }} />
+              <Area type="monotone" dataKey="in" stroke="#0066FF" strokeWidth={2} fill="url(#cgIn)" />
+            </AreaChart>
+          </ResponsiveContainer>
+        </GCard>
+      </div>
+    </div>
+  );
+}
+
+// ─── Nutrition Screen ─────────────────────────────────────────────────────────
+const MEALS_DATA = [
+  {
+    name: "Breakfast", time: "8:30 AM", icon: "🌅", kcal: 420, items: [
+      { name: "Overnight Oats", kcal: 280, p: 12, c: 45, f: 8 },
+      { name: "Greek Yogurt", kcal: 140, p: 18, c: 10, f: 3 },
+    ]
+  },
+  {
+    name: "Lunch", time: "12:45 PM", icon: "☀️", kcal: 680, items: [
+      { name: "Grilled Chicken Salad", kcal: 420, p: 48, c: 22, f: 12 },
+      { name: "Whole Grain Bread", kcal: 180, p: 7, c: 34, f: 2 },
+      { name: "Apple", kcal: 80, p: 0, c: 21, f: 0 },
+    ]
+  },
+  {
+    name: "Dinner", time: "7:15 PM", icon: "🌙", kcal: 0, items: []
+  },
+  {
+    name: "Snacks", time: "", icon: "🍎", kcal: 180, items: [
+      { name: "Mixed Nuts", kcal: 180, p: 6, c: 8, f: 16 },
+    ]
+  },
+];
+
+function NutritionScreen({ lang }: { lang: Lang }) {
+  const [expanded, setExpanded] = useState<number | null>(0);
+  const t = T[lang];
+  const totalKcal = MEALS_DATA.reduce((s, m) => s + m.kcal, 0);
+  return (
+    <div className="flex flex-col gap-5 pb-28" dir={T[lang].dir}>
+      <div className="px-5 pt-2">
+        <div className="flex items-center justify-between mb-5">
+          <h1 className="text-2xl font-black text-white" style={{ fontFamily: "var(--font-display)" }}>{t.nutrition}</h1>
+          <GBtn sm onClick={() => {}}><Plus size={16} />{lang === "ar" ? "إضافة" : lang === "de" ? "Hinzufügen" : "Add Food"}</GBtn>
+        </div>
+
+        {/* Calorie overview */}
+        <GCard className="p-5 mb-5" style={{ background: "linear-gradient(135deg, rgba(0,102,255,0.12) 0%, rgba(6,182,212,0.06) 100%)", border: "1px solid rgba(0,102,255,0.18)" }}>
+          <div className="flex items-center gap-5">
+            <ProgressRing progress={(totalKcal / 2340) * 100} size={88} sw={8} color="#06B6D4">
+              <div className="text-center">
+                <p className="text-white font-black text-base leading-none" style={{ fontFamily: "var(--font-display)" }}>{totalKcal}</p>
+                <p className="text-white/40 text-xs">kcal</p>
+              </div>
+            </ProgressRing>
+            <div className="flex-1">
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { l: t.protein, v: "98g", pct: 65, c: "#0066FF" },
+                  { l: t.carbs, v: "180g", pct: 72, c: "#06B6D4" },
+                  { l: t.fat, v: "38g", pct: 63, c: "#8B5CF6" },
+                ].map((m, i) => (
+                  <div key={i}>
+                    <p className="text-white font-bold text-sm" style={{ fontFamily: "var(--font-display)" }}>{m.v}</p>
+                    <div className="h-1 rounded-full my-1" style={{ background: "rgba(255,255,255,0.1)" }}>
+                      <div className="h-full rounded-full" style={{ width: `${m.pct}%`, background: m.c }} />
+                    </div>
+                    <p className="text-white/40 text-xs">{m.l}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </GCard>
+
+        {/* AI food suggestion */}
+        <GCard className="p-4 mb-5 flex items-center gap-3" style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.2)" }}>
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "rgba(16,185,129,0.2)" }}>
+            <Lightbulb size={16} style={{ color: "#10B981" }} />
+          </div>
+          <div className="flex-1">
+            <p className="text-white text-sm font-semibold">
+              {lang === "ar" ? "اقتراح الذكاء الاصطناعي: أضف صدر الدجاج للعشاء لتلبية هدف البروتين"
+                : lang === "de" ? "KI-Vorschlag: Füge Hähnchenbrust zum Abendessen hinzu"
+                : "AI Suggest: Add chicken breast to dinner to hit protein goal"}
+            </p>
+          </div>
+          <ChevronRight size={16} className="text-white/30" />
+        </GCard>
+
+        {/* Macro pie */}
+        <SectionHeader title={lang === "ar" ? "توزيع العناصر" : lang === "de" ? "Makro-Verteilung" : "Macro Distribution"} />
+        <GCard className="p-4 mb-5">
+          <div className="flex items-center gap-4">
+            <PieChart width={100} height={100}>
+              <Pie data={macros} cx={45} cy={45} innerRadius={28} outerRadius={45} paddingAngle={3} dataKey="value">
+                {macros.map((m, i) => <Cell key={i} fill={m.color} />)}
+              </Pie>
+            </PieChart>
+            <div className="flex flex-col gap-2">
+              {macros.map((m, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-full" style={{ background: m.color }} />
+                  <span className="text-white/60 text-xs">{m.name}</span>
+                  <span className="text-white font-bold text-xs ml-auto">{m.value}%</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </GCard>
+
+        {/* Meal list */}
+        <SectionHeader title={lang === "ar" ? "سجل الوجبات" : lang === "de" ? "Mahlzeiten-Tagebuch" : "Food Diary"} />
+        <div className="flex flex-col gap-3">
+          {MEALS_DATA.map((meal, idx) => (
+            <GCard key={idx} className="overflow-hidden">
+              <button className="w-full flex items-center gap-4 p-4" onClick={() => setExpanded(expanded === idx ? null : idx)}>
+                <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-xl" style={{ background: "rgba(255,255,255,0.06)" }}>
+                  {meal.icon}
+                </div>
+                <div className="flex-1 text-left">
+                  <p className="text-white font-bold text-sm" style={{ fontFamily: "var(--font-display)" }}>{meal.name}</p>
+                  <p className="text-white/40 text-xs">{meal.time || (lang === "ar" ? "لم يُسجَّل" : lang === "de" ? "Nicht erfasst" : "Not logged")}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-white font-bold text-sm">{meal.kcal > 0 ? `${meal.kcal} kcal` : "—"}</span>
+                  <ChevronDown size={16} className="text-white/30 transition-transform" style={{ transform: expanded === idx ? "rotate(180deg)" : "none" }} />
+                </div>
+              </button>
+              {expanded === idx && (
+                <div className="px-4 pb-4 flex flex-col gap-2">
+                  {meal.items.length === 0 ? (
+                    <button className="flex items-center gap-2 py-3 text-sm font-semibold" style={{ color: "#06B6D4" }}>
+                      <Plus size={16} />{lang === "ar" ? "إضافة طعام" : lang === "de" ? "Essen hinzufügen" : "Add food"}
+                    </button>
+                  ) : (
+                    <>
+                      {meal.items.map((item, ii) => (
+                        <div key={ii} className="flex items-center justify-between py-2.5 px-3 rounded-2xl" style={{ background: "rgba(255,255,255,0.04)" }}>
+                          <div>
+                            <p className="text-white text-sm font-semibold">{item.name}</p>
+                            <p className="text-white/40 text-xs">P: {item.p}g · C: {item.c}g · F: {item.f}g</p>
+                          </div>
+                          <span className="text-white/70 text-sm font-bold">{item.kcal}</span>
+                        </div>
+                      ))}
+                      <button className="flex items-center gap-2 py-2 text-sm font-semibold" style={{ color: "#06B6D4" }}>
+                        <Plus size={16} />{lang === "ar" ? "إضافة المزيد" : lang === "de" ? "Mehr hinzufügen" : "Add more"}
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
+            </GCard>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Workout Screen ───────────────────────────────────────────────────────────
+const EXERCISES = [
+  { name: "Barbell Squat", sets: 4, reps: "8-10", weight: "80 kg", muscle: "Legs", done: true },
+  { name: "Romanian Deadlift", sets: 3, reps: "10-12", weight: "70 kg", muscle: "Hamstrings", done: true },
+  { name: "Leg Press", sets: 3, reps: "12-15", weight: "140 kg", muscle: "Quads", done: false },
+  { name: "Calf Raises", sets: 4, reps: "20", weight: "60 kg", muscle: "Calves", done: false },
+  { name: "Leg Extension", sets: 3, reps: "15", weight: "50 kg", muscle: "Quads", done: false },
+];
+
+function WorkoutScreen({ lang }: { lang: Lang }) {
+  const [started, setStarted] = useState(false);
+  const [seconds, setSeconds] = useState(0);
+  const t = T[lang];
+  const done = EXERCISES.filter(e => e.done).length;
+  return (
+    <div className="flex flex-col gap-5 pb-28" dir={T[lang].dir}>
+      <div className="px-5 pt-2">
+        <div className="flex items-center justify-between mb-5">
+          <h1 className="text-2xl font-black text-white" style={{ fontFamily: "var(--font-display)" }}>{t.workout}</h1>
+          <Tag color="#F59E0B">{lang === "ar" ? "يوم الأرجل" : lang === "de" ? "Bein-Tag" : "Leg Day"}</Tag>
+        </div>
+
+        {/* Workout hero card */}
+        <GCard className="p-6 mb-5 overflow-hidden relative" style={{ background: "linear-gradient(135deg, rgba(245,158,11,0.12) 0%, rgba(239,68,68,0.06) 100%)", border: "1px solid rgba(245,158,11,0.2)" }}>
+          <div className="absolute top-0 right-0 w-32 h-32 rounded-full opacity-10 pointer-events-none"
+            style={{ background: "radial-gradient(circle, #F59E0B, transparent)", transform: "translate(30%, -30%)" }} />
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #F59E0B, #EF4444)", boxShadow: "0 4px 20px rgba(245,158,11,0.4)" }}>
+              <Dumbbell size={24} className="text-white" />
+            </div>
+            <div>
+              <p className="text-white font-black text-lg" style={{ fontFamily: "var(--font-display)" }}>
+                {lang === "ar" ? "تمرين الأرجل — الحجم" : lang === "de" ? "Bein-Training — Volumen" : "Leg Day — Volume"}
+              </p>
+              <p className="text-white/50 text-sm">5 {lang === "ar" ? "تمارين" : lang === "de" ? "Übungen" : "exercises"} · ~55 {lang === "ar" ? "دقيقة" : lang === "de" ? "Min" : "min"}</p>
+            </div>
+          </div>
+          <div className="flex gap-4 mb-4">
+            {[{ l: lang === "ar" ? "مكتمل" : lang === "de" ? "Fertig" : "Done", v: `${done}/${EXERCISES.length}`, c: "#10B981" },
+              { l: lang === "ar" ? "الوقت" : lang === "de" ? "Zeit" : "Time", v: started ? "28:14" : "00:00", c: "#06B6D4" },
+              { l: lang === "ar" ? "الحجم" : lang === "de" ? "Volumen" : "Volume", v: "3,200 kg", c: "#F59E0B" }].map((s, i) => (
+              <div key={i} className="flex-1 p-3 rounded-2xl" style={{ background: "rgba(255,255,255,0.06)" }}>
+                <p className="font-black text-base" style={{ color: s.c, fontFamily: "var(--font-display)" }}>{s.v}</p>
+                <p className="text-white/40 text-xs">{s.l}</p>
+              </div>
+            ))}
+          </div>
+          {/* Progress bar */}
+          <div className="h-2 rounded-full" style={{ background: "rgba(255,255,255,0.1)" }}>
+            <div className="h-full rounded-full" style={{ width: `${(done / EXERCISES.length) * 100}%`, background: "linear-gradient(90deg, #F59E0B, #EF4444)", boxShadow: "0 0 8px rgba(245,158,11,0.5)" }} />
+          </div>
+          <div className="mt-4">
+            <GBtn onClick={() => setStarted(!started)} className="w-full" style={{ background: started ? "linear-gradient(135deg, #EF4444, #DC2626)" : "linear-gradient(135deg, #F59E0B, #EF4444)", boxShadow: started ? "0 4px 20px rgba(239,68,68,0.4)" : "0 4px 20px rgba(245,158,11,0.4)" }}>
+              {started ? <><RefreshCw size={18} />{lang === "ar" ? "إيقاف التمرين" : lang === "de" ? "Training pausieren" : "Pause Workout"}</>
+                : <><Play size={18} />{lang === "ar" ? "بدء التمرين" : lang === "de" ? "Training starten" : "Start Workout"}</>}
+            </GBtn>
+          </div>
+        </GCard>
+
+        {/* Exercise list */}
+        <SectionHeader title={lang === "ar" ? "التمارين" : lang === "de" ? "Übungen" : "Exercises"} />
+        <div className="flex flex-col gap-3">
+          {EXERCISES.map((ex, i) => (
+            <GCard key={i} className="p-4 flex items-center gap-4" style={ex.done ? { border: "1px solid rgba(16,185,129,0.2)", background: "rgba(16,185,129,0.05)" } : {}}>
+              <div className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0"
+                style={{ background: ex.done ? "rgba(16,185,129,0.15)" : "rgba(255,255,255,0.06)" }}>
+                {ex.done ? <Check size={18} style={{ color: "#10B981" }} /> : <span className="text-white/40 font-bold text-sm">{i + 1}</span>}
+              </div>
+              <div className="flex-1">
+                <p className="text-white font-bold text-sm" style={{ fontFamily: "var(--font-display)", textDecoration: ex.done ? "none" : "none", opacity: ex.done ? 0.7 : 1 }}>{ex.name}</p>
+                <p className="text-white/40 text-xs">{ex.sets} sets × {ex.reps} reps · {ex.weight}</p>
+              </div>
+              <Tag color={ex.done ? "#10B981" : "#0066FF"}>{ex.muscle}</Tag>
+            </GCard>
+          ))}
+        </div>
+
+        {/* Rest timer */}
+        {started && (
+          <GCard className="mt-4 p-5 flex items-center gap-4" style={{ background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)" }}>
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: "rgba(139,92,246,0.2)" }}>
+              <Clock size={18} style={{ color: "#8B5CF6" }} />
+            </div>
+            <div className="flex-1">
+              <p className="text-white font-bold text-sm">{lang === "ar" ? "وقت الراحة" : lang === "de" ? "Pausenzeit" : "Rest Timer"}</p>
+              <p className="text-white/40 text-xs">{lang === "ar" ? "الراحة الموصى بها: 90 ثانية" : "Recommended: 90 seconds"}</p>
+            </div>
+            <span className="text-3xl font-black" style={{ color: "#8B5CF6", fontFamily: "var(--font-display)" }}>1:30</span>
+          </GCard>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── AI Coach Screen ──────────────────────────────────────────────────────────
+const CHAT_MSGS = [
+  { role: "ai", text: "Hey Alex! 👋 I've analyzed your recent progress. You're doing amazing — 5 workouts this week and hitting 85% of your nutrition goals. What would you like to work on today?", time: "9:41 AM" },
+  { role: "user", text: "I want to improve my squat form and increase my protein intake.", time: "9:43 AM" },
+  { role: "ai", text: "Great goals! For squat form, focus on keeping your chest up and knees tracking over your toes. I'd recommend recording yourself for feedback.\n\nFor protein, you need ~150g/day. Try adding: Greek yogurt (20g) + chicken breast (45g) + protein shake (25g). That's an extra 90g!", time: "9:44 AM" },
+  { role: "user", text: "What about recovery? I feel sore today.", time: "9:46 AM" },
+  { role: "ai", text: "Your HRV data shows mild fatigue. I recommend:\n• Active recovery today — 20min walk\n• Foam rolling quads & hamstrings\n• Extra 500ml water + electrolytes\n• Sleep by 10PM for full recovery 🌙", time: "9:47 AM" },
+];
+
+function AICoachScreen({ lang }: { lang: Lang }) {
+  const [input, setInput] = useState("");
+  const t = T[lang];
+  const chips = lang === "ar"
+    ? ["خطة التغذية", "نصيحة التعافي", "برنامج التمارين", "فقدان الوزن"]
+    : lang === "de"
+    ? ["Ernährungsplan", "Regeneration", "Trainingsplan", "Gewichtsabnahme"]
+    : ["Meal Plan", "Recovery Tips", "Workout Plan", "Weight Loss"];
+
+  return (
+    <div className="flex flex-col h-screen" dir={T[lang].dir} style={{ background: "#050A14" }}>
+      {/* Header */}
+      <div className="px-5 pt-2 pb-4 flex-shrink-0" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        <StatusBar />
+        <div className="flex items-center gap-4 mt-2">
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #8B5CF6, #0066FF)", boxShadow: "0 4px 20px rgba(139,92,246,0.4)" }}>
+            <Sparkles size={20} className="text-white" />
+          </div>
+          <div>
+            <p className="text-white font-black text-lg" style={{ fontFamily: "var(--font-display)" }}>
+              {lang === "ar" ? "مدرب الذكاء الاصطناعي" : lang === "de" ? "KI-Coach" : "AI Coach"}
+            </p>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-green-400" style={{ boxShadow: "0 0 6px rgba(74,222,128,0.8)" }} />
+              <span className="text-white/40 text-xs">{lang === "ar" ? "متاح الآن" : lang === "de" ? "Online" : "Online now"}</span>
+            </div>
+          </div>
+          <button className="ml-auto w-9 h-9 rounded-xl flex items-center justify-center" style={GLASS}>
+            <RefreshCw size={16} className="text-white/50" />
+          </button>
+        </div>
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-4">
+        {/* Daily motivation card */}
+        <GCard className="p-4" style={{ background: "linear-gradient(135deg, rgba(245,158,11,0.1), rgba(239,68,68,0.05))", border: "1px solid rgba(245,158,11,0.15)" }}>
+          <div className="flex items-center gap-2 mb-2">
+            <Zap size={14} style={{ color: "#F59E0B" }} />
+            <span className="text-xs font-bold uppercase tracking-wider" style={{ color: "#F59E0B" }}>
+              {lang === "ar" ? "دافع اليوم" : lang === "de" ? "Tages-Motivation" : "Daily Motivation"}
+            </span>
+          </div>
+          <p className="text-white text-sm leading-relaxed font-medium">
+            {lang === "ar" ? '"الانضباط يبني الجسر بين الأهداف والإنجازات."'
+              : lang === "de" ? '"Disziplin ist die Brücke zwischen Zielen und Leistung."'
+              : '"Discipline is the bridge between goals and accomplishment."'}
+          </p>
+        </GCard>
+
+        {CHAT_MSGS.map((msg, i) => (
+          <div key={i} className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
+            {msg.role === "ai" && (
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 self-end" style={{ background: "linear-gradient(135deg, #8B5CF6, #0066FF)" }}>
+                <Sparkles size={14} className="text-white" />
+              </div>
+            )}
+            <div className={`max-w-[80%] ${msg.role === "user" ? "items-end" : "items-start"} flex flex-col gap-1`}>
+              <div className="px-4 py-3 rounded-2xl text-sm leading-relaxed"
+                style={msg.role === "user"
+                  ? { background: GRAD, color: "white", borderRadius: "20px 20px 4px 20px", boxShadow: "0 4px 20px rgba(0,102,255,0.3)" }
+                  : { ...GLASS, color: "rgba(255,255,255,0.85)", borderRadius: "20px 20px 20px 4px" }}>
+                {msg.text.split("\n").map((line, li) => <p key={li}>{line}</p>)}
+              </div>
+              <span className="text-white/25 text-xs px-1">{msg.time}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Quick chips */}
+      <div className="px-5 py-2 flex gap-2 overflow-x-auto flex-shrink-0">
+        {chips.map((c, i) => (
+          <button key={i} onClick={() => setInput(c)}
+            className="flex-shrink-0 px-4 py-2 rounded-full text-xs font-semibold text-white/70 transition-all active:scale-95"
+            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}>
+            {c}
+          </button>
+        ))}
+      </div>
+
+      {/* Input */}
+      <div className="px-5 pb-28 pt-3 flex-shrink-0">
+        <div className="flex gap-3 items-end">
+          <div className="flex-1 rounded-2xl px-5 py-4 flex items-center gap-2" style={GLASS}>
+            <input value={input} onChange={e => setInput(e.target.value)}
+              placeholder={lang === "ar" ? "اسأل مدربك..." : lang === "de" ? "Frage deinen Coach..." : "Ask your AI coach..."}
+              className="flex-1 bg-transparent text-white text-sm outline-none placeholder:text-white/30" />
+          </div>
+          <button className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
+            style={{ background: GRAD, boxShadow: "0 4px 20px rgba(0,102,255,0.4)" }}>
+            <Send size={18} className="text-white" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Progress Screen ──────────────────────────────────────────────────────────
+function ProgressScreen({ lang }: { lang: Lang }) {
+  const [period, setPeriod] = useState<"week" | "month" | "year">("month");
+  const labels = { week: lang === "de" ? "Woche" : lang === "ar" ? "أسبوع" : "Week", month: lang === "de" ? "Monat" : lang === "ar" ? "شهر" : "Month", year: lang === "de" ? "Jahr" : lang === "ar" ? "سنة" : "Year" };
+  const measurements = [
+    { l: lang === "ar" ? "الصدر" : lang === "de" ? "Brust" : "Chest", v: "98 cm", d: "-1.5 cm", pos: false },
+    { l: lang === "ar" ? "الخصر" : lang === "de" ? "Taille" : "Waist", v: "82 cm", d: "-2.0 cm", pos: false },
+    { l: lang === "ar" ? "الأرداف" : lang === "de" ? "Hüfte" : "Hips", v: "96 cm", d: "-0.5 cm", pos: false },
+    { l: lang === "ar" ? "الذراع" : lang === "de" ? "Bizeps" : "Bicep", v: "38 cm", d: "+1.0 cm", pos: true },
+    { l: lang === "ar" ? "الفخذ" : lang === "de" ? "Oberschenkel" : "Thigh", v: "58 cm", d: "-1.0 cm", pos: false },
+  ];
+  return (
+    <div className="flex flex-col gap-5 pb-28" dir={T[lang].dir}>
+      <div className="px-5 pt-2">
+        <h1 className="text-2xl font-black text-white mb-5" style={{ fontFamily: "var(--font-display)" }}>{T[lang].progress}</h1>
+
+        {/* Streak & goal */}
+        <div className="flex gap-3 mb-5">
+          <GCard className="flex-1 p-4 flex flex-col items-center gap-2" style={{ background: "linear-gradient(135deg, rgba(245,158,11,0.12), rgba(239,68,68,0.06))", border: "1px solid rgba(245,158,11,0.2)" }}>
+            <Trophy size={24} style={{ color: "#F59E0B" }} />
+            <span className="text-white font-black text-2xl" style={{ fontFamily: "var(--font-display)" }}>18</span>
+            <span className="text-white/40 text-xs">{lang === "ar" ? "يوم متواصل 🔥" : lang === "de" ? "Tage-Streak 🔥" : "Day Streak 🔥"}</span>
+          </GCard>
+          <GCard className="flex-1 p-4 flex flex-col items-center gap-2" style={{ background: "linear-gradient(135deg, rgba(0,102,255,0.12), rgba(6,182,212,0.06))", border: "1px solid rgba(0,102,255,0.2)" }}>
+            <ProgressRing progress={74} size={56} sw={6} color="#0066FF">
+              <span className="text-white font-black text-xs">74%</span>
+            </ProgressRing>
+            <span className="text-white/40 text-xs">{lang === "ar" ? "اكتمال الهدف" : lang === "de" ? "Ziel erreicht" : "Goal Complete"}</span>
+          </GCard>
+        </div>
+
+        {/* Period toggle */}
+        <div className="flex rounded-2xl p-1 mb-5" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
+          {(["week", "month", "year"] as const).map(p => (
+            <button key={p} onClick={() => setPeriod(p)}
+              className="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all"
+              style={period === p ? { background: GRAD, color: "white", boxShadow: "0 2px 12px rgba(0,102,255,0.3)" } : { color: "rgba(255,255,255,0.35)" }}>
+              {labels[p]}
+            </button>
+          ))}
+        </div>
+
+        {/* Weight chart */}
+        <SectionHeader title={lang === "ar" ? "تطور الوزن" : lang === "de" ? "Gewichtsverlauf" : "Weight Progress"} />
+        <GCard className="p-4 mb-5">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <span className="text-white font-black text-3xl" style={{ fontFamily: "var(--font-display)" }}>76.2</span>
+              <span className="text-white/40 text-sm ml-1">kg</span>
+            </div>
+            <div className="text-right">
+              <p className="text-green-400 font-bold text-sm">−6.2 kg</p>
+              <p className="text-white/30 text-xs">{lang === "ar" ? "منذ البداية" : lang === "de" ? "seit Start" : "since start"}</p>
+            </div>
+          </div>
+          <ResponsiveContainer width="100%" height={140}>
+            <AreaChart data={weightData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+              <defs>
+                <linearGradient id="wg" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#0066FF" stopOpacity={0.3} />
+                  <stop offset="100%" stopColor="#0066FF" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <XAxis dataKey="m" tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis domain={[74, 84]} tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={{ background: "#0A1628", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "#fff", fontSize: 12 }}
+                formatter={(v: number) => [`${v} kg`, "Weight"]} />
+              <Area type="monotone" dataKey="v" stroke="#0066FF" strokeWidth={2.5} fill="url(#wg)" dot={{ fill: "#0066FF", r: 3 }} activeDot={{ r: 5 }} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </GCard>
+
+        {/* Measurements */}
+        <SectionHeader title={lang === "ar" ? "قياسات الجسم" : lang === "de" ? "Körpermaße" : "Body Measurements"} action={lang === "ar" ? "تحديث" : lang === "de" ? "Aktualisieren" : "Update"} />
+        <GCard className="overflow-hidden mb-5">
+          {measurements.map((m, i) => (
+            <div key={i} className={`flex items-center justify-between px-5 py-4 ${i < measurements.length - 1 ? "border-b" : ""}`} style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+              <span className="text-white/60 text-sm">{m.l}</span>
+              <div className="flex items-center gap-3">
+                <span className="text-white font-bold text-sm">{m.v}</span>
+                <span className={`text-xs font-bold px-2.5 py-1 rounded-full`} style={{ background: m.pos ? "rgba(16,185,129,0.15)" : "rgba(6,182,212,0.15)", color: m.pos ? "#10B981" : "#06B6D4" }}>{m.d}</span>
+              </div>
+            </div>
+          ))}
+        </GCard>
+
+        {/* Workout frequency */}
+        <SectionHeader title={lang === "ar" ? "تكرار التمارين" : lang === "de" ? "Trainingsfrequenz" : "Workout Frequency"} />
+        <GCard className="p-4">
+          <ResponsiveContainer width="100%" height={120}>
+            <BarChart data={workoutWeeks} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+              <XAxis dataKey="w" tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={{ background: "#0A1628", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "#fff", fontSize: 12 }} />
+              <Bar dataKey="n" radius={[6, 6, 0, 0]} fill="url(#barGrad)">
+                {workoutWeeks.map((_, i) => <Cell key={i} fill={i === 3 ? "#0066FF" : "rgba(0,102,255,0.4)"} />)}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </GCard>
+      </div>
+    </div>
+  );
+}
+
+// ─── Analytics Screen ─────────────────────────────────────────────────────────
+function AnalyticsScreen({ lang }: { lang: Lang }) {
+  const [tab, setTab] = useState(0);
+  const tabs = lang === "ar"
+    ? ["السعرات", "التغذية", "التمارين", "النوم", "النشاط"]
+    : lang === "de"
+    ? ["Kalorien", "Ernährung", "Training", "Schlaf", "Aktivität"]
+    : ["Calories", "Nutrition", "Workout", "Sleep", "Activity"];
+
+  const summaryStats = [
+    [
+      { l: lang === "ar" ? "متوسط السعرات" : "Avg. Calories", v: "2,045", c: "#0066FF" },
+      { l: lang === "ar" ? "أيام الهدف" : "Goal Days", v: "5/7", c: "#10B981" },
+      { l: lang === "ar" ? "عجز السعرات" : "Deficit", v: "−3,780", c: "#06B6D4" },
+    ],
+    [
+      { l: "Avg. Protein", v: "112g", c: "#0066FF" },
+      { l: "Avg. Carbs", v: "195g", c: "#06B6D4" },
+      { l: "Avg. Fat", v: "52g", c: "#8B5CF6" },
+    ],
+    [
+      { l: lang === "ar" ? "تمارين/أسبوع" : "Workouts/Week", v: "4.6", c: "#F59E0B" },
+      { l: lang === "ar" ? "وقت التمرين" : "Avg. Duration", v: "54 min", c: "#0066FF" },
+      { l: lang === "ar" ? "السعرات المحروقة" : "Avg. Burned", v: "480", c: "#EF4444" },
+    ],
+    [
+      { l: lang === "ar" ? "متوسط النوم" : "Avg. Sleep", v: "7.5h", c: "#8B5CF6" },
+      { l: lang === "ar" ? "جودة النوم" : "Sleep Quality", v: "82%", c: "#0066FF" },
+      { l: lang === "ar" ? "وقت النوم" : "Bedtime", v: "10:45 PM", c: "#06B6D4" },
+    ],
+    [
+      { l: "Avg. Steps", v: "9,240", c: "#10B981" },
+      { l: "Active Days", v: "6/7", c: "#0066FF" },
+      { l: "Avg. Active", v: "48 min", c: "#F59E0B" },
+    ],
+  ];
+
+  return (
+    <div className="flex flex-col gap-5 pb-28" dir={T[lang].dir}>
+      <div className="px-5 pt-2">
+        <h1 className="text-2xl font-black text-white mb-5" style={{ fontFamily: "var(--font-display)" }}>{T[lang].analytics}</h1>
+
+        {/* Tab strip */}
+        <div className="flex gap-2 overflow-x-auto pb-1 mb-5">
+          {tabs.map((tt, i) => (
+            <button key={i} onClick={() => setTab(i)}
+              className="flex-shrink-0 px-4 py-2.5 rounded-2xl text-sm font-bold transition-all"
+              style={tab === i ? { background: GRAD, color: "white", boxShadow: "0 2px 16px rgba(0,102,255,0.35)" } : { ...GLASS, color: "rgba(255,255,255,0.4)" }}>
+              {tt}
+            </button>
+          ))}
+        </div>
+
+        {/* Summary stats */}
+        <div className="flex gap-3 mb-5">
+          {summaryStats[tab].map((s, i) => (
+            <GCard key={i} className="flex-1 p-4">
+              <p className="font-black text-xl" style={{ color: s.c, fontFamily: "var(--font-display)" }}>{s.v}</p>
+              <p className="text-white/40 text-xs mt-1">{s.l}</p>
+            </GCard>
+          ))}
+        </div>
+
+        {/* Main chart */}
+        <GCard className="p-4 mb-5">
+          <p className="text-white font-bold text-sm mb-4" style={{ fontFamily: "var(--font-display)" }}>
+            {tabs[tab]} — {lang === "ar" ? "هذا الأسبوع" : lang === "de" ? "Diese Woche" : "This Week"}
+          </p>
+          {tab === 0 && (
+            <ResponsiveContainer width="100%" height={180}>
+              <BarChart data={caloriesWeekData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                <XAxis dataKey="d" tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={{ background: "#0A1628", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "#fff", fontSize: 12 }} />
+                <Bar dataKey="in" fill="#0066FF" radius={[4, 4, 0, 0]} name="Intake" />
+                <Bar dataKey="out" fill="#06B6D4" radius={[4, 4, 0, 0]} name="Burned" />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+          {tab === 1 && (
+            <div className="flex items-center gap-6">
+              <PieChart width={140} height={140}>
+                <Pie data={macros} cx={65} cy={65} innerRadius={40} outerRadius={65} paddingAngle={3} dataKey="value">
+                  {macros.map((m, i) => <Cell key={i} fill={m.color} />)}
+                </Pie>
+              </PieChart>
+              <div className="flex flex-col gap-4 flex-1">
+                {macros.map((m, i) => (
+                  <div key={i}>
+                    <div className="flex justify-between mb-1">
+                      <span className="text-white/60 text-xs">{m.name}</span>
+                      <span className="text-white text-xs font-bold">{m.value}%</span>
+                    </div>
+                    <div className="h-2 rounded-full" style={{ background: "rgba(255,255,255,0.08)" }}>
+                      <div className="h-full rounded-full" style={{ width: `${m.value}%`, background: m.color }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {tab === 2 && (
+            <ResponsiveContainer width="100%" height={180}>
+              <BarChart data={workoutWeeks} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                <XAxis dataKey="w" tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={{ background: "#0A1628", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "#fff", fontSize: 12 }} />
+                <Bar dataKey="n" radius={[6, 6, 0, 0]} name="Workouts">
+                  {workoutWeeks.map((_, i) => <Cell key={i} fill={i === workoutWeeks.length - 1 ? "#0066FF" : "rgba(0,102,255,0.5)"} />)}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+          {tab === 3 && (
+            <ResponsiveContainer width="100%" height={180}>
+              <AreaChart data={sleepData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#8B5CF6" stopOpacity={0.3} />
+                    <stop offset="100%" stopColor="#8B5CF6" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <XAxis dataKey="d" tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis domain={[5, 10]} tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={{ background: "#0A1628", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "#fff", fontSize: 12 }}
+                  formatter={(v: number) => [`${v}h`, "Sleep"]} />
+                <Area type="monotone" dataKey="h" stroke="#8B5CF6" strokeWidth={2.5} fill="url(#sg)" dot={{ fill: "#8B5CF6", r: 3 }} />
+              </AreaChart>
+            </ResponsiveContainer>
+          )}
+          {tab === 4 && (
+            <ResponsiveContainer width="100%" height={180}>
+              <AreaChart data={[
+                { d: "Mon", steps: 9200 }, { d: "Tue", steps: 11400 }, { d: "Wed", steps: 7800 },
+                { d: "Thu", steps: 10100 }, { d: "Fri", steps: 8900 }, { d: "Sat", steps: 12300 }, { d: "Sun", steps: 6500 }
+              ]} margin={{ top: 5, right: 5, left: -10, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="stg" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#10B981" stopOpacity={0.3} />
+                    <stop offset="100%" stopColor="#10B981" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <XAxis dataKey="d" tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 9 }} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={{ background: "#0A1628", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "#fff", fontSize: 12 }} />
+                <Area type="monotone" dataKey="steps" stroke="#10B981" strokeWidth={2.5} fill="url(#stg)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          )}
+        </GCard>
+
+        {/* Insights */}
+        <SectionHeader title={lang === "ar" ? "رؤى الذكاء الاصطناعي" : lang === "de" ? "KI-Einblicke" : "AI Insights"} />
+        <div className="flex flex-col gap-3">
+          {[
+            { icon: <TrendingUp size={16} />, text: lang === "ar" ? "أداؤك أفضل بنسبة 12% من الأسبوع الماضي" : "Your performance is 12% better than last week", color: "#10B981" },
+            { icon: <Lightbulb size={16} />, text: lang === "ar" ? "تناول الوجبات في توقيت منتظم يحسن نتائجك" : "Consistent meal timing is improving your results", color: "#F59E0B" },
+            { icon: <Activity size={16} />, text: lang === "ar" ? "ارفع حدة التمارين يوم الأربعاء لكسر الثبات" : "Increase Wednesday intensity to break through plateau", color: "#0066FF" },
+          ].map((ins, i) => (
+            <GCard key={i} className="p-4 flex items-start gap-3">
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${ins.color}22`, color: ins.color }}>{ins.icon}</div>
+              <p className="text-white/70 text-sm flex-1 leading-relaxed">{ins.text}</p>
+            </GCard>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Health Screen ────────────────────────────────────────────────────────────
+function HealthScreen({ lang }: { lang: Lang }) {
+  const metrics = [
+    { icon: <Moon size={20} />, l: lang === "ar" ? "النوم" : lang === "de" ? "Schlaf" : "Sleep", v: "7h 32m", score: 82, c: "#8B5CF6", sub: "Deep: 1h 48m" },
+    { icon: <Heart size={20} />, l: lang === "ar" ? "معدل القلب" : lang === "de" ? "Herzfrequenz" : "Heart Rate", v: "68 BPM", score: 91, c: "#EF4444", sub: "Resting" },
+    { icon: <Droplets size={20} />, l: lang === "ar" ? "الماء" : lang === "de" ? "Wasser" : "Water", v: "1.8 / 2.5L", score: 72, c: "#06B6D4", sub: "3 glasses left" },
+    { icon: <Wind size={20} />, l: lang === "ar" ? "التوتر" : lang === "de" ? "Stress" : "Stress", v: "Low", score: 88, c: "#10B981", sub: "HRV: 62ms" },
+    { icon: <Zap size={20} />, l: lang === "ar" ? "التعافي" : lang === "de" ? "Erholung" : "Recovery", v: "85%", score: 85, c: "#F59E0B", sub: "Ready to train" },
+    { icon: <Activity size={20} />, l: lang === "ar" ? "النشاط" : lang === "de" ? "Aktivität" : "Activity", v: "48 min", score: 78, c: "#0066FF", sub: "Goal: 60 min" },
+  ];
+
+  const wellnessScore = 86;
+
+  return (
+    <div className="flex flex-col gap-5 pb-28" dir={T[lang].dir}>
+      <div className="px-5 pt-2">
+        <h1 className="text-2xl font-black text-white mb-5" style={{ fontFamily: "var(--font-display)" }}>{T[lang].health}</h1>
+
+        {/* Wellness score */}
+        <GCard className="p-6 mb-5 flex items-center gap-6" style={{ background: "linear-gradient(135deg, rgba(0,102,255,0.12), rgba(139,92,246,0.08))", border: "1px solid rgba(0,102,255,0.2)" }}>
+          <ProgressRing progress={wellnessScore} size={110} sw={10} color="#0066FF" bg="rgba(255,255,255,0.07)">
+            <div className="text-center">
+              <p className="text-white font-black text-2xl leading-none" style={{ fontFamily: "var(--font-display)" }}>{wellnessScore}</p>
+              <p className="text-white/40 text-xs">/100</p>
+            </div>
+          </ProgressRing>
+          <div>
+            <p className="text-white/50 text-xs uppercase tracking-wider mb-1">
+              {lang === "ar" ? "درجة العافية" : lang === "de" ? "Wellness-Score" : "Wellness Score"}
+            </p>
+            <p className="text-white font-black text-xl" style={{ fontFamily: "var(--font-display)" }}>
+              {lang === "ar" ? "ممتاز" : lang === "de" ? "Ausgezeichnet" : "Excellent"}
+            </p>
+            <p className="text-white/40 text-sm mt-1">
+              {lang === "ar" ? "أفضل بـ 4 نقاط من أمس" : lang === "de" ? "+4 Punkte gegenüber gestern" : "+4 pts from yesterday"}
+            </p>
+            <div className="flex gap-2 mt-3">
+              <Tag color="#10B981">{lang === "ar" ? "جاهز للتمرين" : lang === "de" ? "Trainingsbereit" : "Train Ready"}</Tag>
+            </div>
+          </div>
+        </GCard>
+
+        {/* Metric grid */}
+        <SectionHeader title={lang === "ar" ? "مؤشرات الصحة" : lang === "de" ? "Gesundheitsmetriken" : "Health Metrics"} />
+        <div className="grid grid-cols-2 gap-3 mb-5">
+          {metrics.map((m, i) => (
+            <GCard key={i} className="p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: `${m.c}20`, color: m.c }}>{m.icon}</div>
+                <span className="text-white/50 text-xs font-semibold">{m.l}</span>
+              </div>
+              <p className="text-white font-black text-lg leading-none mb-1" style={{ fontFamily: "var(--font-display)" }}>{m.v}</p>
+              <p className="text-white/30 text-xs mb-3">{m.sub}</p>
+              <div className="h-1.5 rounded-full" style={{ background: "rgba(255,255,255,0.08)" }}>
+                <div className="h-full rounded-full" style={{ width: `${m.score}%`, background: m.c, boxShadow: `0 0 8px ${m.c}60` }} />
+              </div>
+            </GCard>
+          ))}
+        </div>
+
+        {/* Sleep chart */}
+        <SectionHeader title={lang === "ar" ? "نوم هذا الأسبوع" : lang === "de" ? "Schlaf diese Woche" : "Sleep This Week"} />
+        <GCard className="p-4 mb-5">
+          <ResponsiveContainer width="100%" height={140}>
+            <BarChart data={sleepData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+              <XAxis dataKey="d" tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis domain={[5, 10]} tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={{ background: "#0A1628", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "#fff", fontSize: 12 }}
+                formatter={(v: number) => [`${v}h`, "Sleep"]} />
+              <Bar dataKey="h" radius={[6, 6, 0, 0]}>
+                {sleepData.map((d, i) => <Cell key={i} fill={d.h >= 8 ? "#8B5CF6" : d.h >= 7 ? "rgba(139,92,246,0.6)" : "rgba(139,92,246,0.3)"} />)}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+          <div className="flex items-center gap-4 mt-2 pt-3" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+            {[{ l: lang === "ar" ? "متوسط" : "Avg", v: "7.5h" }, { l: lang === "ar" ? "أفضل" : "Best", v: "8.5h" }, { l: lang === "ar" ? "أسوأ" : "Worst", v: "6.5h" }].map((s, i) => (
+              <div key={i}>
+                <p className="text-white font-bold text-sm" style={{ fontFamily: "var(--font-display)" }}>{s.v}</p>
+                <p className="text-white/30 text-xs">{s.l}</p>
+              </div>
+            ))}
+          </div>
+        </GCard>
+
+        {/* HR trend */}
+        <SectionHeader title={lang === "ar" ? "معدل القلب — اليوم" : lang === "de" ? "Herzfrequenz heute" : "Heart Rate — Today"} />
+        <GCard className="p-4">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <span className="text-white font-black text-3xl" style={{ fontFamily: "var(--font-display)" }}>68</span>
+              <span className="text-white/40 text-sm ml-1">BPM</span>
+            </div>
+            <div className="flex gap-3 text-xs">
+              {[{ l: "Min", v: "54" }, { l: "Max", v: "142" }].map((s, i) => (
+                <div key={i} className="text-right">
+                  <p className="text-white font-bold">{s.v}</p>
+                  <p className="text-white/30">{s.l}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <ResponsiveContainer width="100%" height={100}>
+            <AreaChart data={[54,58,62,68,72,65,68,78,92,88,72,68,62,58,56,55,57,60,65,68,70,72,68,65].map((v, i) => ({ t: i, v }))}
+              margin={{ top: 5, right: 0, left: -30, bottom: 0 }}>
+              <defs>
+                <linearGradient id="hrg" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#EF4444" stopOpacity={0.3} />
+                  <stop offset="100%" stopColor="#EF4444" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <Area type="monotone" dataKey="v" stroke="#EF4444" strokeWidth={2} fill="url(#hrg)" dot={false} />
+              <Tooltip contentStyle={{ background: "#0A1628", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "#fff", fontSize: 12 }}
+                formatter={(v: number) => [`${v} BPM`, ""]} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </GCard>
+      </div>
+    </div>
+  );
+}
+
+// ─── Premium Screen ───────────────────────────────────────────────────────────
+const PREMIUM_FEATURES = [
+  { icon: <Sparkles size={16} />, l: "Unlimited AI Coach conversations", ar: "محادثات مع المدرب بلا حدود", de: "Unbegrenzte KI-Coach-Gespräche" },
+  { icon: <BarChart2 size={16} />, l: "Advanced analytics & insights", ar: "تحليلات وإرشادات متقدمة", de: "Erweiterte Analysen & Einblicke" },
+  { icon: <Leaf size={16} />, l: "Smart nutrition AI planning", ar: "تخطيط التغذية الذكي بالذكاء الاصطناعي", de: "KI-gestützte Ernährungsplanung" },
+  { icon: <Target size={16} />, l: "Personalized workout programs", ar: "برامج تدريبية شخصية", de: "Personalisierte Trainingsprogramme" },
+  { icon: <Activity size={16} />, l: "Full health metrics & HRV", ar: "مقاييس صحية كاملة ومتغير معدل ضربات القلب", de: "Vollständige Gesundheitsmetriken & HRV" },
+  { icon: <Bluetooth size={16} />, l: "Wearable device sync", ar: "مزامنة الأجهزة القابلة للارتداء", de: "Tragbare Gerätesynchronisation" },
+  { icon: <Download size={16} />, l: "Export data & reports", ar: "تصدير البيانات والتقارير", de: "Daten & Berichte exportieren" },
+  { icon: <Shield size={16} />, l: "Priority support 24/7", ar: "دعم أولوي على مدار الساعة", de: "Prioritätssupport rund um die Uhr" },
+];
+
+const PLANS = [
+  { id: "monthly", badge: null, price: "9.99", period: "mo", label: "Monthly", de: "Monatlich", ar: "شهري", savings: null },
+  { id: "yearly", badge: "Best Value", price: "5.83", period: "mo", label: "Yearly", de: "Jährlich", ar: "سنوي", savings: "Save 42%", totalPrice: "69.99/yr" },
+  { id: "lifetime", badge: "One-Time", price: "149", period: "once", label: "Lifetime", de: "Lebenslang", ar: "مدى الحياة", savings: null },
+];
+
+function PremiumScreen({ lang }: { lang: Lang }) {
+  const [selected, setSelected] = useState("yearly");
+  return (
+    <div className="flex flex-col gap-5 pb-28" dir={T[lang].dir}>
+      <div className="px-5 pt-2">
+        {/* Hero */}
+        <div className="relative rounded-3xl overflow-hidden mb-6 p-6" style={{ background: "linear-gradient(135deg, #0A1F4D 0%, #1A0A3D 100%)", border: "1px solid rgba(139,92,246,0.25)" }}>
+          <div className="absolute top-0 right-0 w-48 h-48 opacity-20 pointer-events-none" style={{ background: "radial-gradient(circle, #8B5CF6, transparent)", transform: "translate(30%, -30%)", filter: "blur(30px)" }} />
+          <div className="absolute bottom-0 left-0 w-40 h-40 opacity-15 pointer-events-none" style={{ background: "radial-gradient(circle, #0066FF, transparent)", transform: "translate(-30%, 30%)", filter: "blur(30px)" }} />
+          <div className="relative z-10">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #8B5CF6, #0066FF)", boxShadow: "0 4px 16px rgba(139,92,246,0.5)" }}>
+                <Crown size={18} className="text-white" />
+              </div>
+              <span className="font-black text-white text-lg" style={{ fontFamily: "var(--font-display)" }}>
+                {lang === "ar" ? "فيتنس AI المميز" : lang === "de" ? "Fitness KI Premium" : "Fitness AI Premium"}
+              </span>
+            </div>
+            <p className="text-white/60 text-sm leading-relaxed">
+              {lang === "ar" ? "افتح الإمكانات الكاملة للذكاء الاصطناعي لتحسين صحتك ولياقتك"
+                : lang === "de" ? "Entfalte das volle KI-Potenzial für deine Gesundheit und Fitness"
+                : "Unlock the full power of AI to transform your health and fitness"}
+            </p>
+          </div>
+        </div>
+
+        {/* Plan cards */}
+        <SectionHeader title={lang === "ar" ? "اختر خطتك" : lang === "de" ? "Plan wählen" : "Choose Your Plan"} />
+        <div className="flex flex-col gap-3 mb-6">
+          {PLANS.map(plan => (
+            <button key={plan.id} onClick={() => setSelected(plan.id)}
+              className="relative p-5 rounded-3xl transition-all active:scale-[0.98] text-left w-full"
+              style={selected === plan.id
+                ? { background: "linear-gradient(135deg, rgba(0,102,255,0.15), rgba(139,92,246,0.1))", border: "2px solid rgba(0,102,255,0.5)", boxShadow: "0 4px 24px rgba(0,102,255,0.2)" }
+                : { ...GLASS, border: "1px solid rgba(255,255,255,0.08)" }}>
+              {plan.badge && (
+                <div className="absolute -top-3 right-5">
+                  <span className="px-3 py-1 rounded-full text-xs font-bold text-white" style={{ background: GRAD, boxShadow: "0 2px 12px rgba(0,102,255,0.4)" }}>{plan.badge}</span>
+                </div>
+              )}
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-white font-black text-base" style={{ fontFamily: "var(--font-display)" }}>
+                    {lang === "ar" ? plan.ar : lang === "de" ? plan.de : plan.label}
+                  </p>
+                  {plan.savings && <p className="text-green-400 text-xs font-semibold mt-0.5">{plan.savings}</p>}
+                  {plan.totalPrice && <p className="text-white/30 text-xs">{plan.totalPrice}</p>}
+                </div>
+                <div className="text-right flex items-center gap-3">
+                  <div>
+                    <span className="text-white font-black text-2xl" style={{ fontFamily: "var(--font-display)" }}>${plan.price}</span>
+                    <span className="text-white/40 text-sm">/{plan.period}</span>
+                  </div>
+                  <div className="w-6 h-6 rounded-full border-2 flex items-center justify-center"
+                    style={{ borderColor: selected === plan.id ? "#0066FF" : "rgba(255,255,255,0.2)", background: selected === plan.id ? GRAD : "transparent" }}>
+                    {selected === plan.id && <Check size={12} className="text-white" />}
+                  </div>
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+
+        {/* Features */}
+        <SectionHeader title={lang === "ar" ? "كل ما تحصل عليه" : lang === "de" ? "Alles enthalten" : "Everything Included"} />
+        <GCard className="p-5 mb-6">
+          <div className="grid grid-cols-1 gap-3">
+            {PREMIUM_FEATURES.map((f, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <div className="w-7 h-7 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: GRAD_SOFT, color: "#06B6D4" }}>{f.icon}</div>
+                <span className="text-white/70 text-sm">{lang === "ar" ? f.ar : lang === "de" ? f.de : f.l}</span>
+                <Check size={14} className="ml-auto flex-shrink-0" style={{ color: "#10B981" }} />
+              </div>
+            ))}
+          </div>
+        </GCard>
+
+        <GBtn className="w-full mb-3">
+          <Crown size={18} />{lang === "ar" ? "ابدأ تجربة مجانية 7 أيام" : lang === "de" ? "7 Tage gratis testen" : "Start 7-Day Free Trial"}
+        </GBtn>
+        <p className="text-center text-white/30 text-xs">
+          {lang === "ar" ? "لا رسوم الآن • إلغاء في أي وقت" : lang === "de" ? "Jetzt nichts bezahlen • Jederzeit kündigen" : "No charge now • Cancel anytime"}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Profile Screen ───────────────────────────────────────────────────────────
+function ProfileScreen({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => void }) {
+  const [notifs, setNotifs] = useState(true);
+  const [privacy, setPrivacy] = useState(false);
+  const [units, setUnits] = useState(true);
+
+  const SETTINGS_GROUPS = [
+    {
+      title: lang === "ar" ? "الحساب" : lang === "de" ? "Konto" : "Account",
+      items: [
+        { icon: <Edit size={18} />, l: lang === "ar" ? "تعديل الملف الشخصي" : lang === "de" ? "Profil bearbeiten" : "Edit Profile", action: "nav" },
+        { icon: <Target size={18} />, l: lang === "ar" ? "الأهداف" : lang === "de" ? "Ziele" : "Goals", action: "nav" },
+        { icon: <Bluetooth size={18} />, l: lang === "ar" ? "الأجهزة المتصلة" : lang === "de" ? "Verbundene Geräte" : "Connected Devices", action: "nav" },
+      ]
+    },
+    {
+      title: lang === "ar" ? "التفضيلات" : lang === "de" ? "Einstellungen" : "Preferences",
+      items: [
+        { icon: <Bell size={18} />, l: lang === "ar" ? "الإشعارات" : lang === "de" ? "Benachrichtigungen" : "Notifications", action: "toggle", val: notifs, onChange: () => setNotifs(!notifs) },
+        { icon: <Shield size={18} />, l: lang === "ar" ? "وضع الخصوصية" : lang === "de" ? "Datenschutzmodus" : "Privacy Mode", action: "toggle", val: privacy, onChange: () => setPrivacy(!privacy) },
+        { icon: <Activity size={18} />, l: lang === "ar" ? "الوحدات المترية" : lang === "de" ? "Metrische Einheiten" : "Metric Units", action: "toggle", val: units, onChange: () => setUnits(!units) },
+      ]
+    },
+    {
+      title: lang === "ar" ? "اللغة" : lang === "de" ? "Sprache" : "Language",
+      items: [
+        { icon: <Globe size={18} />, l: "English", action: "lang", langVal: "en" as Lang },
+        { icon: <Globe size={18} />, l: "العربية (Arabic)", action: "lang", langVal: "ar" as Lang },
+        { icon: <Globe size={18} />, l: "Deutsch (German)", action: "lang", langVal: "de" as Lang },
+      ]
+    },
+    {
+      title: lang === "ar" ? "المزيد" : lang === "de" ? "Mehr" : "More",
+      items: [
+        { icon: <Download size={18} />, l: lang === "ar" ? "تصدير البيانات" : lang === "de" ? "Daten exportieren" : "Export Data", action: "nav" },
+        { icon: <Shield size={18} />, l: lang === "ar" ? "الخصوصية والبنود" : lang === "de" ? "Datenschutz & AGB" : "Privacy & Terms", action: "nav" },
+        { icon: <LogOut size={18} />, l: lang === "ar" ? "تسجيل الخروج" : lang === "de" ? "Abmelden" : "Sign Out", action: "nav", danger: true },
+      ]
+    }
+  ];
+
+  return (
+    <div className="flex flex-col gap-5 pb-28" dir={T[lang].dir}>
+      <div className="px-5 pt-2">
+        <h1 className="text-2xl font-black text-white mb-5" style={{ fontFamily: "var(--font-display)" }}>{T[lang].profile}</h1>
+
+        {/* Profile card */}
+        <GCard className="p-6 mb-5" style={{ background: "linear-gradient(135deg, rgba(0,102,255,0.1), rgba(6,182,212,0.05))", border: "1px solid rgba(0,102,255,0.18)" }}>
+          <div className="flex items-center gap-4 mb-5">
+            <div className="relative">
+              <div className="w-20 h-20 rounded-3xl flex items-center justify-center text-3xl font-black text-white" style={{ background: GRAD, boxShadow: "0 4px 20px rgba(0,102,255,0.4)", fontFamily: "var(--font-display)" }}>AJ</div>
+              <button className="absolute -bottom-1 -right-1 w-7 h-7 rounded-xl flex items-center justify-center" style={{ background: GRAD, boxShadow: "0 2px 8px rgba(0,102,255,0.4)" }}>
+                <Edit size={12} className="text-white" />
+              </button>
+            </div>
+            <div>
+              <p className="text-white font-black text-xl" style={{ fontFamily: "var(--font-display)" }}>Alex Johnson</p>
+              <p className="text-white/40 text-sm">alex@example.com</p>
+              <div className="flex items-center gap-2 mt-2">
+                <Tag color="#8B5CF6"><Crown size={10} className="inline mr-1" />Premium</Tag>
+                <Tag color="#10B981">🔥 18 Day Streak</Tag>
+              </div>
+            </div>
+          </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { l: lang === "ar" ? "الوزن" : lang === "de" ? "Gewicht" : "Weight", v: "76.2 kg" },
+              { l: lang === "ar" ? "الطول" : lang === "de" ? "Größe" : "Height", v: "178 cm" },
+              { l: lang === "ar" ? "العمر" : lang === "de" ? "Alter" : "Age", v: "28 yr" },
+            ].map((s, i) => (
+              <div key={i} className="p-3 rounded-2xl text-center" style={{ background: "rgba(255,255,255,0.05)" }}>
+                <p className="text-white font-black text-base" style={{ fontFamily: "var(--font-display)" }}>{s.v}</p>
+                <p className="text-white/40 text-xs mt-0.5">{s.l}</p>
+              </div>
+            ))}
+          </div>
+        </GCard>
+
+        {/* Settings groups */}
+        {SETTINGS_GROUPS.map((group, gi) => (
+          <div key={gi} className="mb-5">
+            <p className="text-white/30 text-xs font-bold uppercase tracking-widest mb-3 px-1">{group.title}</p>
+            <GCard className="overflow-hidden">
+              {group.items.map((item: any, ii: number) => (
+                <div key={ii}
+                  className={`flex items-center gap-4 px-5 py-4 ${ii < group.items.length - 1 ? "border-b" : ""} ${item.action !== "toggle" ? "cursor-pointer active:bg-white/5 transition-colors" : ""}`}
+                  style={{ borderColor: "rgba(255,255,255,0.06)" }}
+                  onClick={item.action === "lang" ? () => setLang(item.langVal) : undefined}>
+                  <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: item.danger ? "rgba(239,68,68,0.12)" : "rgba(255,255,255,0.06)", color: item.danger ? "#EF4444" : "rgba(255,255,255,0.6)" }}>
+                    {item.icon}
+                  </div>
+                  <span className={`flex-1 text-sm font-semibold ${item.danger ? "text-red-400" : "text-white/80"}`}>{item.l}</span>
+                  {item.action === "toggle" && <Switch on={item.val} onChange={item.onChange} />}
+                  {item.action === "nav" && <ChevronRight size={16} className="text-white/20" />}
+                  {item.action === "lang" && lang === item.langVal && <Check size={16} style={{ color: "#06B6D4" }} />}
+                </div>
+              ))}
+            </GCard>
+          </div>
+        ))}
+
+        <p className="text-center text-white/20 text-xs mt-2 mb-4">Fitness AI v2.4.1 · © 2026 Fadi Core Platform</p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Bottom Navigation ────────────────────────────────────────────────────────
+function BottomNav({ screen, setScreen, lang }: { screen: AppScreen; setScreen: (s: AppScreen) => void; lang: Lang }) {
+  const t = T[lang];
+  const items: { id: AppScreen; icon: React.ReactNode; label: string }[] = [
+    { id: "dashboard", icon: <Home size={22} />, label: t.home },
+    { id: "nutrition", icon: <Utensils size={22} />, label: t.nutrition },
+    { id: "workout", icon: <Dumbbell size={22} />, label: t.workout },
+    { id: "ai", icon: <Sparkles size={22} />, label: t.ai },
+    { id: "profile", icon: <User size={22} />, label: t.profile },
+  ];
+  return (
+    <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] z-50 px-4 pb-6 pt-2"
+      style={{ background: "linear-gradient(to top, #050A14 60%, transparent)" }}>
+      <div className="flex justify-around items-center px-2 py-3 rounded-3xl" style={{ background: "rgba(10,22,40,0.95)", backdropFilter: "blur(24px)", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 -4px 40px rgba(0,0,0,0.5)" }}>
+        {items.map(item => {
+          const active = screen === item.id;
+          return (
+            <button key={item.id} onClick={() => setScreen(item.id)}
+              className="flex flex-col items-center gap-1 px-3 py-1.5 rounded-2xl transition-all active:scale-90"
+              style={active ? { background: GRAD_SOFT } : {}}>
+              <div style={{ color: active ? "#06B6D4" : "rgba(255,255,255,0.35)", filter: active ? "drop-shadow(0 0 8px #06B6D450)" : "none" }}>
+                {item.icon}
+              </div>
+              <span className="text-xs font-semibold" style={{ color: active ? "#06B6D4" : "rgba(255,255,255,0.35)", fontFamily: "var(--font-display)" }}>
+                {item.label}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ─── Screen Header (for main app screens) ────────────────────────────────────
+function AppHeader({ screen, lang, setScreen }: { screen: AppScreen; lang: Lang; setScreen: (s: AppScreen) => void }) {
+  const secondaryScreens: Partial<Record<AppScreen, boolean>> = { progress: true, analytics: true, health: true, premium: true };
+  if (["dashboard", "nutrition", "workout", "ai", "profile"].includes(screen)) return null;
+  return (
+    <div className="px-5 pt-2 pb-2 flex items-center gap-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+      <div className="flex gap-2 overflow-x-auto">
+        {(["progress", "analytics", "health", "premium"] as AppScreen[]).map(s => (
+          <button key={s} onClick={() => setScreen(s)}
+            className="flex-shrink-0 px-4 py-2 rounded-xl text-xs font-bold transition-all"
+            style={screen === s ? { background: GRAD, color: "white", boxShadow: "0 2px 12px rgba(0,102,255,0.3)" } : { ...GLASS, color: "rgba(255,255,255,0.4)" }}>
+            {T[lang][s] || s}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── App ──────────────────────────────────────────────────────────────────────
+export default function App() {
+  const [flow, setFlow] = useState<Flow>("welcome");
+  const [appScreen, setAppScreen] = useState<AppScreen>("dashboard");
+  const [lang, setLang] = useState<Lang>("en");
+
+  const dir = T[lang].dir;
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const handleSetScreen = (s: AppScreen) => {
+    setAppScreen(s);
+    scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  return (
+    <div className="min-h-screen flex items-start justify-center" style={{ background: "radial-gradient(ellipse 120% 80% at 50% -10%, #0A1F4D 0%, #020810 50%)" }}>
+      <div className="w-full max-w-[430px] min-h-screen relative overflow-hidden" style={{ background: "#050A14" }}>
+        {flow === "welcome" && <WelcomeScreen lang={lang} onStart={() => setFlow("onboarding")} onLogin={() => setFlow("auth")} />}
+        {flow === "onboarding" && <OnboardingScreen lang={lang} onDone={() => setFlow("auth")} />}
+        {flow === "auth" && <AuthScreen lang={lang} onDone={() => setFlow("app")} />}
+
+        {flow === "app" && (
+          <>
+            {appScreen === "ai" ? (
+              <AICoachScreen lang={lang} />
+            ) : (
+              <div className="flex flex-col min-h-screen">
+                <StatusBar />
+
+                {/* ── Back navigation bar (all non-dashboard screens) ── */}
+                {appScreen !== "dashboard" && (
+                  <div className="flex-shrink-0 px-4 pt-2 pb-2.5"
+                    style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                    <div className="flex items-center gap-2">
+                      {/* Back to Home button */}
+                      <button
+                        onClick={() => handleSetScreen("dashboard")}
+                        className="flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all active:scale-95 flex-shrink-0"
+                        style={GLASS}>
+                        <ChevronLeft size={15} className="text-white/70" />
+                        <span className="text-white/60 text-xs font-semibold">{T[lang].home}</span>
+                      </button>
+
+                      {/* Secondary screens: tab strip after the back button */}
+                      {(["progress", "analytics", "health", "premium"] as AppScreen[]).includes(appScreen) && (
+                        <div className="flex gap-1.5 overflow-x-auto ml-1">
+                          {(["progress", "analytics", "health", "premium"] as AppScreen[]).map(s => (
+                            <button key={s} onClick={() => handleSetScreen(s)}
+                              className="flex-shrink-0 px-3 py-2 rounded-xl text-xs font-bold transition-all"
+                              style={appScreen === s
+                                ? { background: GRAD, color: "white", boxShadow: "0 2px 12px rgba(0,102,255,0.3)" }
+                                : { ...GLASS, color: "rgba(255,255,255,0.4)" }}>
+                              {T[lang][s] || s}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                <div ref={scrollRef} className="flex-1 overflow-y-auto" dir={dir}>
+                  {appScreen === "dashboard" && <DashboardScreen lang={lang} />}
+                  {appScreen === "nutrition" && <NutritionScreen lang={lang} />}
+                  {appScreen === "workout" && <WorkoutScreen lang={lang} />}
+                  {appScreen === "progress" && <ProgressScreen lang={lang} />}
+                  {appScreen === "analytics" && <AnalyticsScreen lang={lang} />}
+                  {appScreen === "health" && <HealthScreen lang={lang} />}
+                  {appScreen === "premium" && <PremiumScreen lang={lang} />}
+                  {appScreen === "profile" && <ProfileScreen lang={lang} setLang={setLang} />}
+                </div>
+                <BottomNav screen={appScreen} setScreen={handleSetScreen} lang={lang} />
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}

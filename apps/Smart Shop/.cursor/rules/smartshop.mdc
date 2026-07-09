@@ -1,0 +1,14 @@
+---
+description: SmartShop implementation — read Fadi-Core-Platform first
+alwaysApply: true
+---
+
+# SmartShop
+
+**Read first:** `Fadi-Core-Platform/AGENTS.md` · `philosophy/PRINCIPLES.md` · `products/smartshop.md`
+
+Implementation only. Platform owns product direction and HIE architecture.
+
+Do not duplicate ecosystem philosophy in this repo. Pilot: free tier, St. Pölten. No inventory consumer UI in v1.
+
+Code: `apps/smart-shop/` · `core/` · `ecosystem/` · `shared/`

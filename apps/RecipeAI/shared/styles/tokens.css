@@ -1,0 +1,35 @@
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap");
+
+:root {
+  --font-size: 16px;
+  --background: #faf9f7;
+  --foreground: #1a1918;
+  --warm-white: #faf9f7;
+  --soft-beige: #f0ede8;
+  --warm-gray: #9a9590;
+  --deep-charcoal: #1a1918;
+  --cook-background: #1a1918;
+  --cook-surface: #252422;
+  --cook-text: #f5f3f0;
+  --primary: #d97742;
+  --primary-foreground: #ffffff;
+  --border: #f0ede8;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --app-max-width: 100%;
+  --app-height: 100dvh;
+  --space-xs: 8px;
+  --space-sm: 16px;
+  --space-md: 24px;
+  --space-lg: 32px;
+  --space-xl: 48px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+}
+
+@media (min-width: 481px) {
+  :root {
+    --app-max-width: 430px;
+    --app-height: min(844px, 100dvh);
+  }
+}

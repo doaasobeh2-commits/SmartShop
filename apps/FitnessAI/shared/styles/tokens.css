@@ -1,0 +1,43 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap");
+
+:root {
+  --font-size: 16px;
+  --background: #050a14;
+  --foreground: #ffffff;
+  --card: rgba(255, 255, 255, 0.05);
+  --card-foreground: #ffffff;
+  --primary: #0066ff;
+  --primary-foreground: #ffffff;
+  --secondary: rgba(255, 255, 255, 0.08);
+  --secondary-foreground: rgba(255, 255, 255, 0.7);
+  --muted: rgba(255, 255, 255, 0.04);
+  --muted-foreground: rgba(255, 255, 255, 0.4);
+  --accent: #06b6d4;
+  --accent-foreground: #050a14;
+  --border: rgba(255, 255, 255, 0.08);
+  --font-sans: "Inter", sans-serif;
+  --font-display: "Plus Jakarta Sans", sans-serif;
+  --app-max-width: 100%;
+  --app-height: 100dvh;
+  --gradient-app-background: radial-gradient(
+      ellipse 120% 80% at 50% -10%,
+      #0a1f4d 0%,
+      #020810 50%
+    ),
+    #050a14;
+}
+
+@media (min-width: 481px) {
+  :root {
+    --app-max-width: 430px;
+    --app-height: min(844px, 100dvh);
+  }
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

@@ -1,0 +1,40 @@
+# Fadi Household Platform — Registry (canonical)
+
+ecosystem:
+  name: Fadi Household Platform
+  constitution: ./
+  agents: AGENTS.md
+
+applications:
+  smartshop:
+    path: apps/Smart Shop/
+    role: household_hub
+    maturity: pilot
+    product_doc: products/smartshop.md
+    owns: [household_graph, hie_runtime, hidden_inventory, shopping]
+
+  fitnessai:
+    path: apps/FitnessAI/
+    role: body_lens
+    maturity: alpha
+    product_doc: products/fitnessai.md
+    integration: isolated
+    brain_spec: apps/FitnessAI/docs/FITNESS_BRAIN.md
+
+  recipeai:
+    path: apps/RecipeAI/
+    role: meal_lens
+    maturity: alpha
+    product_doc: products/recipeai.md
+    blueprint: apps/RecipeAI/docs/V1_PRODUCT_BLUEPRINT.md
+    figma_gate: true
+
+integrations:
+  platform_intelligence: { status: implemented, path: apps/Smart Shop/ecosystem/src/intelligence/PlatformIntelligenceBridge.ts }
+  recipe_inventory: { status: stub }
+  recipe_ai_bridge: { status: stub }
+  fitness_ai_bridge: { status: stub }
+  recipe_signals: { status: implemented, ui_wired: false }
+
+shared_id:
+  householdId: familyId  # RecipeAI === SmartShop

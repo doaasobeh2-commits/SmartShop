@@ -1,0 +1,66 @@
+@import "@recipe-ai/shared/styles/tokens.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    overflow: hidden;
+    background: var(--warm-white);
+    font-family: var(--font-sans);
+    color: var(--foreground);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #root {
+    display: flex;
+    width: 100%;
+    min-height: 100dvh;
+    justify-content: center;
+    align-items: stretch;
+    overflow: hidden;
+    background: #e8e4df;
+  }
+}
+
+@media (min-width: 481px) {
+  #root {
+    align-items: center;
+    padding: 1rem;
+  }
+}
+
+@layer components {
+  .screen-scroll {
+    @apply flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden;
+  }
+
+  .meal-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: var(--deep-charcoal);
+  }
+
+  .cook-instruction {
+    font-family: var(--font-display);
+    font-weight: 500;
+    line-height: 1.45;
+    color: var(--cook-text);
+  }
+}

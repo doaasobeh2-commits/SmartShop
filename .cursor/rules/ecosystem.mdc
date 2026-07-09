@@ -1,0 +1,35 @@
+---
+description: Fadi ecosystem constitution — read platform docs first, always
+alwaysApply: true
+---
+
+# Fadi Ecosystem
+
+**Read first:** repository root `AGENTS.md` and `philosophy/PRINCIPLES.md`
+
+This workspace uses **Fadi-Core-Platform** as the single source of truth. Application folders contain implementation only.
+
+## Before any work
+
+1. `Fadi-Core-Platform/AGENTS.md`
+2. `Fadi-Core-Platform/philosophy/PRINCIPLES.md`
+3. `Fadi-Core-Platform/products/{app}.md`
+4. App `AGENTS.md` for code paths only
+
+## Current priority
+
+**Figma redesign before code.** No major UI implementation without approved Figma. No repo separation.
+
+## Non-negotiable
+
+Invisible intelligence · one question per screen · behavior over forms · brain-first · no chat-as-product · SmartShop owns household graph
+
+## Platform wins
+
+When app docs conflict with platform docs, platform wins. ADRs in `Fadi-Core-Platform/decisions/`.
+
+## Anti-patterns
+
+Macro dashboards as home · long onboarding · Coach tab · Analytics tab · "AI" on free tier · duplicate household profiles · pantry UI in v1
+
+Full list: `Fadi-Core-Platform/philosophy/PRINCIPLES.md`

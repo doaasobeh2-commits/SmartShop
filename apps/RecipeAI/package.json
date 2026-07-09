@@ -1,0 +1,18 @@
+{
+  "name": "recipe-ai",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*",
+    "shared",
+    "core"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=@recipe-ai/app",
+    "build": "npm run build --workspace=@recipe-ai/app",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

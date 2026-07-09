@@ -1,0 +1,14 @@
+---
+description: FitnessAI implementation — read Fadi-Core-Platform first
+alwaysApply: true
+---
+
+# FitnessAI
+
+**Read first:** `Fadi-Core-Platform/AGENTS.md` · `philosophy/PRINCIPLES.md` · `products/fitnessai.md` · `ai/PRINCIPLES.md`
+
+Implementation only. Expand `fitnessBrain/` before UI. Runtime: `apps/fitness-ai/src/fitnessBrain/`.
+
+Full brain spec: `docs/FITNESS_BRAIN.md`. Platform owns product philosophy.
+
+**Next:** Figma redesign of Today/Eat/Train before further UI work.
