@@ -236,7 +236,111 @@ export const FITNESS_BRAIN_STRINGS: Record<FitnessBrainLocale, FitnessBrainUiStr
       },
     },
   },
-  ar: { smartFocusLabel: "", actions: {} },
+  ar: {
+  smartFocusLabel: "توصية اليوم",
+  actions: {
+    overtraining_risk: {
+      title: "الأولوية للتعافي",
+      message: "عدة أيام تدريب متتالية — اليوم الأفضل حركة خفيفة أو راحة.",
+      reason: "تم تسجيل {{consecutiveDays}} أيام تدريب متتالية.",
+    },
+    recovery_rest: {
+      title: "التعافي أولًا",
+      message: "جسمك يحتاج اليوم إلى راحة وتجدد أكثر من الشدة.",
+      reason: "مؤشر التعافي منخفض ({{recoveryScore}}).",
+    },
+    hydration_critical: {
+      title: "اشرب الماء الآن",
+      message: "أنت أقل بكثير من هدفك اليومي للماء — اشرب كوب ماء الآن.",
+      reason: "تم الوصول إلى {{waterPct}}٪ فقط من هدف الترطيب.",
+    },
+    hydration_focus: {
+      title: "زد كمية الماء",
+      message: "اشرب كوب ماء الآن — أنت أقل من هدفك اليومي.",
+      reason: "باقي {{waterRemainingL}} لتر للوصول إلى الهدف.",
+    },
+    protein_low: {
+      title: "البروتين منخفض",
+      message: "كمية البروتين اليوم قليلة — انتبه لها في الوجبة القادمة.",
+      reason: "ينقصك تقريبًا {{proteinRemainingG}} غ بروتين.",
+    },
+    protein_focus: {
+      title: "انتبه للبروتين",
+      message: "اجعل وجبة المساء غنية بالبروتين.",
+      reason: "ينقصك تقريبًا {{proteinRemainingG}} غ بروتين.",
+    },
+    missed_workout: {
+      title: "هل تعوض التمرين؟",
+      message: "تم تخطي تمرين مخطط — حتى تمرين قصير مفيد.",
+      reason: "كان هناك يوم تدريب مخطط ولم يكتمل.",
+    },
+    calorie_off_track: {
+      title: "انتبه للسعرات",
+      message: "هدفك اليومي بعيد عن المسار — اختر وجبتك القادمة بوعي.",
+      reason: "وصلت إلى {{calorieProgressPct}}٪ من هدف السعرات.",
+    },
+    calorie_balance: {
+      title: "توازن السعرات",
+      message: "باقي {{caloriesRemainingKcal}} سعرة — تناول الطعام بوعي وبدون مبالغة.",
+      reason: "أنت تقترب من هدفك اليومي.",
+    },
+    complete_workout: {
+      title: "تمرين اليوم",
+      message: "خطتك اليوم: {{workoutTitle}} — ابدأ بهدوء وأنهِه بشكل جيد.",
+      reason: "يوم تدريب مع تعافٍ مناسب.",
+    },
+    movement_day: {
+      title: "حركة خفيفة",
+      message: "{{activityTitle}} — اجعلها خفيفة، الاستمرارية أهم.",
+      reason: "اليوم مناسب للتعافي أو نشاط خفيف.",
+    },
+    steady_progress: {
+      title: "استمر ببساطة",
+      message: "خطوة واحدة تكفي: سجّل وجبة أو اشرب ماء.",
+      reason: "الاستمرارية الصغيرة أفضل من الكمال.",
+    },
+    post_activity_hydration: {
+      title: "اشرب بعد النشاط",
+      message: "نشاطك اليوم زاد حاجتك للسوائل — اشرب ماء الآن.",
+      reason: "وصلت إلى {{waterPct}}٪ فقط من هدف الماء.",
+    },
+    post_activity_protein: {
+      title: "بروتين بعد النشاط",
+      message: "بعد النشاط، وجبة أو سناك غني بالبروتين يساعد التعافي.",
+      reason: "ينقصك تقريبًا {{proteinRemainingG}} غ بروتين.",
+    },
+    post_activity_fuel: {
+      title: "أعد تعبئة الطاقة",
+      message: "نشاطك يحتاج طاقة مناسبة — كربوهيدرات أو وجبة متوازنة.",
+      reason: "تم اكتشاف حاجة غذائية بعد النشاط.",
+    },
+    collect_nutrition_evidence: {
+      title: "سجّل وجبات اليوم",
+      message: "وجبات اليوم غير مكتملة — لا يمكن تقييم التغذية بدون تسجيل.",
+      reason: "جمع البيانات ثم تحليلها ثم التوصية.",
+    },
+    collect_hydration_evidence: {
+      title: "سجّل شرب الماء",
+      message: "كمية الماء غير معروفة — عدم التسجيل لا يعني صفر.",
+      reason: "يجب تسجيل الماء قبل تقييم الترطيب.",
+    },
+    collect_sleep_evidence: {
+      title: "سجّل النوم",
+      message: "لا يمكن تقييم التعافي بالكامل لأن بيانات النوم غير موجودة.",
+      reason: "النوم غير المعروف لا يعني نومًا سيئًا.",
+    },
+    collect_primary_sport_evidence: {
+      title: "اختر رياضتك الأساسية",
+      message: "لم تحدد رياضة أساسية — سيعمل التطبيق مؤقتًا بوضع نمط الحياة.",
+      reason: "الرياضة الأساسية مهمة لبناء تدريب مناسب.",
+    },
+    collect_experience_evidence: {
+      title: "حدد مستوى خبرتك",
+      message: "مستوى الخبرة غير معروف — الخطة تحتاج مستواك الحقيقي.",
+      reason: "لا يتم افتراض أنك مبتدئ أو متقدم تلقائيًا.",
+    },
+  },
+},
   tr: { smartFocusLabel: "", actions: {} },
   uk: { smartFocusLabel: "", actions: {} },
   fa: { smartFocusLabel: "", actions: {} },
@@ -326,7 +430,7 @@ export function getBrainExplainer(locale: FitnessBrainLocale = "de"): BrainExpla
 }
 
 export function appLangToBrainLocale(lang: string): FitnessBrainLocale {
-  if (lang === "de") return "de";
-  if (lang === "en") return "en";
-  return "de";
+ if (lang === "en") return "en";
+if (lang === "ar") return "ar";
+return "de";
 }
