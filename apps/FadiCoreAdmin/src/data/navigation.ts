@@ -1,12 +1,11 @@
 import type { LucideIcon } from "lucide-react";
 import {
-  Activity,
-  Cpu,
+  ClipboardList,
   Home,
   LayoutGrid,
-  Link2,
-  Map,
+  Mail,
   Shield,
+  Users,
 } from "lucide-react";
 
 export type NavItem = {
@@ -17,54 +16,59 @@ export type NavItem = {
   implemented: boolean;
 };
 
+/** Phase 3 live-data navigation. Legacy mock pages are disabled. */
 export const navItems: NavItem[] = [
   {
-    id: "platform-overview",
-    label: "Platform Overview",
+    id: "overview",
+    label: "Overview",
     icon: LayoutGrid,
-    href: "/platform-overview",
+    href: "/overview",
     implemented: true,
   },
   {
-    id: "household-intel",
-    label: "Household Intel",
+    id: "users",
+    label: "Users",
+    icon: Users,
+    href: "/users",
+    implemented: true,
+  },
+  {
+    id: "households",
+    label: "Households",
     icon: Home,
-    href: "/household-intelligence",
+    href: "/households",
     implemented: true,
   },
   {
-    id: "app-integrations",
-    label: "App Integrations",
-    icon: Link2,
-    href: "/app-integrations",
+    id: "invitations",
+    label: "Invitations",
+    icon: Mail,
+    href: "/invitations",
     implemented: true,
   },
   {
-    id: "intelligence-engines",
-    label: "Intelligence Engines",
-    icon: Cpu,
-    href: "/intelligence-engines",
-    implemented: true,
-  },
-  {
-    id: "signals-logs",
-    label: "Signals & Logs",
-    icon: Activity,
-    href: "/signals-logs",
-    implemented: true,
-  },
-  {
-    id: "safety-privacy",
-    label: "Safety & Privacy",
+    id: "sessions",
+    label: "Sessions",
     icon: Shield,
-    href: "/safety-privacy",
+    href: "/sessions",
     implemented: true,
   },
   {
-    id: "roadmap",
-    label: "Roadmap",
-    icon: Map,
-    href: "/roadmap",
+    id: "audit-logs",
+    label: "Audit logs",
+    icon: ClipboardList,
+    href: "/audit-logs",
     implemented: true,
   },
 ];
+
+/** Former mock-only routes — kept in codebase but not linked. */
+export const disabledMockRoutes = [
+  "/platform-overview",
+  "/household-intelligence",
+  "/app-integrations",
+  "/intelligence-engines",
+  "/signals-logs",
+  "/safety-privacy",
+  "/roadmap",
+] as const;

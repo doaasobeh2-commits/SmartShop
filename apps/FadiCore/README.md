@@ -30,6 +30,25 @@ Foundation:
 - Schema: `admin_users`, `admin_sessions`, `households` (aliases), `app_clients`, `app_api_keys`, `audit_logs`
 - Endpoints: `/health`, `/admin/auth/*`
 
+## Phase 3 (admin live reads)
+
+Owner-admin JSON APIs for FadiCoreAdmin (cookie `fadi_admin_session`, role `owner`):
+
+| Method | Path |
+|--------|------|
+| GET | `/admin/overview` |
+| GET | `/admin/users` |
+| GET | `/admin/users/:userId` |
+| GET | `/admin/households` |
+| GET | `/admin/households/:householdId` |
+| GET | `/admin/invitations` |
+| GET | `/admin/sessions` |
+| GET | `/admin/audit-logs` |
+
+Responses never include password/token/API key hashes. Audit metadata is redacted.
+
+Admin UI: `apps/FadiCoreAdmin` with `VITE_FADI_CORE_API_URL`.
+
 ## Phase 2 (household accounts & invitations)
 
 See ADR-002.

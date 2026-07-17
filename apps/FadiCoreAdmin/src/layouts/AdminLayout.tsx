@@ -23,7 +23,7 @@ function AdminLayoutShell() {
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="border-b border-slate-line bg-white px-4 py-3 lg:hidden">
           <Link
-            to="/platform-overview"
+            to="/overview"
             className="block text-[16px] font-semibold text-navy-ink"
           >
             Fadi Core
