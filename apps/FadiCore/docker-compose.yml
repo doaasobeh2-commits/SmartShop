@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: fadi-core-postgres
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: fadi
+      POSTGRES_PASSWORD: fadi
+      POSTGRES_DB: fadi_core
+    volumes:
+      - fadi_core_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fadi -d fadi_core"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  fadi_core_pg:
