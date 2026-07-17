@@ -7,7 +7,7 @@ import {
   index,
 } from "drizzle-orm/pg-core";
 
-export const actorTypes = ["admin", "app", "system"] as const;
+export const actorTypes = ["admin", "app", "system", "user"] as const;
 export type ActorType = (typeof actorTypes)[number];
 
 export const auditLogs = pgTable(

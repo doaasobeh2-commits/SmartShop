@@ -4,6 +4,9 @@ import cors from "@fastify/cors";
 import { env } from "./config.js";
 import { authRoutes } from "./modules/auth/routes.js";
 import { healthRoutes } from "./modules/health/routes.js";
+import { userAuthRoutes } from "./modules/users/routes.js";
+import { householdRoutes } from "./modules/households/routes.js";
+import { invitationRoutes } from "./modules/invitations/routes.js";
 
 export async function buildApp() {
   const app = Fastify({
@@ -21,6 +24,9 @@ export async function buildApp() {
 
   await app.register(healthRoutes);
   await app.register(authRoutes);
+  await app.register(userAuthRoutes);
+  await app.register(householdRoutes);
+  await app.register(invitationRoutes);
 
   return app;
 }

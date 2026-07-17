@@ -10,44 +10,101 @@ Connected apps remain domain owners:
 
 ## Household identity (approved)
 
-See [`docs/ADR-001-household-identity.md`](docs/ADR-001-household-identity.md).
+See [`docs/ADR-001-household-identity.md`](docs/ADR-001-household-identity.md) and [`docs/ADR-002-household-membership.md`](docs/ADR-002-household-membership.md).
 
 Summary:
 
 - Fadi Core owns stable `household_id` and shared cross-app memory
-- Family linking uses **authenticated Fadi accounts** + invitations (Phase 2)
+- Family linking uses **authenticated Fadi accounts** + invitations
 - **Never** use IP addresses to create or link households
 - IP may only be used later for security, rate limiting, or approximate country detection
-- Phase 1 `households` stores aliases only — no personal data / no full address
-- Invitations, membership permissions, and privacy controls are **Phase 2**
-- Billing / family subscription is documentation-only for now (no implementation; example prices are not approved)
+- No full address on `households`
+- Billing / family subscription remains documentation-only (example prices are not approved)
 
-## Phase 1 (this delivery)
+## Phase 1
 
-Foundation only:
+Foundation:
 
-- Fastify + TypeScript API
-- PostgreSQL + Drizzle migrations
-- Admin session auth (Argon2 passwords, HttpOnly cookies)
-- Schema: `admin_users`, `admin_sessions`, `households`, `app_clients`, `app_api_keys`, `audit_logs`
-- Seed: one owner admin + three app clients (refuses example passwords)
-- Endpoints: health + admin login/me/logout
-- Clear `503 database_unavailable` when Postgres is down
+- Fastify + TypeScript API, PostgreSQL + Drizzle
+- Admin session auth (Argon2, HttpOnly `fadi_admin_session`)
+- Schema: `admin_users`, `admin_sessions`, `households` (aliases), `app_clients`, `app_api_keys`, `audit_logs`
+- Endpoints: `/health`, `/admin/auth/*`
 
-Not included yet: signal ingest, engines, Redis/queues, GDPR jobs, invitations, frontend wiring, billing.
+## Phase 2 (household accounts & invitations)
+
+See ADR-002.
+
+### Schema additions
+
+- `user_accounts`, `user_sessions`
+- `household_members`, `household_invitations`
+- `households` extended with `name`, `owner_user_id`, `preferred_locale`, `updated_at` (still no address)
+
+### User auth endpoints
+
+| Method | Path | Notes |
+|--------|------|-------|
+| POST | `/auth/register` | Creates user + household + owner membership |
+| POST | `/auth/login` | User session cookie |
+| POST | `/auth/logout` | Revokes user session |
+| GET | `/auth/me` | Current user + current household id/role |
+
+### Household endpoints
+
+| Method | Path |
+|--------|------|
+| GET | `/households/current` |
+| PATCH | `/households/current` |
+| GET | `/households/current/members` |
+| PATCH | `/households/current/members/:memberId` |
+| DELETE | `/households/current/members/:memberId` |
+
+### Invitation endpoints
+
+| Method | Path |
+|--------|------|
+| POST | `/households/current/invitations` |
+| GET | `/households/current/invitations` |
+| POST | `/households/current/invitations/:invitationId/revoke` |
+| POST | `/invitations/:token/accept` |
+
+Development/test only: create-invite responses may include `developmentOnlyToken` (no real email).
+
+### Role / permission matrix
+
+| Permission | owner | adult | teen | child | caregiver |
+|------------|:-----:|:-----:|:----:|:-----:|:---------:|
+| household.view | yes | yes | yes | yes | yes |
+| household.manage | yes | — | — | — | — |
+| members.view | yes | yes | yes | yes | yes |
+| members.invite | yes | policy* | — | — | — |
+| members.change_role | yes | — | — | — | — |
+| members.remove | yes | — | — | — | — |
+| invitations.view | yes | yes | yes | yes | yes |
+| invitations.revoke | yes | — | — | — | — |
+
+\*Adults invite only when `ADULT_CAN_INVITE=true` (default false).
+
+### Security controls
+
+- Separate admin vs user session cookies
+- Invitation tokens hashed (SHA-256); passwords Argon2id
+- Invitation expiry; normalized emails
+- Exactly one active owner (DB partial unique index + API guards)
+- Duplicate active membership blocked (partial unique index)
+- Server-side permission checks; rate limits on auth + invite accept
+- Hashes never returned in JSON
 
 ## Local setup
 
-### 1. Start Postgres
-
-Requires Docker Desktop (or any Postgres reachable via `DATABASE_URL`).
+### 1. Postgres
 
 ```bash
 cd apps/FadiCore
 docker compose up -d
 ```
 
-Postgres listens on **localhost:5433**.
+Or set `DATABASE_URL` (e.g. Neon).
 
 ### 2. Configure API env
 
@@ -57,25 +114,17 @@ cp .env.example .env
 npm install
 ```
 
-**Required before seed:** set a unique `ADMIN_BOOTSTRAP_PASSWORD` in `.env`.  
-Seed **refuses** the example/default password from `.env.example`.
+Set unique `ADMIN_BOOTSTRAP_PASSWORD` before seed. Optional Phase 2:
 
-Also set:
-
-- `ADMIN_BOOTSTRAP_EMAIL`
-- `DATABASE_URL` (if not using compose defaults)
-
-Never commit `.env` or real secrets.
+- `INVITE_TTL_HOURS` (default 168)
+- `ADULT_CAN_INVITE` (`true`/`false`, default false)
 
 ### 3. Migrate + seed
 
 ```bash
-npm run db:generate   # only when schema changes
 npm run db:migrate
 npm run db:seed
 ```
-
-Seed prints **app API key plaintexts once**. Store them securely. They are never written to the database in plaintext (hashes only).
 
 ### 4. Run API
 
@@ -83,26 +132,7 @@ Seed prints **app API key plaintexts once**. Store them securely. They are never
 npm run dev
 ```
 
-API default: `http://localhost:8787`
-
-### 5. Verify
-
-Use the email/password from **your** `.env` (not the example password):
-
-```bash
-curl http://localhost:8787/health
-
-curl -X POST http://localhost:8787/admin/auth/login \
-  -H "Content-Type: application/json" \
-  -c cookies.txt \
-  -d "{\"email\":\"YOUR_ADMIN_EMAIL\",\"password\":\"YOUR_ADMIN_PASSWORD\"}"
-
-curl http://localhost:8787/admin/auth/me -b cookies.txt
-
-curl -X POST http://localhost:8787/admin/auth/logout -b cookies.txt -c cookies.txt
-```
-
-If Postgres is down, login returns `503` with `error: "database_unavailable"` (not a generic 500).
+Default: `http://localhost:8787`
 
 ## Scripts
 
@@ -110,16 +140,14 @@ If Postgres is down, login returns `503` with `error: "database_unavailable"` (n
 |--------|---------|
 | `npm run dev` | Watch API |
 | `npm run build` / `typecheck` | TypeScript check |
-| `npm run test` | Unit tests (Node test runner) |
-| `npm run db:generate` | Generate Drizzle SQL migration from schema |
+| `npm run test` | Unit + Phase 2 API tests (API tests need `DATABASE_URL`) |
 | `npm run db:migrate` | Apply migrations |
-| `npm run db:seed` | Seed owner + app clients/keys |
+| `npm run db:seed` | Seed owner admin + app clients/keys |
 
 ## Security notes
 
 - Passwords: Argon2id
-- Session tokens + API keys: SHA-256 hashes only at rest
-- Session cookie: HttpOnly, SameSite=Lax
-- Login route: rate limited
-- Admin session / audit may record IP for **security only** — never as household identity
-- Household table stores aliases only — no personal data in Phase 1
+- Session tokens + API keys + invite tokens: SHA-256 hashes at rest
+- Cookies: HttpOnly, SameSite=Lax
+- Login/register/invite-accept: rate limited
+- Session/audit may record IP for **security only** — never as household identity

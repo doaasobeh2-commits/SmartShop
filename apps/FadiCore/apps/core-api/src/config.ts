@@ -18,6 +18,16 @@ const envSchema = z.object({
   ADMIN_BOOTSTRAP_PASSWORD: z.string().min(12).default("ChangeMe_Owner_2026!"),
   LOGIN_RATE_MAX: z.coerce.number().int().positive().default(5),
   LOGIN_RATE_WINDOW_MS: z.coerce.number().int().positive().default(60_000),
+  /** Invitation lifetime in hours (default 7 days). */
+  INVITE_TTL_HOURS: z.coerce.number().int().positive().default(168),
+  /**
+   * Policy: whether adults may create invitations.
+   * Owners always can. Extensible later to per-household settings.
+   */
+  ADULT_CAN_INVITE: z.preprocess(
+    (value) => value === true || value === "true",
+    z.boolean(),
+  ),
 });
 
 const parsed = envSchema.safeParse(process.env);
@@ -29,4 +39,11 @@ if (!parsed.success) {
 
 export const env = parsed.data;
 
-export const SESSION_COOKIE_NAME = "fadi_admin_session";
+export const ADMIN_SESSION_COOKIE_NAME = "fadi_admin_session";
+/** @deprecated Use ADMIN_SESSION_COOKIE_NAME */
+export const SESSION_COOKIE_NAME = ADMIN_SESSION_COOKIE_NAME;
+export const USER_SESSION_COOKIE_NAME = "fadi_user_session";
+
+export function isDevTokenExposureEnabled(): boolean {
+  return env.NODE_ENV === "development" || env.NODE_ENV === "test";
+}
