@@ -52,7 +52,8 @@ export function HouseholdsPage() {
                   <th className="px-4 py-3">Owner</th>
                   <th className="px-4 py-3">Members</th>
                   <th className="px-4 py-3">Pending invites</th>
-                  <th className="px-4 py-3">Locale</th>
+                  <th className="px-4 py-3">Join requests</th>
+                  <th className="px-4 py-3">Address</th>
                 </tr>
               </thead>
               <tbody>
@@ -70,7 +71,12 @@ export function HouseholdsPage() {
                     </td>
                     <td className="px-4 py-3">{h.activeMemberCount}</td>
                     <td className="px-4 py-3">{h.pendingInvitationCount}</td>
-                    <td className="px-4 py-3">{h.preferredLocale}</td>
+                    <td className="px-4 py-3">{h.pendingJoinRequestCount ?? 0}</td>
+                    <td className="px-4 py-3">
+                      {h.address
+                        ? `${h.address.city}, ${h.address.postalCodePrefix}…`
+                        : "—"}
+                    </td>
                   </tr>
                 ))}
               </tbody>

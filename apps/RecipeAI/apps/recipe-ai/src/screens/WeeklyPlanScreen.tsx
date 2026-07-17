@@ -1,5 +1,6 @@
 import type { WeekDayPlan } from "@recipe-ai/core/types";
 import { AtmosphereScreen, PrimaryButton, TextButton } from "@recipe-ai/shared";
+import { useI18n } from "../i18n/useI18n";
 
 type WeeklyPlanScreenProps = {
   plan: WeekDayPlan[];
@@ -9,12 +10,14 @@ type WeeklyPlanScreenProps = {
 };
 
 export function WeeklyPlanScreen({ plan, onUpdateDay, onSave, onBack }: WeeklyPlanScreenProps) {
+  const { t } = useI18n();
+
   return (
     <AtmosphereScreen atmosphere="planning-light" contentLayout="scroll">
       <div className="screen-scroll px-8 pb-12 pt-16">
-        <h1 className="meal-title mb-3 text-4xl">This week</h1>
+        <h1 className="meal-title mb-3 text-4xl">{t("thisWeekTitle")}</h1>
         <p className="mb-12 text-base leading-relaxed" style={{ color: "var(--warm-gray)" }}>
-          One meal for each day. Simple as a notebook.
+          {t("thisWeekBody")}
         </p>
 
         <ul className="mb-12 space-y-0">
@@ -45,10 +48,10 @@ export function WeeklyPlanScreen({ plan, onUpdateDay, onSave, onBack }: WeeklyPl
         </ul>
 
         <PrimaryButton onClick={onSave} className="mb-4">
-          Save
+          {t("save")}
         </PrimaryButton>
         <TextButton onClick={onBack} className="mx-auto block py-2">
-          Back
+          {t("back")}
         </TextButton>
       </div>
     </AtmosphereScreen>

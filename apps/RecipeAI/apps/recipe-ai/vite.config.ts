@@ -5,6 +5,9 @@ import path from "node:path";
 export default defineConfig({
   base: "./",
   plugins: [react()],
+  server: {
+    port: 5173,
+  },
   resolve: {
     alias: {
       "@recipe-ai/app": path.resolve(__dirname, "./src"),

@@ -1,13 +1,15 @@
 import Fastify from "fastify";
 import cookie from "@fastify/cookie";
 import cors from "@fastify/cors";
-import { env } from "./config.js";
+import { env, parseCorsOrigins } from "./config.js";
 import { authRoutes } from "./modules/auth/routes.js";
 import { healthRoutes } from "./modules/health/routes.js";
 import { userAuthRoutes } from "./modules/users/routes.js";
 import { householdRoutes } from "./modules/households/routes.js";
 import { invitationRoutes } from "./modules/invitations/routes.js";
 import { adminReadRoutes } from "./modules/adminRead/routes.js";
+import { familyRoutes } from "./modules/family/routes.js";
+import { onboardingRoutes } from "./modules/onboarding/routes.js";
 
 export async function buildApp() {
   const app = Fastify({
@@ -16,8 +18,15 @@ export async function buildApp() {
     },
   });
 
+  const corsOrigins = parseCorsOrigins(env.CORS_ORIGIN);
   await app.register(cors, {
-    origin: env.CORS_ORIGIN,
+    origin: (origin, cb) => {
+      if (!origin || corsOrigins.includes(origin)) {
+        cb(null, true);
+        return;
+      }
+      cb(null, false);
+    },
     credentials: true,
   });
 
@@ -28,6 +37,8 @@ export async function buildApp() {
   await app.register(userAuthRoutes);
   await app.register(householdRoutes);
   await app.register(invitationRoutes);
+  await app.register(familyRoutes);
+  await app.register(onboardingRoutes);
   await app.register(adminReadRoutes);
 
   return app;

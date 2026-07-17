@@ -2,6 +2,7 @@ import { apiRequest } from "./client";
 import type {
   AdminUser,
   AuditPage,
+  HouseholdDetailResponse,
   InvitationRow,
   OverviewResponse,
   PlatformHousehold,
@@ -41,29 +42,9 @@ export function fetchHouseholds() {
 }
 
 export function fetchHousehold(householdId: string) {
-  return apiRequest<{
-    household: PlatformHousehold;
-    members: Array<{
-      id: string;
-      userId: string;
-      role: string;
-      status: string;
-      joinedAt: string | null;
-      email: string;
-      displayName: string;
-    }>;
-    invitationSummary: Record<string, number>;
-    invitations: Array<{
-      id: string;
-      email: string;
-      role: string;
-      status: string;
-      expiresAt: string;
-      acceptedAt: string | null;
-      createdAt: string;
-      invitedByUserId: string;
-    }>;
-  }>(`/admin/households/${householdId}`);
+  return apiRequest<HouseholdDetailResponse>(
+    `/admin/households/${householdId}`,
+  );
 }
 
 export function fetchInvitations() {

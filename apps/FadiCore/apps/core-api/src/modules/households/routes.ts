@@ -5,9 +5,8 @@ import {
   requireActiveMembership,
   requirePermission,
 } from "../../middleware/requireHouseholdAccess.js";
-import { ASSIGNABLE_MEMBER_ROLES } from "../../permissions/householdPermissions.js";
 import {
-  changeMemberRole,
+  createHouseholdWithAddress,
   getCurrentHousehold,
   listCurrentMembers,
   publicHousehold,
@@ -21,12 +20,55 @@ const patchHouseholdSchema = z.object({
   preferredLocale: z.string().min(2).max(16).optional(),
 });
 
-const patchMemberSchema = z.object({
-  role: z.enum(ASSIGNABLE_MEMBER_ROLES),
+const createHouseholdSchema = z.object({
+  name: z.string().min(1).max(120),
+  preferredLocale: z.string().min(2).max(16).optional(),
+  address: z.object({
+    countryCode: z.string().length(2),
+    postalCode: z.string().min(1).max(32),
+    city: z.string().min(1).max(120),
+    street: z.string().min(1).max(200),
+    houseNumber: z.string().min(1).max(32),
+    unit: z.string().max(64).optional(),
+  }),
 });
 
 export async function householdRoutes(app: FastifyInstance): Promise<void> {
   const guards = [requireUserSession, requireActiveMembership];
+
+  app.post(
+    "/households",
+    { preHandler: requireUserSession },
+    async (request, reply) => {
+      const parsed = createHouseholdSchema.safeParse(request.body);
+      if (!parsed.success) {
+        return reply.code(400).send({
+          error: "invalid_body",
+          details: parsed.error.flatten(),
+        });
+      }
+
+      const result = await createHouseholdWithAddress({
+        userId: request.user!.id,
+        displayName: request.user!.displayName,
+        name: parsed.data.name,
+        preferredLocale: parsed.data.preferredLocale,
+        address: parsed.data.address,
+        ip: request.ip,
+      });
+
+      if (!result.ok) {
+        const status =
+          result.reason === "already_in_household" ? 409 : 400;
+        return reply.code(status).send({ error: result.reason });
+      }
+
+      return reply.code(201).send({
+        household: result.household,
+        memberId: result.memberId,
+      });
+    },
+  );
 
   app.get(
     "/households/current",
@@ -82,37 +124,8 @@ export async function householdRoutes(app: FastifyInstance): Promise<void> {
     },
   );
 
-  app.patch(
-    "/households/current/members/:memberId",
-    {
-      preHandler: [...guards, requirePermission("members.change_role")],
-    },
-    async (request, reply) => {
-      const params = z
-        .object({ memberId: z.string().uuid() })
-        .safeParse(request.params);
-      const parsed = patchMemberSchema.safeParse(request.body);
-      if (!params.success || !parsed.success) {
-        return reply.code(400).send({ error: "invalid_body" });
-      }
-
-      const result = await changeMemberRole({
-        membership: request.membership!,
-        memberId: params.data.memberId,
-        newRole: parsed.data.role,
-        ip: request.ip,
-      });
-
-      if (!result.ok) {
-        if (result.reason === "not_found") {
-          return reply.code(404).send({ error: "member_not_found" });
-        }
-        return reply.code(403).send({ error: result.reason });
-      }
-
-      return { member: publicMember(result.member) };
-    },
-  );
+  // PATCH /households/current/members/:memberId lives in family/routes.ts
+  // (role + managed profile fields).
 
   app.delete(
     "/households/current/members/:memberId",

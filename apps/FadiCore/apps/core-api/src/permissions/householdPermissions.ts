@@ -6,31 +6,40 @@ export type HouseholdPermission =
   | "household.manage"
   | "members.view"
   | "members.invite"
+  | "members.create_managed"
   | "members.change_role"
   | "members.remove"
+  | "members.manage_claims"
   | "invitations.view"
-  | "invitations.revoke";
+  | "invitations.revoke"
+  | "enrollments.view"
+  | "enrollments.manage";
 
 const OWNER_PERMISSIONS: readonly HouseholdPermission[] = [
   "household.view",
   "household.manage",
   "members.view",
   "members.invite",
+  "members.create_managed",
   "members.change_role",
   "members.remove",
+  "members.manage_claims",
   "invitations.view",
   "invitations.revoke",
+  "enrollments.view",
+  "enrollments.manage",
 ] as const;
 
 const READ_PERMISSIONS: readonly HouseholdPermission[] = [
   "household.view",
   "members.view",
   "invitations.view",
+  "enrollments.view",
 ] as const;
 
 /**
  * Extensible role → permission map.
- * Adult invite is gated by ADULT_CAN_INVITE policy (env for Phase 2).
+ * Adult invite / managed minors gated by ADULT_CAN_INVITE policy.
  */
 export function permissionsForRole(role: MemberRole): ReadonlySet<HouseholdPermission> {
   switch (role) {
@@ -40,6 +49,9 @@ export function permissionsForRole(role: MemberRole): ReadonlySet<HouseholdPermi
       const set = new Set<HouseholdPermission>(READ_PERMISSIONS);
       if (env.ADULT_CAN_INVITE) {
         set.add("members.invite");
+        set.add("members.create_managed");
+        set.add("members.manage_claims");
+        set.add("enrollments.manage");
       }
       return set;
     }
@@ -66,3 +78,14 @@ export const ASSIGNABLE_MEMBER_ROLES = [
   "child",
   "caregiver",
 ] as const satisfies readonly MemberRole[];
+
+/** Roles allowed for managed (no-login) profiles. */
+export const MANAGED_MEMBER_ROLES = [
+  "teen",
+  "child",
+  "caregiver",
+] as const satisfies readonly MemberRole[];
+
+export function isMinorRole(role: MemberRole): boolean {
+  return role === "child" || role === "teen";
+}

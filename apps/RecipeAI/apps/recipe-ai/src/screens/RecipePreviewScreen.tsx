@@ -1,5 +1,6 @@
 import type { MealRecommendation } from "@recipe-ai/core/types";
 import { AtmosphereScreen, InventoryRow, PrimaryButton, TextButton } from "@recipe-ai/shared";
+import { useI18n } from "../i18n/useI18n";
 
 type RecipePreviewScreenProps = {
   meal: MealRecommendation;
@@ -8,6 +9,7 @@ type RecipePreviewScreenProps = {
 };
 
 export function RecipePreviewScreen({ meal, onStartCook, onBack }: RecipePreviewScreenProps) {
+  const { t } = useI18n();
   const haveItems = meal.ingredients.filter((i) => i.status === "have");
   const needItems = meal.ingredients.filter((i) => i.status === "need");
 
@@ -22,7 +24,10 @@ export function RecipePreviewScreen({ meal, onStartCook, onBack }: RecipePreview
         >
           <h1 className="meal-title mb-2 text-4xl">{meal.title}</h1>
           <p className="mb-10 text-base" style={{ color: "var(--warm-gray)" }}>
-            {meal.prepMinutes} minutes · {meal.cuisine}
+            {t("minutesCuisine", {
+              minutes: meal.prepMinutes,
+              cuisine: meal.cuisine,
+            })}
           </p>
 
           {haveItems.length > 0 && (
@@ -31,7 +36,7 @@ export function RecipePreviewScreen({ meal, onStartCook, onBack }: RecipePreview
                 className="mb-4 text-xs font-medium uppercase tracking-[0.12em]"
                 style={{ color: "var(--warm-gray)" }}
               >
-                From your kitchen
+                {t("fromYourKitchen")}
               </p>
               {haveItems.map((item) => (
                 <InventoryRow key={item.id} item={item} />
@@ -45,7 +50,7 @@ export function RecipePreviewScreen({ meal, onStartCook, onBack }: RecipePreview
                 className="mb-4 text-xs font-medium uppercase tracking-[0.12em]"
                 style={{ color: "var(--warm-gray)" }}
               >
-                Pick up
+                {t("pickUp")}
               </p>
               {needItems.map((item) => (
                 <InventoryRow key={item.id} item={item} />
@@ -54,10 +59,10 @@ export function RecipePreviewScreen({ meal, onStartCook, onBack }: RecipePreview
           )}
 
           <PrimaryButton onClick={onStartCook} className="mb-4">
-            Start cooking
+            {t("startCooking")}
           </PrimaryButton>
           <TextButton onClick={onBack} className="mx-auto block py-2">
-            Back
+            {t("back")}
           </TextButton>
         </div>
       </div>

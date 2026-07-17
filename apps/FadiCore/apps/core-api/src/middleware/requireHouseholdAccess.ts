@@ -58,7 +58,7 @@ export async function requireActiveMembership(
     .limit(1);
 
   const row = rows[0];
-  if (!row) {
+  if (!row || !row.userId) {
     reply.code(404).send({ error: "household_not_found" });
     return;
   }
@@ -117,7 +117,7 @@ export async function loadActiveMembershipForUser(
     .limit(1);
 
   const row = rows[0];
-  if (!row) return null;
+  if (!row || !row.userId) return null;
   return {
     memberId: row.memberId,
     householdId: row.householdId,

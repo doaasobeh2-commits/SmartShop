@@ -5,7 +5,7 @@ export async function healthRoutes(app: FastifyInstance): Promise<void> {
     return {
       status: "ok",
       service: "fadi-core-api",
-      phase: 3,
+      phase: 4,
       timestamp: new Date().toISOString(),
     };
   });

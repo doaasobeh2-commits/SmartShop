@@ -1,12 +1,8 @@
 import { eq } from "drizzle-orm";
 import { isDatabaseConnectionError } from "../../db/errors.js";
 import { db } from "../../db/client.js";
-import {
-  householdMembers,
-  households,
-  userAccounts,
-} from "../../db/schema/index.js";
-import { createPublicAlias, writeAudit } from "../../lib/audit.js";
+import { userAccounts } from "../../db/schema/index.js";
+import { writeAudit } from "../../lib/audit.js";
 import { normalizeEmail } from "../../lib/email.js";
 import { hashPassword, verifyPassword } from "../auth/crypto.js";
 import {
@@ -14,11 +10,23 @@ import {
   type UserPrincipal,
 } from "./session.js";
 
+function parseOptionalDob(
+  value: string | undefined,
+): string | null | "invalid" {
+  if (value === undefined || value === "") return null;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return "invalid";
+  const d = new Date(`${value}T00:00:00.000Z`);
+  if (Number.isNaN(d.getTime())) return "invalid";
+  if (d.toISOString().slice(0, 10) !== value) return "invalid";
+  if (d.getTime() > Date.now()) return "invalid";
+  return value;
+}
+
 export async function registerUser(input: {
   email: string;
   password: string;
   displayName: string;
-  householdName?: string;
+  dateOfBirth?: string;
   preferredLocale?: string;
   ip?: string;
   userAgent?: string;
@@ -28,15 +36,25 @@ export async function registerUser(input: {
       principal: UserPrincipal;
       token: string;
       expiresAt: Date;
-      householdId: string;
+      householdId: null;
+      dateOfBirth: string | null;
     }
   | {
       ok: false;
-      reason: "email_taken" | "database_unavailable" | "weak_password";
+      reason:
+        | "email_taken"
+        | "database_unavailable"
+        | "weak_password"
+        | "invalid_date_of_birth";
     }
 > {
   if (input.password.length < 12) {
     return { ok: false, reason: "weak_password" };
+  }
+
+  const dob = parseOptionalDob(input.dateOfBirth);
+  if (dob === "invalid") {
+    return { ok: false, reason: "invalid_date_of_birth" };
   }
 
   const email = normalizeEmail(input.email);
@@ -54,71 +72,36 @@ export async function registerUser(input: {
     const passwordHash = await hashPassword(input.password);
     const now = new Date();
 
-    const result = await db.transaction(async (tx) => {
-      const [user] = await tx
-        .insert(userAccounts)
-        .values({
-          email,
-          passwordHash,
-          displayName: input.displayName.trim(),
-          status: "active",
-          updatedAt: now,
-        })
-        .returning({
-          id: userAccounts.id,
-          email: userAccounts.email,
-          displayName: userAccounts.displayName,
-          status: userAccounts.status,
-        });
-
-      const [household] = await tx
-        .insert(households)
-        .values({
-          publicAlias: createPublicAlias(),
-          name: (input.householdName?.trim() || `${user.displayName}'s household`).slice(
-            0,
-            120,
-          ),
-          ownerUserId: user.id,
-          preferredLocale: input.preferredLocale?.trim() || "en",
-          updatedAt: now,
-        })
-        .returning({ id: households.id });
-
-      await tx.insert(householdMembers).values({
-        householdId: household.id,
-        userId: user.id,
-        role: "owner",
+    const [user] = await db
+      .insert(userAccounts)
+      .values({
+        email,
+        passwordHash,
+        displayName: input.displayName.trim(),
+        dateOfBirth: dob,
         status: "active",
-        joinedAt: now,
         updatedAt: now,
+      })
+      .returning({
+        id: userAccounts.id,
+        email: userAccounts.email,
+        displayName: userAccounts.displayName,
+        status: userAccounts.status,
+        dateOfBirth: userAccounts.dateOfBirth,
       });
 
-      return { user, householdId: household.id };
-    });
-
     await writeAudit({
       actorType: "user",
-      actorId: result.user.id,
+      actorId: user.id,
       action: "user.register",
       resourceType: "user_account",
-      resourceId: result.user.id,
-      metaJson: { email },
-      ip: input.ip,
-    });
-
-    await writeAudit({
-      actorType: "user",
-      actorId: result.user.id,
-      action: "household.created",
-      resourceType: "household",
-      resourceId: result.householdId,
-      metaJson: { ownerUserId: result.user.id },
+      resourceId: user.id,
+      metaJson: { email, hasDateOfBirth: Boolean(dob) },
       ip: input.ip,
     });
 
     const { token, expiresAt } = await createUserSession({
-      userId: result.user.id,
+      userId: user.id,
       ip: input.ip,
       userAgent: input.userAgent,
     });
@@ -127,12 +110,13 @@ export async function registerUser(input: {
       ok: true,
       token,
       expiresAt,
-      householdId: result.householdId,
+      householdId: null,
+      dateOfBirth: user.dateOfBirth ?? null,
       principal: {
-        id: result.user.id,
-        email: result.user.email,
-        displayName: result.user.displayName,
-        status: result.user.status,
+        id: user.id,
+        email: user.email,
+        displayName: user.displayName,
+        status: user.status,
       },
     };
   } catch (error) {

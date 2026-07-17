@@ -7,6 +7,7 @@ export default defineConfig({
     "./src/db/schema/households.ts",
     "./src/db/schema/apps.ts",
     "./src/db/schema/audit.ts",
+    "./src/db/schema/enrollments.ts",
   ],
   out: "./drizzle",
   dialect: "postgresql",

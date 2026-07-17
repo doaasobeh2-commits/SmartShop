@@ -1,5 +1,6 @@
 import type { MealRecommendation } from "@recipe-ai/core/types";
 import { AtmosphereScreen, PrimaryButton, TextButton } from "@recipe-ai/shared";
+import { useI18n } from "../i18n/useI18n";
 
 type CookModeScreenProps = {
   meal: MealRecommendation;
@@ -16,6 +17,7 @@ export function CookModeScreen({
   onBack,
   onExit,
 }: CookModeScreenProps) {
+  const { t } = useI18n();
   const step = meal.steps[stepIndex];
   const progress = ((stepIndex + 1) / meal.steps.length) * 100;
   const isLast = stepIndex >= meal.steps.length - 1;
@@ -25,10 +27,10 @@ export function CookModeScreen({
       <div className="flex min-h-full flex-col px-8 pb-12 pt-14">
         <div className="mb-12 flex items-center justify-between">
           <TextButton onClick={onExit} className="!text-[#9A9590]">
-            Exit
+            {t("exit")}
           </TextButton>
           <span className="text-sm" style={{ color: "#9A9590" }}>
-            Step {step.order} of {meal.steps.length}
+            {t("stepOf", { current: step.order, total: meal.steps.length })}
           </span>
         </div>
 
@@ -54,15 +56,15 @@ export function CookModeScreen({
 
         {step.timerMinutes && (
           <p className="mb-12 text-base" style={{ color: "#9A9590" }}>
-            {step.timerMinutes} min
+            {t("timerMinutes", { n: step.timerMinutes })}
           </p>
         )}
 
         <div className="mt-auto flex flex-col gap-4">
-          <PrimaryButton onClick={onNext}>{isLast ? "Finish" : "Next"}</PrimaryButton>
+          <PrimaryButton onClick={onNext}>{isLast ? t("finish") : t("next")}</PrimaryButton>
           {stepIndex > 0 && (
             <TextButton onClick={onBack} className="mx-auto !text-[#9A9590]">
-              Previous
+              {t("previous")}
             </TextButton>
           )}
         </div>

@@ -18,6 +18,13 @@ describe("phase2 household api", { skip: !hasDb }, () => {
   const ownerEmail = `owner.${suffix}@example.com`;
   const memberEmail = `member.${suffix}@example.com`;
   const password = "Phase2_Test_Pass_9x!";
+  const defaultAddress = {
+    countryCode: "AT",
+    postalCode: "3100",
+    city: "St. Poelten",
+    street: "Hauptstrasse",
+    houseNumber: "12",
+  };
 
   let ownerCookie = "";
   let memberCookie = "";
@@ -34,6 +41,37 @@ describe("phase2 household api", { skip: !hasDb }, () => {
       .map((c) => String(c).split(";")[0])
       .filter((c) => c.startsWith("fadi_user_session="))
       .join("; ");
+  }
+
+  async function registerThenCreateHousehold(input: {
+    email: string;
+    password: string;
+    displayName: string;
+    householdName: string;
+    address?: typeof defaultAddress;
+  }) {
+    const reg = await app.inject({
+      method: "POST",
+      url: "/auth/register",
+      payload: {
+        email: input.email,
+        password: input.password,
+        displayName: input.displayName,
+      },
+    });
+    if (reg.statusCode !== 200) {
+      return { reg, create: null as null };
+    }
+    const create = await app.inject({
+      method: "POST",
+      url: "/households",
+      headers: { cookie: cookieFrom(reg) },
+      payload: {
+        name: input.householdName,
+        address: input.address ?? defaultAddress,
+      },
+    });
+    return { reg, create };
   }
 
   before(async () => {
@@ -53,28 +91,28 @@ describe("phase2 household api", { skip: !hasDb }, () => {
     await closeDb();
   });
 
-  it("registers user + household + owner membership", async () => {
-    const res = await app.inject({
-      method: "POST",
-      url: "/auth/register",
-      payload: {
-        email: ownerEmail,
-        password,
-        displayName: "Owner",
-        householdName: "Phase2 Home",
-      },
+  it("registers user without household, then creates household", async () => {
+    const { reg, create } = await registerThenCreateHousehold({
+      email: ownerEmail,
+      password,
+      displayName: "Owner",
+      householdName: "Phase2 Home",
     });
-    assert.equal(res.statusCode, 200);
-    const body = res.json();
+    assert.equal(reg.statusCode, 200);
+    const body = reg.json();
     assert.ok(body.user?.id);
-    assert.ok(body.householdId);
+    assert.equal(body.householdId, null);
     assert.equal(body.user.email, ownerEmail.toLowerCase());
     assert.equal(body.passwordHash, undefined);
     assert.equal(body.user.passwordHash, undefined);
     ownerId = body.user.id;
-    householdId = body.householdId;
-    ownerCookie = cookieFrom(res);
+    ownerCookie = cookieFrom(reg);
     assert.ok(ownerCookie.includes("fadi_user_session="));
+
+    assert.ok(create);
+    assert.equal(create!.statusCode, 201);
+    householdId = create!.json().household.id;
+    assert.ok(householdId);
   });
 
   it("rejects duplicate email", async () => {
@@ -167,6 +205,7 @@ describe("phase2 household api", { skip: !hasDb }, () => {
       },
     });
     assert.equal(memberReg.statusCode, 200);
+    assert.equal(memberReg.json().householdId, null);
     memberCookie = cookieFrom(memberReg);
 
     const res = await app.inject({

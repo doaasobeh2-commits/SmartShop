@@ -6,6 +6,7 @@ import { isDatabaseConnectionError } from "../../db/errors.js";
 import { writeAudit } from "../../lib/audit.js";
 import { requireUserSession } from "../../middleware/requireUserSession.js";
 import { loadActiveMembershipForUser } from "../../middleware/requireHouseholdAccess.js";
+import { listActiveEnrollmentsForMember } from "../family/enrollmentsService.js";
 import { loginUser, registerUser } from "./service.js";
 import {
   clearUserSessionCookie,
@@ -17,7 +18,10 @@ const registerBodySchema = z.object({
   email: z.string().email(),
   password: z.string().min(12),
   displayName: z.string().min(1).max(120),
-  householdName: z.string().min(1).max(120).optional(),
+  dateOfBirth: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "YYYY-MM-DD")
+    .optional(),
   preferredLocale: z.string().min(2).max(16).optional(),
 });
 
@@ -61,6 +65,9 @@ export async function userAuthRoutes(app: FastifyInstance): Promise<void> {
         if (result.reason === "weak_password") {
           return reply.code(400).send({ error: "weak_password" });
         }
+        if (result.reason === "invalid_date_of_birth") {
+          return reply.code(400).send({ error: "invalid_date_of_birth" });
+        }
         return reply.code(503).send({
           error: "database_unavailable",
           message: "Cannot reach PostgreSQL.",
@@ -74,8 +81,9 @@ export async function userAuthRoutes(app: FastifyInstance): Promise<void> {
           email: result.principal.email,
           displayName: result.principal.displayName,
           status: result.principal.status,
+          dateOfBirth: result.dateOfBirth,
         },
-        householdId: result.householdId,
+        householdId: null,
       };
     });
 
@@ -119,6 +127,9 @@ export async function userAuthRoutes(app: FastifyInstance): Promise<void> {
 
   app.get("/auth/me", { preHandler: requireUserSession }, async (request) => {
     const membership = await loadActiveMembershipForUser(request.user!.id);
+    const enrollments = membership
+      ? await listActiveEnrollmentsForMember(membership.memberId)
+      : [];
     return {
       user: {
         id: request.user!.id,
@@ -127,7 +138,9 @@ export async function userAuthRoutes(app: FastifyInstance): Promise<void> {
         status: request.user!.status,
       },
       householdId: membership?.householdId ?? null,
+      memberId: membership?.memberId ?? null,
       memberRole: membership?.role ?? null,
+      enrollments,
     };
   });
 

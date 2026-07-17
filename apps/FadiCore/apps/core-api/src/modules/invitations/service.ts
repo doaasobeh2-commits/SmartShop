@@ -265,12 +265,19 @@ export async function acceptInvitation(input: {
   }
 
   const now = new Date();
+  const accounts = await db
+    .select({ displayName: userAccounts.displayName })
+    .from(userAccounts)
+    .where(eq(userAccounts.id, input.userId))
+    .limit(1);
+
   const memberId = await db.transaction(async (tx) => {
     const [member] = await tx
       .insert(householdMembers)
       .values({
         householdId: invitation.householdId,
         userId: input.userId,
+        displayName: accounts[0]?.displayName?.trim() || "Member",
         role: invitation.role,
         status: "active",
         joinedAt: now,

@@ -15,6 +15,27 @@
       "when": 1784312000000,
       "tag": "0001_phase2_household_membership",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784318000000,
+      "tag": "0002_phase4_recipe_profile",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1784320000000,
+      "tag": "0003_phase4_shared_family_apps",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1784322000000,
+      "tag": "0004_phase4b_registration_address_age",
+      "breakpoints": true
     }
   ]
 }

@@ -51,10 +51,28 @@ describe("phase3 admin read api", { skip: !hasDb }, () => {
         email: userEmail,
         password: userPassword,
         displayName: "Phase3 Test User",
-        householdName: "Phase3 Test Household",
       },
     });
     assert.equal(reg.statusCode, 200, reg.body);
+    assert.equal(reg.json().householdId, null);
+
+    const userCookie = cookieFrom(reg, "fadi_user_session");
+    const createHh = await app.inject({
+      method: "POST",
+      url: "/households",
+      headers: { cookie: userCookie },
+      payload: {
+        name: "Phase3 Test Household",
+        address: {
+          countryCode: "AT",
+          postalCode: "3100",
+          city: "St. Poelten",
+          street: "Admin Test Weg",
+          houseNumber: "3",
+        },
+      },
+    });
+    assert.equal(createHh.statusCode, 201, createHh.body);
   });
 
   after(async () => {

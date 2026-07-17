@@ -6,6 +6,7 @@ import {
   varchar,
   uniqueIndex,
   index,
+  date,
 } from "drizzle-orm/pg-core";
 
 export const userAccountStatuses = ["active", "suspended", "deleted"] as const;
@@ -22,6 +23,8 @@ export const userAccounts = pgTable(
     email: varchar("email", { length: 255 }).notNull(),
     passwordHash: text("password_hash").notNull(),
     displayName: varchar("display_name", { length: 120 }).notNull(),
+    /** Optional ISO date of birth for age-gated product access. */
+    dateOfBirth: date("date_of_birth"),
     status: varchar("status", { length: 32 })
       .notNull()
       .$type<UserAccountStatus>()

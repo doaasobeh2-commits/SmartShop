@@ -1,5 +1,7 @@
 import type { MealFeedbackRating, MealRecommendation } from "@recipe-ai/core/types";
 import { AtmosphereScreen, TextButton } from "@recipe-ai/shared";
+import { useI18n } from "../i18n/useI18n";
+import type { MessageKey } from "../i18n/types";
 
 type FeedbackScreenProps = {
   meal: MealRecommendation;
@@ -7,13 +9,15 @@ type FeedbackScreenProps = {
   onSkip: () => void;
 };
 
-const options: { rating: MealFeedbackRating; label: string }[] = [
-  { rating: "loved", label: "Loved it" },
-  { rating: "good", label: "It was good" },
-  { rating: "not-for-us", label: "Not for us" },
+const options: { rating: MealFeedbackRating; labelKey: MessageKey }[] = [
+  { rating: "loved", labelKey: "lovedIt" },
+  { rating: "good", labelKey: "itWasGood" },
+  { rating: "not-for-us", labelKey: "notForUs" },
 ];
 
 export function FeedbackScreen({ meal, onSubmit, onSkip }: FeedbackScreenProps) {
+  const { t } = useI18n();
+
   return (
     <AtmosphereScreen atmosphere="dinner-complete" contentLayout="bottom">
       <div className="flex min-h-full flex-col items-center px-8 pb-12 pt-16 text-center">
@@ -26,13 +30,13 @@ export function FeedbackScreen({ meal, onSubmit, onSkip }: FeedbackScreenProps) 
           aria-hidden
         />
 
-        <h1 className="meal-title mb-4 text-4xl">How was dinner tonight?</h1>
+        <h1 className="meal-title mb-4 text-4xl">{t("howWasDinner")}</h1>
         <p className="mb-12 max-w-xs text-sm leading-relaxed" style={{ color: "var(--warm-gray)" }}>
-          Your feedback helps Recipe AI learn your household.
+          {t("feedbackHelps")}
         </p>
 
         <div className="mb-8 w-full max-w-sm space-y-3">
-          {options.map(({ rating, label }) => (
+          {options.map(({ rating, labelKey }) => (
             <button
               key={rating}
               type="button"
@@ -43,13 +47,13 @@ export function FeedbackScreen({ meal, onSubmit, onSkip }: FeedbackScreenProps) 
                 color: "var(--deep-charcoal)",
               }}
             >
-              {label}
+              {t(labelKey)}
             </button>
           ))}
         </div>
 
         <TextButton onClick={onSkip} className="py-2">
-          Skip
+          {t("skip")}
         </TextButton>
 
         <span className="sr-only">{meal.title}</span>

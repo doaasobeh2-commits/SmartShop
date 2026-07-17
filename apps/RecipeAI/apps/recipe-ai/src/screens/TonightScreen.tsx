@@ -1,5 +1,6 @@
 import type { MealRecommendation } from "@recipe-ai/core/types";
 import { AtmosphereScreen, PrimaryButton, TextButton } from "@recipe-ai/shared";
+import { useI18n } from "../i18n/useI18n";
 
 type TonightScreenProps = {
   meal: MealRecommendation;
@@ -20,6 +21,7 @@ export function TonightScreen({
   onOpenWeekPlan,
   showWeekPlanLink,
 }: TonightScreenProps) {
+  const { t } = useI18n();
   const missingCount = meal.ingredients.filter((i) => i.status === "need").length;
 
   return (
@@ -29,7 +31,7 @@ export function TonightScreen({
 
         <div className="flex flex-col px-8 pb-12">
           <p className="mb-2 text-sm tracking-wide" style={{ color: "var(--warm-gray)" }}>
-            Tonight
+            {t("tonight")}
           </p>
           <h1 className="meal-title mb-4 text-[2.125rem]">{meal.title}</h1>
           <p className="mb-2 max-w-md text-base leading-relaxed" style={{ color: "var(--warm-gray)" }}>
@@ -37,13 +39,15 @@ export function TonightScreen({
           </p>
           {missingCount > 0 && (
             <p className="mb-8 text-sm" style={{ color: "var(--warm-gray)" }}>
-              Need {missingCount} item{missingCount > 1 ? "s" : ""}
+              {t(missingCount === 1 ? "needItems" : "needItemsPlural", {
+                count: missingCount,
+              })}
             </p>
           )}
           {missingCount === 0 && <div className="mb-8" />}
 
           <PrimaryButton onClick={onCook} className="mb-4">
-            Cook
+            {t("cook")}
           </PrimaryButton>
 
           <button
@@ -52,20 +56,20 @@ export function TonightScreen({
             className="mb-3 text-center text-sm font-medium"
             style={{ color: "var(--warm-gray)" }}
           >
-            View recipe
+            {t("viewRecipe")}
           </button>
 
           <TextButton onClick={onNotTonight} className="mx-auto block py-2">
-            Not tonight
+            {t("notTonight")}
           </TextButton>
 
           <TextButton onClick={onCookWithWhatIHave} className="mx-auto mt-4 block py-2">
-            Cook with what I have
+            {t("cookWithWhatIHave")}
           </TextButton>
 
           {showWeekPlanLink && onOpenWeekPlan && (
             <TextButton onClick={onOpenWeekPlan} className="mx-auto mt-2 block py-2">
-              This week
+              {t("thisWeek")}
             </TextButton>
           )}
         </div>

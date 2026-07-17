@@ -72,11 +72,16 @@ export const householdMembers = pgTable(
     householdId: uuid("household_id")
       .notNull()
       .references(() => households.id, { onDelete: "cascade" }),
-    userId: uuid("user_id")
-      .notNull()
-      .references(() => userAccounts.id, { onDelete: "cascade" }),
+    /** Null = managed profile without login; set when claimed/linked. */
+    userId: uuid("user_id").references(() => userAccounts.id, {
+      onDelete: "cascade",
+    }),
+    displayName: varchar("display_name", { length: 120 }).notNull().default("Member"),
+    preferredLocale: varchar("preferred_locale", { length: 16 }),
     role: varchar("role", { length: 32 }).notNull().$type<MemberRole>(),
     status: varchar("status", { length: 32 }).notNull().$type<MemberStatus>(),
+    /** Creator of a managed profile (parent/adult member). */
+    createdByMemberId: uuid("created_by_member_id"),
     joinedAt: timestamp("joined_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
@@ -86,7 +91,7 @@ export const householdMembers = pgTable(
     index("household_members_user_id_idx").on(table.userId),
     uniqueIndex("household_members_active_uidx")
       .on(table.householdId, table.userId)
-      .where(sql`${table.status} = 'active'`),
+      .where(sql`${table.status} = 'active' AND ${table.userId} IS NOT NULL`),
     uniqueIndex("household_members_one_active_owner_uidx")
       .on(table.householdId)
       .where(sql`${table.role} = 'owner' AND ${table.status} = 'active'`),
