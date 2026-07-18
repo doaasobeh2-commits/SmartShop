@@ -22,6 +22,13 @@ export const atmospheres: Record<ScreenAtmosphere, AtmosphereConfig> = {
       "linear-gradient(to top, rgba(26, 25, 24, 0.75) 0%, rgba(26, 25, 24, 0.2) 45%, transparent 70%)",
     contentFade: "linear-gradient(to bottom, transparent 0%, #FAF9F7 85%)",
   },
+  "kitchen-ingredients": {
+    fallbackGradient:
+      "linear-gradient(165deg, #F3EEE6 0%, #E8DFD4 30%, #D4C4B0 55%, #C9B8A8 80%, #A89585 100%)",
+    overlayGradient:
+      "linear-gradient(to top, rgba(26, 25, 24, 0.35) 0%, rgba(26, 25, 24, 0.08) 40%, transparent 70%)",
+    contentFade: "linear-gradient(to bottom, transparent 0%, #FAF9F7 88%)",
+  },
   "vegetables-fresh": {
     fallbackGradient:
       "linear-gradient(160deg, #E8F0E4 0%, #C5D4BC 30%, #8FA87E 55%, #6B8F5E 80%, #4A6B42 100%)",

@@ -24,7 +24,8 @@ export function FeedbackScreen({ meal, onSubmit, onSkip }: FeedbackScreenProps) 
         <div
           className="mb-8 h-20 w-20 shrink-0 rounded-2xl"
           style={{
-            background: "linear-gradient(135deg, #C4A574 0%, #8B6914 100%)",
+            background:
+              "linear-gradient(135deg, var(--decorative-gold) 0%, var(--brand-primary) 100%)",
             boxShadow: "0 8px 32px rgba(26, 25, 24, 0.12)",
           }}
           aria-hidden

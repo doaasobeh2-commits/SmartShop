@@ -145,7 +145,8 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
 
         <button
           type="button"
-          className="mt-4 text-center text-sm text-white/80 underline"
+          className="mt-4 text-center text-sm font-medium underline"
+          style={{ color: "var(--brand-primary)" }}
           onClick={() => {
             setMode((m) => (m === "register" ? "login" : "register"));
             setError(null);

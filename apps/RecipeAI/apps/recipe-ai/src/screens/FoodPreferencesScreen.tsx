@@ -13,15 +13,21 @@ export function FoodPreferencesScreen({
   onContinue,
 }: FoodPreferencesScreenProps) {
   return (
-    <AtmosphereScreen atmosphere="vegetables-fresh" contentLayout="scroll">
+    <AtmosphereScreen atmosphere="kitchen-ingredients" contentLayout="scroll">
       <div className="flex min-h-full flex-col px-8 pb-12 pt-16">
         <h1
-          className="mb-3 text-4xl font-semibold leading-tight text-white"
-          style={{ fontFamily: "var(--font-display)" }}
+          className="mb-3 text-4xl font-semibold leading-tight"
+          style={{
+            fontFamily: "var(--font-display)",
+            color: "var(--brand-primary)",
+          }}
         >
           Any allergies?
         </h1>
-        <p className="mb-10 max-w-sm text-base leading-relaxed text-white/70">
+        <p
+          className="mb-10 max-w-sm text-base leading-relaxed"
+          style={{ color: "var(--warm-gray)" }}
+        >
           We never suggest meals that aren&apos;t safe for your household.
         </p>
 

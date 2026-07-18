@@ -26,17 +26,17 @@ export function CookModeScreen({
     <AtmosphereScreen atmosphere="cookbook-dark" dark contentLayout="scroll">
       <div className="flex min-h-full flex-col px-8 pb-12 pt-14">
         <div className="mb-12 flex items-center justify-between">
-          <TextButton onClick={onExit} className="!text-[#9A9590]">
+          <TextButton onClick={onExit} className="!text-[var(--cook-muted)]">
             {t("exit")}
           </TextButton>
-          <span className="text-sm" style={{ color: "#9A9590" }}>
+          <span className="text-sm" style={{ color: "var(--cook-muted)" }}>
             {t("stepOf", { current: step.order, total: meal.steps.length })}
           </span>
         </div>
 
         <div
           className="mb-16 h-[3px] w-full overflow-hidden rounded-full"
-          style={{ background: "#3D3A37" }}
+          style={{ background: "var(--cook-progress-track)" }}
         >
           <div
             className="h-full rounded-full transition-all duration-500 ease-out"
@@ -55,7 +55,7 @@ export function CookModeScreen({
         </p>
 
         {step.timerMinutes && (
-          <p className="mb-12 text-base" style={{ color: "#9A9590" }}>
+          <p className="mb-12 text-base" style={{ color: "var(--cook-muted)" }}>
             {t("timerMinutes", { n: step.timerMinutes })}
           </p>
         )}
@@ -63,7 +63,7 @@ export function CookModeScreen({
         <div className="mt-auto flex flex-col gap-4">
           <PrimaryButton onClick={onNext}>{isLast ? t("finish") : t("next")}</PrimaryButton>
           {stepIndex > 0 && (
-            <TextButton onClick={onBack} className="mx-auto !text-[#9A9590]">
+            <TextButton onClick={onBack} className="mx-auto !text-[var(--cook-muted)]">
               {t("previous")}
             </TextButton>
           )}

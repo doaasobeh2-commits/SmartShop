@@ -1,16 +1,27 @@
-# RecipeAI
+# ShareYum (RecipeAI codebase)
 
-**Role:** Meal lens · **Maturity:** alpha (UI in progress) · **Path:** `apps/RecipeAI/`
+**Working name:** **ShareYum**  
+**Legacy / repo name:** RecipeAI · **Maturity:** alpha · **Path:** `apps/RecipeAI/`
+
+> Package paths and identifiers (`recipe-ai`, `@recipe-ai/*`) remain until a controlled rename. See [`apps/RecipeAI/docs/CURRENT_STATE_AUDIT.md`](../apps/RecipeAI/docs/CURRENT_STATE_AUDIT.md).
 
 ## One question
 
 **Tonight:** What should we cook tonight?
 
+## Architecture boundary (approved)
+
+| System | Owns |
+|--------|------|
+| **FadiCore** | Shared identity, household, membership, enrollment, permissions, platform concerns |
+| **ShareYum backend** (planned) | Recipes, recommendations, scoring, meal planning, allergen logic, feedback intelligence, food-domain algorithms |
+| **ShareYum client** (`apps/RecipeAI/`) | Presentation, navigation, cook UX — consumes ShareYum APIs; **must not** ship decision logic in browser bundles |
+
 ## What it is
 
 Household **meal decision engine** — not a recipe library. The decision and the household are the product; the recipe is the answer.
 
-**Master vision:** [`apps/RecipeAI/docs/MASTER_PRODUCT_VISION.md`](../apps/RecipeAI/docs/MASTER_PRODUCT_VISION.md)
+**Master vision:** [`apps/RecipeAI/docs/MASTER_PRODUCT_VISION.md`](../apps/RecipeAI/docs/MASTER_PRODUCT_VISION.md) — includes locked **The Living Kitchen** art direction.
 
 ## Core loop
 
@@ -63,3 +74,8 @@ Curated ~50 recipes per major cuisine — engine data, not browse UI. Quality ov
 ## Figma / UI
 
 ADR-0005 superseded for implementation starting from locked master vision + existing design direction. See master vision doc.
+
+## Current state & next phase
+
+- Audit: [`apps/RecipeAI/docs/CURRENT_STATE_AUDIT.md`](../apps/RecipeAI/docs/CURRENT_STATE_AUDIT.md)
+- **Next (planned, not started):** Phase A1 — ShareYum identity + onboarding/navigation cleanup only

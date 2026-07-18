@@ -81,6 +81,7 @@ export type MessageKey =
   | "couldNotLoadSetup"
   | "couldNotLoadOnboarding"
   | "kitchenNameDefault"
+  | "appName"
   | "welcomeTagline"
   | "letsCook"
   | "planWeekTitle"

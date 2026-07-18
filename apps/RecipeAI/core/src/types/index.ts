@@ -15,6 +15,7 @@ export type MealFeedbackRating = "loved" | "good" | "not-for-us";
 
 export type ScreenAtmosphere =
   | "kitchen-morning"
+  | "kitchen-ingredients"
   | "vegetables-fresh"
   | "meal-evening"
   | "meal-preview"
@@ -58,6 +59,7 @@ export type WeekDayPlan = {
 
 export type AppPreferences = {
   onboardingComplete: boolean;
+  foodPreferencesComplete: boolean;
 
   email?: string;
   language?: string;

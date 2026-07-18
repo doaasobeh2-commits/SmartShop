@@ -1,10 +1,23 @@
-# Recipe AI — Master Product Vision (Locked)
+# ShareYum — Master Product Vision (Locked)
 
+> **Working product name:** ShareYum  
+> **Codebase / path (legacy):** RecipeAI · `apps/RecipeAI/` · `@recipe-ai/*` packages until controlled rename  
 > **Status:** Canonical north star for all UI, content, and engineering.  
 > **Supersedes:** Earlier briefs where they conflict — especially Premium: **contextual cook assistant**, not chat.
 
 ---
 
+## Architecture boundary (approved)
+
+| Layer | Responsibility |
+|-------|----------------|
+| **FadiCore** | Shared identity, household, membership, enrollment, permissions, platform concerns only |
+| **ShareYum backend** | Recipes, recommendation logic, scoring, meal planning, allergen logic, feedback intelligence, food-domain algorithms — **server-side only** |
+| **ShareYum client** | UI, navigation, cook experience — consumes ShareYum APIs; no decision logic in browser bundles |
+
+FadiCore must not own recipe, meal, or recommendation domain logic.
+
+---
 ## What Recipe AI is
 
 | Layer | Definition |
@@ -69,6 +82,59 @@ No dark colorful UI except Cook Mode. Warm whites · natural colors · large spa
 
 ---
 
+## The Living Kitchen (approved visual direction)
+
+> **Status:** Locked art direction for all backgrounds and photography. Supersedes ad-hoc per-screen decoration.
+
+### Core principle
+
+**One household · one coherent home/material world.** Meals and cuisines change; **the home stays.**
+
+The user moves through chapters of one story in **one believable kitchen** — not a travel magazine of different countries per dish.
+
+### What this means
+
+| Rule | Detail |
+|------|--------|
+| **No cuisine tourism** | Ramen, kibbeh, and pasta must feel photographed **on the same table**, with the same wood, linen, and light — not in Tokyo, Beirut, and Rome |
+| **Two visual grammars** | **Raw ingredients** (Preferences, Cook With What I Have) vs **finished meals** (Tonight, Preview, Feedback) — never mix on the wrong screen |
+| **Meal continuity** | Tonight → Preview → Feedback share **one meal identity** where possible: same hero photograph reframed; Feedback may show aftermath (empty plate, same table) |
+| **Cook Mode** | Deep charcoal + subtle paper/canvas texture + **extremely restrained** blurred meal/kitchen atmosphere (2–4% opacity). Instructions remain hero |
+| **Weekly Plan** | Functionally **non-linear** — optional branch, not a forced step in a “one day” sequence. Atmosphere: notebook on calm table |
+| **No real-time-of-day switching in V1** | Light arc is **designed into assets**, not switched by clock at runtime |
+| **Scales to dynamic recipes** | System must **not** depend on bespoke photography per generated recipe. Use: canonical home atmospheres + meal image slot + graded overlays + fallback material library |
+
+### Screen atmospheres (emotional purpose)
+
+| Screen | Story beat | Atmosphere |
+|--------|------------|------------|
+| **Welcome** | Arrive home | Real family kitchen — morning light, wood, ceramic, herbs; alive, not staged |
+| **Food Preferences** | Before cooking | Raw vegetables & herbs at counter — restriction/safety, not shopping |
+| **Tonight** | Dinner is waiting | Selected meal as hero — desirable, warm evening feel |
+| **Preview** | You're still making this | **Same meal** visible above; content floats on Warm White below |
+| **Cook Mode** | Focus at the stove | Dark cookbook; minimal; peripheral kitchen warmth only |
+| **Weekly Plan** | Notebook planning | Bright, calm table/notebook — never spreadsheet |
+| **Cook With What I Have** | What's possible? | Ingredients/pantry — not a finished plate |
+| **Feedback** | Quiet completion | Post-dinner table — satisfaction, not celebration |
+
+### Visual asset strategy (V1+)
+
+1. **Canonical home library** — one kitchen, one ingredient set, one table — reused across screens  
+2. **Meal slot** — `imageUrl` per recommendation; Preview reuses Tonight asset; Feedback uses paired aftermath when available  
+3. **Fallback gradients** — acceptable dev placeholder only; production targets photography  
+4. **Reject** — stock grids, cuisine banners, per-cuisine color themes, illustration, cartoon, oversaturation  
+
+### Legacy client data (pending review)
+
+The following files exist in the client repo but are **legacy / non-authoritative**. Do not remove or refactor until catalog and Living Kitchen asset strategy is reviewed:
+
+- `apps/recipe-ai/src/data/worldKitchens.ts`
+- `apps/recipe-ai/src/data/cuisines/cuisines.ts`
+
+They conflict with The Living Kitchen (cuisine-tourism patterns) and are not wired to active navigation.
+
+---
+
 ## Product architecture (three layers)
 
 ```text
@@ -122,12 +188,13 @@ Open → Tonight → Preview → Cook → Feedback → Tonight
 ### Flow B — First launch
 
 ```text
-Welcome → Food Preferences (allergies)
-        → "Plan your week's meals?" → Yes | Not now
-        → Tonight
+Welcome → Auth → (FadiCore household gate) → Weekly Plan opt-in → Tonight
+Food Preferences (allergies) — required in vision; wire when product-profile phase lands
 ```
 
 **Not now** = never ask again (stored preference; no nagging).
+
+**Note:** Weekly Plan is an **optional branch**, not a mandatory step in a linear “one day” sequence.
 
 ### Flow C — Cook With What I Have (secondary)
 
@@ -253,6 +320,11 @@ Before any screen is "done":
 
 ## References
 
+- Current state audit: [`CURRENT_STATE_AUDIT.md`](CURRENT_STATE_AUDIT.md)
 - Logic spec: [`V1_PRODUCT_BLUEPRINT.md`](V1_PRODUCT_BLUEPRINT.md)
 - Platform product: [`../../../products/recipeai.md`](../../../products/recipeai.md)
 - ADR-0005 override: building from approved design direction (this document)
+
+## Planned next phase
+
+**Phase A1** — ShareYum identity + onboarding/navigation cleanup only (not started; awaiting approval).

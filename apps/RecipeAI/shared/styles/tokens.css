@@ -2,18 +2,40 @@
 
 :root {
   --font-size: 16px;
+
+  /* ShareYum approved palette (Phase A1) */
+  --brand-primary: #5a4030;
+  --brand-chocolate: #3a2416;
+  --accent: #c4652e;
+  --accent-foreground: #ffffff;
+
   --background: #faf9f7;
-  --foreground: #1a1918;
   --warm-white: #faf9f7;
+  --surface: #f3eee6;
   --soft-beige: #f0ede8;
-  --warm-gray: #9a9590;
+  --warm-gray: #8a827a;
   --deep-charcoal: #1a1918;
+  --foreground: #1a1918;
+
+  --decorative-gold: #d5ab7b;
+  --success: #5c7a5a;
+  --warning: #b8863a;
+  --error: #9e4a3d;
+
+  /* Cook Mode */
   --cook-background: #1a1918;
   --cook-surface: #252422;
   --cook-text: #f5f3f0;
-  --primary: #d97742;
-  --primary-foreground: #ffffff;
-  --border: #f0ede8;
+  --cook-progress-track: #3d3a37;
+  --cook-muted: #9a9590;
+
+  /* Legacy alias — primary actions use accent */
+  --primary: var(--accent);
+  --primary-foreground: var(--accent-foreground);
+
+  --border: var(--soft-beige);
+  --kitchen-wood: #8b7355;
+
   --font-sans: "Inter", system-ui, sans-serif;
   --font-display: "Cormorant Garamond", Georgia, serif;
   --app-max-width: 100%;

@@ -1,14 +1,27 @@
 import type { CSSProperties } from "react";
 
+/** Bundled logo — never reference Desktop paths at runtime. */
+export const SHAREYUM_LOGO_SRC = "/assets/shareyum-logo.jpeg";
+
 export const colors = {
+  brandPrimary: "#5A4030",
+  brandChocolate: "#3A2416",
+  accent: "#C4652E",
   warmWhite: "#FAF9F7",
+  surface: "#F3EEE6",
   softBeige: "#F0EDE8",
-  warmGray: "#9A9590",
+  warmGray: "#8A827A",
   deepCharcoal: "#1A1918",
+  decorativeGold: "#D5AB7B",
+  success: "#5C7A5A",
+  warning: "#B8863A",
+  error: "#9E4A3D",
   cookBackground: "#1A1918",
   cookSurface: "#252422",
   cookText: "#F5F3F0",
-  orange: "#D97742",
+  cookProgressTrack: "#3D3A37",
+  cookMuted: "#9A9590",
+  kitchenWood: "#8B7355",
 } as const;
 
 export const spacing = {
