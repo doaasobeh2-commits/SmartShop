@@ -185,6 +185,18 @@ Development/test only: create-invite responses may include `developmentOnlyToken
 - Server-side permission checks; rate limits on auth + invite accept
 - Hashes never returned in JSON
 
+## Deployment (Railway)
+
+Repository readiness for Railway (no cloud resources created by these docs):
+
+| Doc | Purpose |
+|-----|---------|
+| [`docs/DEPLOY.md`](docs/DEPLOY.md) | Root directory, start command, env names, migrate, rollback |
+| [`docs/DEPLOYMENT_CHECKLIST.md`](docs/DEPLOYMENT_CHECKLIST.md) | Checklist before every production deploy |
+| [`docs/OWNER_RUNBOOK.md`](docs/OWNER_RUNBOOK.md) | Incident steps for a non-programmer owner |
+
+Service config file: [`apps/core-api/railway.toml`](apps/core-api/railway.toml).
+
 ## Local setup
 
 ### 1. Postgres

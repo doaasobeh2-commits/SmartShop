@@ -1,0 +1,18 @@
+# Railway config for @fadi-core/core-api
+#
+# Dashboard Root Directory must be:
+#   apps/FadiCore/apps/core-api
+#
+# This file lives next to package.json. Railway Config as Code is resolved
+# from the service root, not from the monorepo repository root.
+#
+# No Dockerfile in 5a.2.0 — Railway’s default Railpack builder is enough for
+# Node + tsx + argon2. Add a Dockerfile later only if a native build fails.
+# Details: ../../docs/DEPLOY.md
+
+[deploy]
+startCommand = "npm start"
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
