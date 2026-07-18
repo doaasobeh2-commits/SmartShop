@@ -2,6 +2,8 @@ import Fastify from "fastify";
 import cookie from "@fastify/cookie";
 import cors from "@fastify/cors";
 import { env, parseCorsOrigins } from "./config.js";
+import { LOGGER_REDACT_PATHS } from "./lib/loggerRedact.js";
+import { registerSafeErrorHandlers } from "./lib/safeErrors.js";
 import { authRoutes } from "./modules/auth/routes.js";
 import { healthRoutes } from "./modules/health/routes.js";
 import { userAuthRoutes } from "./modules/users/routes.js";
@@ -15,8 +17,14 @@ export async function buildApp() {
   const app = Fastify({
     logger: {
       level: env.NODE_ENV === "production" ? "info" : "debug",
+      redact: {
+        paths: [...LOGGER_REDACT_PATHS],
+        censor: "[Redacted]",
+      },
     },
   });
+
+  await registerSafeErrorHandlers(app);
 
   const corsOrigins = parseCorsOrigins(env.CORS_ORIGIN);
   await app.register(cors, {

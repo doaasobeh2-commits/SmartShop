@@ -1,7 +1,11 @@
 import { buildApp } from "./app.js";
-import { env } from "./config.js";
+import { env, isDevTokenExposureEnabled } from "./config.js";
+import { assertProductionSecurityConfig } from "./lib/productionSecurity.js";
 
 async function main() {
+  // Fail closed before binding a port. Operator-facing only — never HTTP.
+  assertProductionSecurityConfig(env, isDevTokenExposureEnabled);
+
   const app = await buildApp();
 
   try {
@@ -13,4 +17,8 @@ async function main() {
   }
 }
 
-main();
+main().catch((error) => {
+  // Startup failures (including production security asserts) stay on stderr.
+  console.error(error instanceof Error ? error.message : error);
+  process.exit(1);
+});
