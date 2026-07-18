@@ -4,15 +4,23 @@
   "version": "0.1.0",
   "workspaces": [
     "apps/*",
+    "packages/*",
+    "services/*",
     "shared",
     "core"
   ],
   "scripts": {
     "dev": "npm run dev --workspace=@recipe-ai/app",
-    "build": "npm run build --workspace=@recipe-ai/app",
-    "typecheck": "npm run typecheck --workspaces --if-present"
+    "dev:food-api": "npm run dev --workspace=@recipe-ai/food-api",
+    "build": "npm run build --workspace=@recipe-ai/food-api && npm run build --workspace=@recipe-ai/app",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present && tsx --test scripts/check-spa-food-core-boundary.test.ts"
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
   }
 }
