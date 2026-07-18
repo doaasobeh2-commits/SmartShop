@@ -4,6 +4,7 @@ import { z } from "zod";
 import { env, USER_SESSION_COOKIE_NAME } from "../../config.js";
 import { isDatabaseConnectionError } from "../../db/errors.js";
 import { writeAudit } from "../../lib/audit.js";
+import { replyDatabaseUnavailable, rateLimitErrorBody } from "../../lib/handledErrors.js";
 import { requireUserSession } from "../../middleware/requireUserSession.js";
 import { loadActiveMembershipForUser } from "../../middleware/requireHouseholdAccess.js";
 import { listActiveEnrollmentsForMember } from "../family/enrollmentsService.js";
@@ -36,11 +37,7 @@ export async function userAuthRoutes(app: FastifyInstance): Promise<void> {
       max: env.LOGIN_RATE_MAX,
       timeWindow: env.LOGIN_RATE_WINDOW_MS,
       hook: "preHandler",
-      errorResponseBuilder: () => ({
-        statusCode: 429,
-        error: "too_many_requests",
-        message: "Too many auth attempts. Try again later.",
-      }),
+      errorResponseBuilder: () => rateLimitErrorBody(),
     });
 
     scoped.post("/auth/register", async (request, reply) => {
@@ -68,10 +65,7 @@ export async function userAuthRoutes(app: FastifyInstance): Promise<void> {
         if (result.reason === "invalid_date_of_birth") {
           return reply.code(400).send({ error: "invalid_date_of_birth" });
         }
-        return reply.code(503).send({
-          error: "database_unavailable",
-          message: "Cannot reach PostgreSQL.",
-        });
+        return replyDatabaseUnavailable(reply, request);
       }
 
       setUserSessionCookie(reply, result.token, result.expiresAt);
@@ -105,10 +99,7 @@ export async function userAuthRoutes(app: FastifyInstance): Promise<void> {
 
       if (!result.ok) {
         if (result.reason === "database_unavailable") {
-          return reply.code(503).send({
-            error: "database_unavailable",
-            message: "Cannot reach PostgreSQL.",
-          });
+          return replyDatabaseUnavailable(reply, request);
         }
         return reply.code(401).send({ error: "invalid_credentials" });
       }
@@ -164,11 +155,7 @@ export async function userAuthRoutes(app: FastifyInstance): Promise<void> {
       } catch (error) {
         if (isDatabaseConnectionError(error)) {
           clearUserSessionCookie(reply);
-          return reply.code(503).send({
-            error: "database_unavailable",
-            message:
-              "Cannot reach PostgreSQL while completing logout. Local session cookie was cleared.",
-          });
+          return replyDatabaseUnavailable(reply, request, error);
         }
         throw error;
       }

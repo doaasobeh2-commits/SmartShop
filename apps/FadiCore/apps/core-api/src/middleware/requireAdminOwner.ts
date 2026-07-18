@@ -10,6 +10,6 @@ export async function requireAdminOwner(
   if (reply.sent) return;
 
   if (request.admin?.role !== "owner") {
-    reply.code(403).send({ error: "forbidden", message: "Owner admin role required." });
+    reply.code(403).send({ error: "forbidden" });
   }
 }

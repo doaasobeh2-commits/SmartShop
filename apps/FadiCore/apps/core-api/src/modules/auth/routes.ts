@@ -7,6 +7,7 @@ import { requireAdminSession } from "../../middleware/requireAdminSession.js";
 import { db } from "../../db/client.js";
 import { auditLogs } from "../../db/schema/index.js";
 import { loginAdmin } from "./service.js";
+import { replyDatabaseUnavailable, rateLimitErrorBody } from "../../lib/handledErrors.js";
 import {
   clearSessionCookie,
   revokeSessionByToken,
@@ -24,11 +25,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
       max: env.LOGIN_RATE_MAX,
       timeWindow: env.LOGIN_RATE_WINDOW_MS,
       hook: "preHandler",
-      errorResponseBuilder: () => ({
-        statusCode: 429,
-        error: "too_many_requests",
-        message: "Too many login attempts. Try again later.",
-      }),
+      errorResponseBuilder: () => rateLimitErrorBody(),
     });
 
     scoped.post("/admin/auth/login", async (request, reply) => {
@@ -49,11 +46,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
 
       if (!result.ok) {
         if (result.reason === "database_unavailable") {
-          return reply.code(503).send({
-            error: "database_unavailable",
-            message:
-              "Cannot reach PostgreSQL. Start apps/FadiCore/docker compose (port 5433), then run db:migrate and db:seed.",
-          });
+          return replyDatabaseUnavailable(reply, request);
         }
         return reply.code(401).send({ error: "invalid_credentials" });
       }
@@ -108,11 +101,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
       } catch (error) {
         if (isDatabaseConnectionError(error)) {
           clearSessionCookie(reply);
-          return reply.code(503).send({
-            error: "database_unavailable",
-            message:
-              "Cannot reach PostgreSQL while completing logout. Local session cookie was cleared.",
-          });
+          return replyDatabaseUnavailable(reply, request, error);
         }
         throw error;
       }

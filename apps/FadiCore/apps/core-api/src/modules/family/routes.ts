@@ -3,6 +3,7 @@ import rateLimit from "@fastify/rate-limit";
 import { z } from "zod";
 import { env } from "../../config.js";
 import { platformApplicationKeys } from "../../db/schema/index.js";
+import { rateLimitErrorBody } from "../../lib/handledErrors.js";
 import { requireUserSession } from "../../middleware/requireUserSession.js";
 import {
   requireActiveMembership,
@@ -218,11 +219,7 @@ export async function familyRoutes(app: FastifyInstance): Promise<void> {
       max: env.LOGIN_RATE_MAX,
       timeWindow: env.LOGIN_RATE_WINDOW_MS,
       hook: "preHandler",
-      errorResponseBuilder: () => ({
-        statusCode: 429,
-        error: "too_many_requests",
-        message: "Too many claim accept attempts. Try again later.",
-      }),
+      errorResponseBuilder: () => rateLimitErrorBody(),
     });
 
     scoped.post(
