@@ -64,3 +64,19 @@
     color: var(--cook-text);
   }
 }
+
+/* Internal admin catalog workspace — full viewport scroll on desktop QA */
+html.admin-workspace,
+body.admin-workspace {
+  overflow: auto;
+  height: auto;
+}
+
+html.admin-workspace #root {
+  display: block;
+  max-width: none;
+  padding: 0;
+  overflow: visible;
+  align-items: stretch;
+  background: var(--warm-white);
+}

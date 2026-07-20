@@ -10,6 +10,7 @@ import {
 import { useAuth } from "../auth/AuthContext";
 import { ErrorState, mapApiErrorMessage } from "../components/AsyncStates";
 import { useI18n } from "../i18n/useI18n";
+import { ONBOARDING_HERO_IMAGES } from "../data/onboardingImagery";
 
 type CreateHouseholdScreenProps = {
   initialAddress?: Partial<AddressInput>;
@@ -34,9 +35,7 @@ export function CreateHouseholdScreen({
   const auth = useAuth();
   const { t, locale } = useI18n();
   const [name, setName] = useState(() =>
-    auth.user
-      ? t("kitchenNameDefault", { name: auth.user.displayName })
-      : "",
+    auth.user ? t("kitchenNameDefault", { name: auth.user.displayName }) : "",
   );
   const [address, setAddress] = useState<AddressInput>({
     ...emptyAddress,
@@ -57,6 +56,7 @@ export function CreateHouseholdScreen({
       const unit = address.unit?.trim();
       await createHousehold({
         name: name.trim(),
+        preferredLocale: locale,
         address: {
           countryCode: address.countryCode.trim().toUpperCase(),
           postalCode: address.postalCode.trim(),
@@ -92,12 +92,18 @@ export function CreateHouseholdScreen({
   }
 
   return (
-    <AtmosphereScreen atmosphere="kitchen-morning" contentLayout="scroll">
+    <AtmosphereScreen
+      atmosphere="kitchen-morning"
+      contentLayout="scroll"
+      imageUrl={ONBOARDING_HERO_IMAGES.householdHub}
+    >
       <form
         onSubmit={onSubmit}
         className="flex min-h-full flex-col justify-end px-8 pb-12 pt-16 text-white"
       >
-        <h1 className="mb-3 text-4xl font-semibold">{t("createHouseholdTitle")}</h1>
+        <h1 className="mb-3 text-4xl font-semibold">
+          {t("createHouseholdTitle")}
+        </h1>
         <p className="mb-6 max-w-sm text-base text-white/85">
           {t("createHouseholdBody")}
         </p>

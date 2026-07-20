@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useState } from "react";
 import { AtmosphereScreen, PrimaryButton, TextButton } from "@recipe-ai/shared";
 import { ApiError } from "../api/client";
-import {
-  fetchMe,
-  listMyJoinRequests,
-  type JoinRequest,
-} from "../api/coreApi";
+import { fetchMe, listMyJoinRequests, type JoinRequest } from "../api/coreApi";
 import { useAuth } from "../auth/AuthContext";
-import { ErrorState, LoadingState, mapApiErrorMessage } from "../components/AsyncStates";
+import {
+  ErrorState,
+  LoadingState,
+  mapApiErrorMessage,
+} from "../components/AsyncStates";
 import { useI18n } from "../i18n/useI18n";
+import { ONBOARDING_HERO_IMAGES } from "../data/onboardingImagery";
 
 type JoinPendingScreenProps = {
   onBackToHub: () => void;
@@ -62,9 +63,15 @@ export function JoinPendingScreen({
   const latest = pending[0] ?? requests[0];
 
   return (
-    <AtmosphereScreen atmosphere="kitchen-morning" contentLayout="bottom">
+    <AtmosphereScreen
+      atmosphere="kitchen-morning"
+      contentLayout="bottom"
+      imageUrl={ONBOARDING_HERO_IMAGES.householdHub}
+    >
       <div className="flex min-h-full flex-col justify-end px-8 pb-12 pt-16 text-white">
-        <h1 className="mb-3 text-4xl font-semibold">{t("waitingApprovalTitle")}</h1>
+        <h1 className="mb-3 text-4xl font-semibold">
+          {t("waitingApprovalTitle")}
+        </h1>
         <p className="mb-6 max-w-sm text-base leading-relaxed text-white/85">
           {t("waitingApprovalBody")}
         </p>
@@ -102,7 +109,9 @@ export function JoinPendingScreen({
           </div>
         ) : null}
 
-        <PrimaryButton onClick={() => void load()}>{t("refreshStatus")}</PrimaryButton>
+        <PrimaryButton onClick={() => void load()}>
+          {t("refreshStatus")}
+        </PrimaryButton>
         <div className="mt-3 space-y-2">
           <TextButton onClick={onBackToHub}>{t("backToSetup")}</TextButton>
           <button

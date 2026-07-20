@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { useAppState } from "../hooks/useAppState";
 import { normalizeAppLocale, type AppLocale, type MessageKey } from "./types";
 import { t as translate } from "./t";
@@ -10,10 +10,15 @@ export function useI18n() {
     [preferences.language],
   );
 
+  const t = useCallback(
+    (key: MessageKey, vars?: Record<string, string | number>) =>
+      translate(locale, key, vars),
+    [locale],
+  );
+
   return {
     locale,
-    t: (key: MessageKey, vars?: Record<string, string | number>) =>
-      translate(locale, key, vars),
+    t,
   };
 }
 

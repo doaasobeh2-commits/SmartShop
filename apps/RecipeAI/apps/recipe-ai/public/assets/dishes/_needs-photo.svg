@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="547" viewBox="0 0 820 547" role="img" aria-label="Recipe photo needed">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#faf9f7"/>
+      <stop offset="1" stop-color="#efe9df"/>
+    </linearGradient>
+    <linearGradient id="plate" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fffdf9"/>
+      <stop offset="1" stop-color="#e7dfd3"/>
+    </linearGradient>
+  </defs>
+  <rect width="820" height="547" fill="url(#bg)"/>
+  <ellipse cx="410" cy="315" rx="235" ry="82" fill="#d8cabb" opacity="0.45"/>
+  <ellipse cx="410" cy="287" rx="215" ry="118" fill="url(#plate)" stroke="#d8cabb" stroke-width="4"/>
+  <ellipse cx="410" cy="287" rx="138" ry="66" fill="none" stroke="#d8cabb" stroke-width="3" opacity="0.8"/>
+  <path d="M272 393c70 42 206 42 276 0" fill="none" stroke="#b69f8a" stroke-width="5" stroke-linecap="round" opacity="0.5"/>
+  <text x="410" y="263" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="30" fill="#5c3c26">Photo needed</text>
+  <text x="410" y="304" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="18" fill="#8d7b6d">Accurate recipe image pending</text>
+</svg>

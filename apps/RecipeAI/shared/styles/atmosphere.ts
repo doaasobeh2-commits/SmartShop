@@ -19,15 +19,15 @@ export const atmospheres: Record<ScreenAtmosphere, AtmosphereConfig> = {
     fallbackGradient:
       "linear-gradient(165deg, #E8DFD4 0%, #C9B8A8 35%, #A89585 70%, #8B7355 100%)",
     overlayGradient:
-      "linear-gradient(to top, rgba(26, 25, 24, 0.75) 0%, rgba(26, 25, 24, 0.2) 45%, transparent 70%)",
-    contentFade: "linear-gradient(to bottom, transparent 0%, #FAF9F7 85%)",
+      "linear-gradient(to top, rgba(26, 25, 24, 0.45) 0%, rgba(26, 25, 24, 0.12) 40%, transparent 72%)",
+    contentFade: "linear-gradient(to bottom, transparent 0%, #FAF9F7 88%)",
   },
   "kitchen-ingredients": {
     fallbackGradient:
       "linear-gradient(165deg, #F3EEE6 0%, #E8DFD4 30%, #D4C4B0 55%, #C9B8A8 80%, #A89585 100%)",
     overlayGradient:
-      "linear-gradient(to top, rgba(26, 25, 24, 0.35) 0%, rgba(26, 25, 24, 0.08) 40%, transparent 70%)",
-    contentFade: "linear-gradient(to bottom, transparent 0%, #FAF9F7 88%)",
+      "linear-gradient(to top, rgba(26, 25, 24, 0.22) 0%, rgba(26, 25, 24, 0.05) 38%, transparent 72%)",
+    contentFade: "linear-gradient(to bottom, transparent 0%, #FAF9F7 90%)",
   },
   "vegetables-fresh": {
     fallbackGradient:
@@ -59,9 +59,10 @@ export const atmospheres: Record<ScreenAtmosphere, AtmosphereConfig> = {
   "planning-light": {
     fallbackGradient:
       "linear-gradient(180deg, #F5F0E8 0%, #EDE6DC 40%, #E5DDD2 100%)",
+    // Keep photography crisp — soft cream bridge only at the bottom edge.
     overlayGradient:
-      "linear-gradient(to bottom, rgba(250, 249, 247, 0.3) 0%, #FAF9F7 70%)",
-    contentFade: "linear-gradient(to bottom, transparent 0%, #FAF9F7 60%)",
+      "linear-gradient(to bottom, transparent 55%, rgba(250, 249, 247, 0.55) 82%, #FAF9F7 100%)",
+    contentFade: "linear-gradient(to bottom, transparent 35%, #FAF9F7 90%)",
   },
   "dinner-complete": {
     fallbackGradient:

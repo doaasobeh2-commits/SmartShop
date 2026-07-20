@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { AtmosphereScreen, PrimaryButton } from "@recipe-ai/shared";
+import { PrimaryButton } from "@recipe-ai/shared";
 import { ApiError } from "../api/client";
 import {
   fetchMe,
@@ -11,6 +11,8 @@ import {
 } from "../api/coreApi";
 import { useAuth } from "../auth/AuthContext";
 import { ErrorState, mapApiErrorMessage } from "../components/AsyncStates";
+import { OnboardingScreenLayout } from "../components/OnboardingScreenLayout";
+import { ONBOARDING_HERO_IMAGES } from "../data/onboardingImagery";
 import { useI18n } from "../i18n/useI18n";
 
 export type AuthNextStep = RecipeAccessGate;
@@ -40,9 +42,7 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
           email: email.trim(),
           password,
           displayName: displayName.trim() || email.split("@")[0],
-          ...(dateOfBirth.trim()
-            ? { dateOfBirth: dateOfBirth.trim() }
-            : {}),
+          ...(dateOfBirth.trim() ? { dateOfBirth: dateOfBirth.trim() } : {}),
         });
       } else {
         await login(email.trim(), password);
@@ -57,7 +57,10 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
           pendingJoin = false;
         }
       }
-      const recipeEnabled = hasActiveAppEnrollment(me.enrollments ?? [], "recipe");
+      const recipeEnabled = hasActiveAppEnrollment(
+        me.enrollments ?? [],
+        "recipe",
+      );
       onAuthenticated(
         resolveRecipeAccessGate({
           householdId: me.householdId,
@@ -78,21 +81,28 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
   }
 
   return (
-    <AtmosphereScreen atmosphere="kitchen-morning" contentLayout="bottom">
-      <form
-        onSubmit={onSubmit}
-        className="flex min-h-full flex-col justify-end px-8 pb-12 pt-16"
-      >
-        <div className="mb-8 text-center text-white">
-          <h1 className="mb-3 text-4xl font-semibold">
-            {mode === "register" ? t("authTitleRegister") : t("authTitleLogin")}
-          </h1>
-          <p className="mx-auto max-w-xs text-base leading-relaxed text-white/85">
-            {t("authSubtitle")}
-          </p>
-        </div>
+    <OnboardingScreenLayout
+      heroImage={ONBOARDING_HERO_IMAGES.auth}
+      atmosphere="kitchen-morning"
+    >
+      <form onSubmit={onSubmit} className="flex min-h-0 flex-1 flex-col">
+        <h1
+          className="mb-2 text-[2.15rem] font-semibold leading-tight"
+          style={{
+            fontFamily: "var(--font-display)",
+            color: "var(--brand-primary)",
+          }}
+        >
+          {mode === "register" ? t("authTitleRegister") : t("authTitleLogin")}
+        </h1>
+        <p
+          className="mb-5 max-w-sm text-sm leading-relaxed"
+          style={{ color: "var(--warm-gray)" }}
+        >
+          {t("authSubtitle")}
+        </p>
 
-        <div className="mb-6 space-y-3">
+        <div className="mb-5 space-y-2.5">
           {mode === "register" ? (
             <>
               <input
@@ -100,14 +110,22 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
                 placeholder={t("displayName")}
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                className="w-full rounded-2xl border border-white/20 bg-white/90 px-4 py-3 text-base text-slate-900 outline-none"
+                className="w-full rounded-2xl border px-4 py-3 text-base outline-none"
+                style={{
+                  borderColor: "var(--soft-beige)",
+                  color: "var(--deep-charcoal)",
+                }}
                 required
               />
               <input
                 type="date"
                 value={dateOfBirth}
                 onChange={(e) => setDateOfBirth(e.target.value)}
-                className="w-full rounded-2xl border border-white/20 bg-white/90 px-4 py-3 text-base text-slate-900 outline-none"
+                className="w-full rounded-2xl border px-4 py-3 text-base outline-none"
+                style={{
+                  borderColor: "var(--soft-beige)",
+                  color: "var(--deep-charcoal)",
+                }}
                 aria-label={t("dateOfBirth")}
               />
             </>
@@ -118,17 +136,27 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
             autoComplete="username"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-2xl border border-white/20 bg-white/90 px-4 py-3 text-base text-slate-900 outline-none"
+            className="w-full rounded-2xl border px-4 py-3 text-base outline-none"
+            style={{
+              borderColor: "var(--soft-beige)",
+              color: "var(--deep-charcoal)",
+            }}
             required
           />
           <input
             type="password"
             placeholder={t("password")}
-            autoComplete={mode === "register" ? "new-password" : "current-password"}
+            autoComplete={
+              mode === "register" ? "new-password" : "current-password"
+            }
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             minLength={mode === "register" ? 12 : 1}
-            className="w-full rounded-2xl border border-white/20 bg-white/90 px-4 py-3 text-base text-slate-900 outline-none"
+            className="w-full rounded-2xl border px-4 py-3 text-base outline-none"
+            style={{
+              borderColor: "var(--soft-beige)",
+              color: "var(--deep-charcoal)",
+            }}
             required
           />
         </div>
@@ -139,22 +167,24 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
           </div>
         ) : null}
 
-        <PrimaryButton type="submit" disabled={submitting}>
-          {submitting ? t("pleaseWait") : t("continue")}
-        </PrimaryButton>
+        <div className="mt-auto space-y-4">
+          <PrimaryButton type="submit" disabled={submitting}>
+            {submitting ? t("pleaseWait") : t("continue")}
+          </PrimaryButton>
 
-        <button
-          type="button"
-          className="mt-4 text-center text-sm font-medium underline"
-          style={{ color: "var(--brand-primary)" }}
-          onClick={() => {
-            setMode((m) => (m === "register" ? "login" : "register"));
-            setError(null);
-          }}
-        >
-          {mode === "register" ? t("alreadyHaveAccount") : t("needAccount")}
-        </button>
+          <button
+            type="button"
+            className="w-full text-center text-sm font-medium underline"
+            style={{ color: "var(--brand-primary)" }}
+            onClick={() => {
+              setMode((m) => (m === "register" ? "login" : "register"));
+              setError(null);
+            }}
+          >
+            {mode === "register" ? t("alreadyHaveAccount") : t("needAccount")}
+          </button>
+        </div>
       </form>
-    </AtmosphereScreen>
+    </OnboardingScreenLayout>
   );
 }

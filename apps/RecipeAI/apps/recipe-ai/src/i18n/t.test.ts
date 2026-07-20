@@ -26,4 +26,17 @@ describe("i18n t()", () => {
       assert.equal(body.includes("household graph"), false);
     }
   });
+
+  it("uses RTL-facing arrows in Arabic actions", () => {
+    assert.match(t("ar", "continue"), /←/);
+    assert.doesNotMatch(t("ar", "continue"), /→/);
+  });
+
+  it("explains explicit guest cuisine without nationality inference", () => {
+    for (const locale of ["en", "de", "ar", "tr"] as const) {
+      assert.ok(t(locale, "guestCuisinePrompt").length > 0);
+      assert.ok(t(locale, "guestCuisineHelp").length > 0);
+    }
+    assert.match(t("en", "guestCuisineHelp"), /never guesses/i);
+  });
 });

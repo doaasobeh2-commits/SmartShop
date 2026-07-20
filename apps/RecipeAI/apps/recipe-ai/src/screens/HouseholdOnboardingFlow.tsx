@@ -7,7 +7,11 @@ import {
   type JoinRequest,
 } from "../api/coreApi";
 import { useAuth } from "../auth/AuthContext";
-import { ErrorState, LoadingState, mapApiErrorMessage } from "../components/AsyncStates";
+import {
+  ErrorState,
+  LoadingState,
+  mapApiErrorMessage,
+} from "../components/AsyncStates";
 import { useI18n } from "../i18n/useI18n";
 import { AddressDiscoverScreen } from "./AddressDiscoverScreen";
 import { CreateHouseholdScreen } from "./CreateHouseholdScreen";
@@ -20,12 +24,16 @@ type HouseholdOnboardingFlowProps = {
   onComplete: () => void;
 };
 
-export function HouseholdOnboardingFlow({ onComplete }: HouseholdOnboardingFlowProps) {
+export function HouseholdOnboardingFlow({
+  onComplete,
+}: HouseholdOnboardingFlowProps) {
   const auth = useAuth();
   const { t, locale } = useI18n();
   const [step, setStep] = useState<Step>("hub");
   const [pendingRequests, setPendingRequests] = useState<JoinRequest[]>([]);
-  const [createAddress, setCreateAddress] = useState<Partial<AddressInput> | undefined>();
+  const [createAddress, setCreateAddress] = useState<
+    Partial<AddressInput> | undefined
+  >();
   const [bootLoading, setBootLoading] = useState(true);
   const [bootError, setBootError] = useState<string | null>(null);
 

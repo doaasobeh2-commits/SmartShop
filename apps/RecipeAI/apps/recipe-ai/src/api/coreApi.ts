@@ -57,6 +57,22 @@ export type PublicHousehold = {
   updatedAt: string;
 };
 
+export type HouseholdMember = {
+  id: string;
+  householdId: string;
+  userId: string | null;
+  role: string;
+  status: string;
+  joinedAt: string | null;
+  email: string | null;
+  displayName: string;
+  preferredLocale: string | null;
+  createdByMemberId: string | null;
+  linkedAccount: boolean;
+};
+
+export type ManagedMemberRole = "teen" | "child" | "caregiver";
+
 export async function registerUser(input: {
   email: string;
   password: string;
@@ -93,6 +109,21 @@ export async function createHousehold(body: {
   address: AddressInput;
 }): Promise<{ household: PublicHousehold; memberId: string }> {
   return apiRequest("/households", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export async function listHouseholdMembers(): Promise<{ members: HouseholdMember[] }> {
+  return apiRequest("/households/current/members");
+}
+
+export async function createManagedMember(body: {
+  displayName: string;
+  role: ManagedMemberRole;
+  preferredLocale?: string;
+}): Promise<{ member: HouseholdMember }> {
+  return apiRequest("/households/current/members", {
     method: "POST",
     body: JSON.stringify(body),
   });

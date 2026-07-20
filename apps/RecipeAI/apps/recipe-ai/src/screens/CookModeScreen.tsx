@@ -24,49 +24,65 @@ export function CookModeScreen({
 
   return (
     <AtmosphereScreen atmosphere="cookbook-dark" dark contentLayout="scroll">
-      <div className="flex min-h-full flex-col px-8 pb-12 pt-14">
-        <div className="mb-12 flex items-center justify-between">
+      <div className="flex min-h-full flex-col px-7 pb-10 pt-12">
+        <div className="mb-8 flex items-center justify-between gap-3">
           <TextButton onClick={onExit} className="!text-[var(--cook-muted)]">
             {t("exit")}
           </TextButton>
-          <span className="text-sm" style={{ color: "var(--cook-muted)" }}>
+          <span
+            className="text-sm tabular-nums"
+            style={{ color: "var(--cook-muted)" }}
+          >
             {t("stepOf", { current: step.order, total: meal.steps.length })}
           </span>
         </div>
 
+        <p className="mb-4 text-sm" style={{ color: "var(--cook-muted)" }}>
+          {meal.title}
+        </p>
+
         <div
-          className="mb-16 h-[3px] w-full overflow-hidden rounded-full"
+          className="mb-8 h-[3px] w-full overflow-hidden rounded-full"
           style={{ background: "var(--cook-progress-track)" }}
         >
           <div
             className="h-full rounded-full transition-all duration-500 ease-out"
             style={{
               width: `${progress}%`,
-              background: isLast ? "var(--primary)" : "rgba(245, 243, 240, 0.45)",
+              background: isLast
+                ? "var(--primary)"
+                : "rgba(245, 243, 240, 0.55)",
             }}
           />
         </div>
 
         <p
-          className="cook-instruction mb-auto text-[1.75rem] leading-snug md:text-[2rem]"
-          style={{ maxWidth: "18ch" }}
+          className="cook-instruction mb-auto text-[1.65rem] leading-snug md:text-[1.85rem]"
+          style={{ maxWidth: "24ch" }}
         >
           {step.instruction}
         </p>
 
-        {step.timerMinutes && (
-          <p className="mb-12 text-base" style={{ color: "var(--cook-muted)" }}>
+        {step.timerMinutes ? (
+          <p className="mb-8 text-base" style={{ color: "var(--cook-muted)" }}>
             {t("timerMinutes", { n: step.timerMinutes })}
           </p>
+        ) : (
+          <div className="mb-8" />
         )}
 
-        <div className="mt-auto flex flex-col gap-4">
-          <PrimaryButton onClick={onNext}>{isLast ? t("finish") : t("next")}</PrimaryButton>
-          {stepIndex > 0 && (
-            <TextButton onClick={onBack} className="mx-auto !text-[var(--cook-muted)]">
+        <div className="mt-auto flex flex-col gap-3">
+          <PrimaryButton onClick={onNext}>
+            {isLast ? t("finish") : t("next")}
+          </PrimaryButton>
+          {stepIndex > 0 ? (
+            <TextButton
+              onClick={onBack}
+              className="mx-auto !text-[var(--cook-muted)]"
+            >
               {t("previous")}
             </TextButton>
-          )}
+          ) : null}
         </div>
       </div>
     </AtmosphereScreen>

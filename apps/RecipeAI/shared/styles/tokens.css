@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@300;400;500;600&display=swap");
 
 :root {
   --font-size: 16px;
@@ -47,6 +47,14 @@
   --space-xl: 48px;
   --radius-md: 12px;
   --radius-lg: 16px;
+  --radius-xl: 22px;
+  --surface-elevated: rgba(255, 253, 249, 0.96);
+  --shadow-soft: 0 10px 28px rgba(58, 36, 22, 0.06);
+}
+
+[dir="rtl"] {
+  --font-sans: "Noto Sans Arabic", system-ui, sans-serif;
+  --font-display: "Noto Naskh Arabic", Georgia, serif;
 }
 
 @media (min-width: 481px) {

@@ -4,7 +4,11 @@ type TextButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   children: ReactNode;
 };
 
-export function TextButton({ children, className = "", ...props }: TextButtonProps) {
+export function TextButton({
+  children,
+  className = "",
+  ...props
+}: TextButtonProps) {
   return (
     <button
       type="button"

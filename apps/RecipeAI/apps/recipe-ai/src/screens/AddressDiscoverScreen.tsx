@@ -8,6 +8,7 @@ import {
 } from "../api/coreApi";
 import { ErrorState, mapApiErrorMessage } from "../components/AsyncStates";
 import { useI18n } from "../i18n/useI18n";
+import { ONBOARDING_HERO_IMAGES } from "../data/onboardingImagery";
 
 type AddressDiscoverScreenProps = {
   onBack: () => void;
@@ -88,7 +89,11 @@ export function AddressDiscoverScreen({
 
   if (phase === "match") {
     return (
-      <AtmosphereScreen atmosphere="kitchen-morning" contentLayout="bottom">
+      <AtmosphereScreen
+        atmosphere="kitchen-morning"
+        contentLayout="bottom"
+        imageUrl={ONBOARDING_HERO_IMAGES.householdHub}
+      >
         <div className="flex min-h-full flex-col justify-end px-8 pb-12 pt-16 text-white">
           <h1 className="mb-3 text-3xl font-semibold leading-tight">
             {t("possibleFamilyTitle")}
@@ -107,7 +112,10 @@ export function AddressDiscoverScreen({
           ) : null}
 
           <div className="space-y-3">
-            <PrimaryButton onClick={() => void onRequestJoin()} disabled={submitting}>
+            <PrimaryButton
+              onClick={() => void onRequestJoin()}
+              disabled={submitting}
+            >
               {submitting ? t("sending") : t("requestToJoin")}
             </PrimaryButton>
             <TextButton
@@ -133,7 +141,11 @@ export function AddressDiscoverScreen({
   }
 
   return (
-    <AtmosphereScreen atmosphere="kitchen-morning" contentLayout="scroll">
+    <AtmosphereScreen
+      atmosphere="kitchen-morning"
+      contentLayout="scroll"
+      imageUrl={ONBOARDING_HERO_IMAGES.householdHub}
+    >
       <form
         onSubmit={onDiscover}
         className="flex min-h-full flex-col justify-end px-8 pb-12 pt-16 text-white"
